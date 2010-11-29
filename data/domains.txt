@@ -1,0 +1,83 @@
+American football	/american_football 	23 	19,052
+Amusement Parks 	/amusement_parks 	15 	1,895
+Architecture 	/architecture 	34 	102,435
+Astronomy 	/astronomy 	64 	24,103
+Atom Feeds 	/atom 	5 	697
+Automotive 	/automotive 	29 	33,553
+Aviation 	/aviation 	27 	22,604
+Awards 	/award 	29 	115,750
+Baseball 	/baseball 	16 	16,340
+Basketball 	/basketball 	12 	11,446
+Bicycles 	/bicycles 	3 	202
+Biology 	/biology 	47 	233,415
+Boats 	/boats 	20 	23,569
+Books 	/book 	20 	6,306,904
+Broadcast 	/broadcast 	25 	42,437
+Business 	/business 	54 	572,465
+Celebrities 	/celebrities 	14 	2,044
+Chemistry 	/chemistry 	15 	13,096
+Comics 	/comic_books 	25 	8,759
+Common 	/common 	15 	14,702,125
+Community 	/community 	2 	4
+Computers 	/computer 	31 	16,905
+Conferences and Conventions 	/conferences 	7 	1,391
+Cricket 	/cricket 	33 	11,179
+Video Games 	/cvg 	30 	65,864
+Data World 	/dataworld 	24 	10,453
+Digicams 	/digicams 	18 	1,381
+Education 	/education 	28 	227,795
+Engineering 	/engineering 	24 	1,219
+Event 	/event 	17 	88,128
+Fashion, Clothing and Textiles 	/fashion 	10 	864
+Fictional Universes 	/fictional_universe 	36 	180,811
+Film 	/film 	52 	403,632
+Food & Drink 	/food 	67 	26,224
+Freebase 	/freebase 	82 	4,612
+Games 	/games 	14 	5,153
+Physical Geography 	/geography 	21 	58,683
+Geology 	/geology 	2 	242
+Government 	/government 	35 	119,221
+Ice Hockey 	/ice_hockey 	8 	7,626
+IMDb 	/imdb 	1 	0
+Influence 	/influence 	2 	49,295
+Hobbies and Interests 	/interests 	8 	1,981
+Internet 	/internet 	15 	41,389
+Language 	/language 	9 	12,237
+Law 	/law 	13 	2,957
+Library 	/library 	2 	10,255
+Location 	/location 	166 	962,588
+Martial Arts 	/martial_arts 	6 	1,697
+Measurement Unit 	/measurement_unit 	92 	656
+Media 	/media_common 	43 	3,249,992
+Medicine 	/medicine 	54 	34,543
+Meteorology 	/meteorology 	9 	1,742
+Military 	/military 	20 	46,647
+Music 	/music 	51 	2,186,716
+NYTimes 	/nytimes 	1 	0
+Olympics 	/olympics 	18 	59,151
+Opera 	/opera 	19 	4,043
+Organization 	/organization 	32 	673,103
+People 	/people 	28 	1,747,842
+Periodicals 	/periodicals 	27 	19,577
+Physics 	/physics 	10 	48
+freequeue 	/pipeline 	10 	11
+Projects 	/projects 	5 	81,154
+Protected Places 	/protected_sites 	9 	48,442
+Radio 	/radio 	4 	625
+Rail 	/rail 	22 	3,947
+Religion 	/religion 	22 	14,320
+Royalty and Nobility 	/royalty 	29 	24,834
+Soccer 	/soccer 	24 	73,333
+Spaceflight 	/spaceflight 	31 	2,323
+Sports 	/sports 	46 	230,263
+Symbols 	/symbols 	19 	1,173
+Tennis 	/tennis 	7 	2,846
+Theater 	/theater 	22 	12,107
+Time 	/time 	11 	2,004
+Transportation 	/transportation 	14 	53,676
+Travel 	/travel 	14 	5,437
+TV 	/tv 	41 	966,077
+Metaweb System Types 	/type 	29 	431,465
+Visual Art 	/visual_art 	13 	38,824
+Wikipedia 	/wikipedia 	1 	0
+Zoos and Aquariums 	/zoos 	4 	655
