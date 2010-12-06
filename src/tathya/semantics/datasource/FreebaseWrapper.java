@@ -44,9 +44,12 @@ public class FreebaseWrapper {
 		
 		return null;
 	}
-
+	
+	/*
+	 * Sort the freebase types in descending order of relevance 
+	 */
 	public List<String> getRankedTypes(String entity, double relevance) {
-		System.out.println(entity);
+		//System.out.println(entity);
 		ArrayList<String> rankedTypes = new ArrayList<String>();
 		List<JSON> types = getTypes(entity, relevance);
 		PriorityQueue<String> queue = new PriorityQueue<String>();
@@ -65,14 +68,16 @@ public class FreebaseWrapper {
 				}
 				String[] tokens = t.split("/");
 				StringBuffer query = new StringBuffer(entity);
+				String origQuery = query.toString();
 				for(String tok : tokens) {
 					if(tok.equalsIgnoreCase("")) {
 						continue;
 					}
 					query.append(" \"" + tok + "\"");
 				}
+
 				int count = YahooBOSS.makeQuery(query.toString());
-				queue.add(query.toString(), ((double) count/(double) entityCount));
+				queue.add(query.toString().substring(origQuery.length(), query.length()).trim(), ((double) count/(double) entityCount));
 				//System.out.println(t + "\t" + ((double) count/(double) entityCount));
 			}
 		}
