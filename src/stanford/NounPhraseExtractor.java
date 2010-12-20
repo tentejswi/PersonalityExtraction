@@ -1,17 +1,11 @@
 package stanford;
 
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
-import tathya.semantics.Triple;
-import tathya.semantics.Word;
-
 import edu.stanford.nlp.parser.lexparser.LexicalizedParser;
-import edu.stanford.nlp.tagger.maxent.MaxentTagger;
 import edu.stanford.nlp.trees.Tree;
-import edu.stanford.nlp.trees.TreePrint;
 
 public class NounPhraseExtractor {
 
@@ -20,7 +14,7 @@ public class NounPhraseExtractor {
 	static {
 		try {
 			lp = new LexicalizedParser(
-					"/Users/akishore/Desktop/tathya/englishPCFG.ser.gz");
+					"/Users/tejaswi/Downloads/stanford-parser-2010-11-30/englishPCFG.ser.gz");
 			lp.setOptionFlags(new String[] { "-maxLength", "80",
 					"-retainTmpSubcategories" });
 		} catch (Exception e) {
@@ -43,7 +37,7 @@ public class NounPhraseExtractor {
 			Tree topNode = queue.remove(0);
 
 			if (topNode.isPreTerminal()) {
-				if (topNode.value().startsWith("N")) {
+				if (topNode.value().startsWith("NNP")) {
 					str.append(topNode.children()[0].value() + " ");
 					flag = true;
 				} else if (flag == true) {
@@ -51,8 +45,12 @@ public class NounPhraseExtractor {
 					phrases.add(str.toString().trim());
 					str = new StringBuffer();
 				}
+			} 
+			else if(flag ==true){
+				flag = false;
+				phrases.add(str.toString().trim());
+				str = new StringBuffer();				
 			}
-
 			// add all children to queue regardless
 			for (Tree c : topNode.children()) {
 				queue.add(c);
@@ -67,6 +65,6 @@ public class NounPhraseExtractor {
 	}
 
 	public static void main(String[] args) {
-		NounPhraseExtractor.extract("Tata bring Jaguar home.");
+		System.out.println(NounPhraseExtractor.extract("Apache Declares War On Oracle Over Java"));
 	}
 }
