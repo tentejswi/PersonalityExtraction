@@ -66,12 +66,12 @@ public class ExtractEntities {
 		return null;
 	}
 	
-	public List<String> getEntitiesinTweet(String tweet){
+	public HashSet<String> getEntitiesinTweet(String tweet){
+		HashSet<String> entities = new HashSet<String>();
 		TwitterTokenizer tweetTokenizer = new TwitterTokenizer();
 		for (String token : tweetTokenizer.tokenize(tweet)) {
 			token = token.trim();
 			token = token.replaceAll("( [^a-zA-Z0-9\\.]) | ( [^a-zA-Z0-9\\.] ) | ([^a-zA-Z0-9\\.] )"," ");
-			HashSet<String> entities = new HashSet<String>();
 			try {
 				Pattern p = Pattern.compile("^[A-Z]+.*");
 				String[] split = token.split("\\s+");
@@ -90,7 +90,7 @@ public class ExtractEntities {
 				}
 			}
 		}
-		return null;
+		return entities;
 	}
 	
 	public HashMap<String, Entity> getAllEntities(String handle){
