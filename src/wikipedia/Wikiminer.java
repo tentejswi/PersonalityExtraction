@@ -30,7 +30,7 @@ public class Wikiminer {
 			arr1String.append(s+" ");
 			union.add(s);
 		}
-		
+		System.out.println(arr1String);
 		String arr1Concat = arr1String.toString().trim();
 		for(String s : contextPhrases){
 			if(arr1Concat.contains(s)){
@@ -100,8 +100,8 @@ public class Wikiminer {
 		return 0.0;
 	}
 	
-	public static ArrayList<String> getWikipediaSenses(String xml){
-		ArrayList<String> senses = new ArrayList<String>();
+	public static ArrayList<String[]> getWikipediaSenses(String xml, boolean getId){
+		ArrayList<String[]> senses = new ArrayList<String[]>();
 		DocumentBuilder db = null;
 		DocumentBuilderFactory dbf = DocumentBuilderFactory.newInstance();
 		try {
@@ -124,14 +124,15 @@ public class Wikiminer {
 					Node commonness = attrs.getNamedItem("commonness");
 					double relevance = Double.parseDouble(commonness.getTextContent());
 					if (relevance >= 0.1) {
-						senses.add(attrs.getNamedItem("title").getTextContent());
+						String[] senseArray = {attrs.getNamedItem("title").getTextContent(), attrs.getNamedItem("id").getTextContent()};
+						senses.add(senseArray);
 					}
 				}
 			}
 		} else {
 			NodeList articleNodes = dom.getElementsByTagName("Article");
 			if (articleNodes != null && articleNodes.item(0) != null) {
-				senses.add("wikipedia entry");
+				senses.add(new String[]{"wikipedia entry", "0"});
 			}
 		}
 		}catch(Exception e){
@@ -142,6 +143,19 @@ public class Wikiminer {
 	}
 	
 	public static String getXML(String query, boolean isId) {
+		
+		if(query.equalsIgnoreCase("wikipedia entry"))
+			return null;
+		StringBuffer correctEncoding = new StringBuffer();
+		String[] sensesplit = query.split("\\s+");
+		if(sensesplit.length>1)
+		for(String s : sensesplit){
+			correctEncoding.append(s+"%20");
+		}
+		if(correctEncoding.length()!=0){
+			query = correctEncoding.toString().substring(0, correctEncoding.toString().length()-3);
+		}
+
 		try {
 			String urlStr = "http://wdm.cs.waikato.ac.nz:8080/service?task=search&xml";
 			if(isId) {
@@ -169,6 +183,11 @@ public class Wikiminer {
 		}
 		
 		return null;
+	}
+	
+	public static void main(String args[]){
+		Wikiminer wm = new Wikiminer();
+		System.out.println(getXML("Model%20(person)", false));
 	}
 
 

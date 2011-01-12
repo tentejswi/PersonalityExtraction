@@ -211,7 +211,7 @@ public class ExtractEntities {
 			String xml = "";
 			if ((xml = Wikiminer.getXML(entity, false)) != null) {
 				try {
-					ArrayList<String> senses = Wikiminer.getWikipediaSenses(xml);
+					ArrayList<String[]> senses = Wikiminer.getWikipediaSenses(xml, true);
 					bw.write("=====================================================\n");
 					bw.write("Entity: "+entity+"\n");
 					bw.write("=====================================================\n");
@@ -221,9 +221,13 @@ public class ExtractEntities {
 						contextPhrases.addAll(ee.getEntitiesinTweet(tweet));
 					
 					PriorityQueue<String> sensesQueue = new PriorityQueue<String>();
-					for(String sense : senses){
-						String xmlSense = Wikiminer.getXML(sense, false);
-						sensesQueue.add(sense, Wikiminer.getPMI(xmlSense, contextPhrases));
+					for(String[] sense : senses){
+						if(sense[0].equalsIgnoreCase("wikipedia entry")){
+							bw.write(sense+"\n");
+							continue;
+						}
+						String xmlSense = Wikiminer.getXML(sense[1], true);							
+						sensesQueue.add(sense[0], Wikiminer.getPMI(xmlSense, contextPhrases));
 					}
 					
 					
