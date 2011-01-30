@@ -18,21 +18,30 @@ import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 import org.xml.sax.InputSource;
 
+import tathya.db.YahooBOSS;
+
+import cs224n.util.PriorityQueue;
+
 public class Wikiminer {
 	
 	//caution ahead: mix up the order of the args at your own peril 
 	public static double calculateJaccard(List<String> links, List<String> contextPhrases){
 		StringBuffer arr1String = new StringBuffer();
 		HashSet<String> union = new HashSet<String>();
+		HashSet<String> cphrases = new HashSet<String>();
+		
+		for(String s : contextPhrases){
+			cphrases.add(s);
+		}
 		
 		double overlap = 0.0;
 		for(String s : links){
 			arr1String.append(s+" ");
 			union.add(s);
 		}
-		System.out.println(arr1String);
+		//System.out.println(arr1String);
 		String arr1Concat = arr1String.toString().trim();
-		for(String s : contextPhrases){
+		for(String s : cphrases){
 			if(arr1Concat.contains(s)){
 				overlap++;
 			}
@@ -42,7 +51,7 @@ public class Wikiminer {
 		return (overlap/union.size());
 	}
 	
-	public static double getPMI(String xml, List<String> contextPhrases){
+	public static double getJaccard(String xml, List<String> contextPhrases){
 		
 		ArrayList<String> links = new ArrayList<String>();		
 		DocumentBuilder db = null;
@@ -99,6 +108,86 @@ public class Wikiminer {
 		}
 		return 0.0;
 	}
+
+	
+	/*
+	 * Given the ID of an entity - look up the category nodes of the wikiminer xml 
+	 * and get the average PMI score of all the categories of this entity
+	 */
+	public static void getPMI(String entityID, String entity, List<String> context){
+		String xml = getXML(entityID, true);
+		DocumentBuilder db = null;
+		DocumentBuilderFactory dbf = DocumentBuilderFactory.newInstance();
+		try {
+			db = dbf.newDocumentBuilder();
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+
+		InputSource is = new InputSource();
+		is.setCharacterStream(new StringReader(xml));
+		try {
+			Document dom = db.parse(is);
+			NodeList categoryNodes = dom.getElementsByTagName("Category");
+			if (categoryNodes != null && categoryNodes.getLength() != 0) {
+				for (int i = 0; i < categoryNodes.getLength(); i++) {
+					String topSense = categoryNodes.item(i).getTextContent();
+					
+				}
+			}
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+	}
+	
+	//get the category nodes inside the xml 
+	public static List<String> getRankedTypes(String entity, String xml, List<String> contextPhrases, int numTypes){
+
+		int entityCount = YahooBOSS.makeQuery('"' + entity + '"');
+
+		StringBuffer contextQuery = new StringBuffer();
+		for (String c : contextPhrases) {
+			contextQuery.append("\"" + c + "\"" + " ");
+		}
+		
+		List<String> rankedCategories = new ArrayList<String>();
+		PriorityQueue<String> queue = new PriorityQueue<String>();
+		
+		DocumentBuilder db = null;
+		DocumentBuilderFactory dbf = DocumentBuilderFactory.newInstance();
+		try {
+			db = dbf.newDocumentBuilder();
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+
+		InputSource is = new InputSource();
+		is.setCharacterStream(new StringReader(xml));
+		try {
+			Document dom = db.parse(is);
+			NodeList senseNodes = dom.getElementsByTagName("Category");
+			if (senseNodes != null && senseNodes.getLength() != 0) {
+				for (int i = 0; i < senseNodes.getLength(); i++) {
+					Node topSense = senseNodes.item(i);
+					if(topSense!=null){
+						NamedNodeMap attrs = topSense.getAttributes();
+						String type = attrs.getNamedItem("title").getTextContent();
+						int count = YahooBOSS.makeQuery("\""+type+"\" \""+entity+"\" "+contextPhrases.toString());
+						queue.add(type, ((double)count/(double)entityCount));
+					}
+				}
+			}
+			while(queue.hasNext() && numTypes > 0 ){
+				numTypes--;
+				rankedCategories.add(queue.next());
+			}
+			
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+		return rankedCategories;
+	}
+	
 	
 	public static ArrayList<String[]> getWikipediaSenses(String xml, boolean getId){
 		ArrayList<String[]> senses = new ArrayList<String[]>();

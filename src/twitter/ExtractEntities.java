@@ -8,7 +8,9 @@ import java.io.InputStreamReader;
 import java.io.StringReader;
 import java.net.URL;
 import java.net.URLConnection;
+import java.nio.Buffer;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -23,12 +25,17 @@ import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 import org.xml.sax.InputSource;
 
+import com.freebase.api.Freebase;
+import com.freebase.json.JSON;
+
 import cs224n.util.Counter;
 import cs224n.util.PriorityQueue;
 
 import net.sf.json.JSONObject;
 
 import stanford.NounPhraseExtractor;
+import tathya.db.YahooBOSS;
+import tathya.semantics.datasource.FreebaseWrapper;
 import tathya.text.tokenizer.TwitterTokenizer;
 import wikipedia.Wikiminer;
 
@@ -76,8 +83,9 @@ public class ExtractEntities {
 				Pattern p = Pattern.compile("^[A-Z]+.*");
 				String[] split = token.split("\\s+");
 				for (String s : split) {
+					s=s.trim();
 					if (p.matcher(s).matches() && !stopWords.contains(s.toLowerCase())) {
-						entities.add(s.toLowerCase());
+						entities.add(s);
 				}
 			}
 			}catch (Exception e) {
@@ -93,6 +101,81 @@ public class ExtractEntities {
 		return entities;
 	}
 	
+	
+	public List<String[]> getRankedEntities(String entity, List<String> contextPhrases){
+		
+		List<String[]> rankedEntities = new ArrayList<String[]>();
+		PriorityQueue<String[]> queue = new PriorityQueue<String[]>();
+
+		contextPhrases.remove(entity);
+		StringBuffer contextQuery = new StringBuffer();
+		for (String c : contextPhrases) {
+			contextQuery.append("\"" + c + "\"" + " ");
+		}
+		int contextCount = YahooBOSS.makeQuery(contextQuery.toString());
+		String xml = "";
+		if((xml=Wikiminer.getXML(entity, false))!=null){
+			ArrayList<String[]> senses = Wikiminer.getWikipediaSenses(xml, true);
+			for(String[] senseArr : senses){
+				int senseCount = YahooBOSS.makeQuery('"' + senseArr[0] + "\" "+contextQuery.toString());
+				queue.add(senseArr, ((double) senseCount / (double) contextCount));
+			}
+		}
+		while(queue.hasNext()){
+			rankedEntities.add(queue.next());
+		}
+		
+		return rankedEntities;
+	}
+	
+	
+	public static void main(String[] args) {
+		ExtractEntities ee = new ExtractEntities();
+		DocumentBuilder db = null;
+		DocumentBuilderFactory dbf = DocumentBuilderFactory.newInstance();
+		BufferedWriter bw = null;
+		BufferedReader br = null;
+		try{
+			br = new BufferedReader(new FileReader("data/"+args[0]+".txt"));
+			bw = new BufferedWriter(new FileWriter("data/"+args[0]+"_wiki_entities.txt"));
+		}catch(Exception e){
+			e.printStackTrace();
+		}
+		try {
+			db = dbf.newDocumentBuilder();
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+		
+		String line = "";
+		try {
+			while ((line = br.readLine()) != null) {
+				bw.write("=====================================================\n");
+				bw.write("Tweet: "+line+"\n");
+				bw.write("=====================================================\n");
+
+				HashSet<String> entities = ee.getEntitiesinTweet(line);
+				List<String> contextPhrases = new ArrayList<String>(entities);
+				for(String entity: entities){
+					bw.write("query: "+entity+"\n");
+					List<String[]> rankedEntities = ee.getRankedEntities(entity, contextPhrases);
+					//bw.write("RankedEntities: "+rankedEntities+"\n");
+					for(String[] entityArr :  rankedEntities){
+						bw.write("Entity: "+entityArr[0]+"\n");
+						String xml = Wikiminer.getXML(entityArr[1], true);
+						bw.write("RankedTypes: "+Wikiminer.getRankedTypes(entityArr[0], xml, contextPhrases, 5)+"\n");
+					}
+					bw.write("--------------------------------------------------\n");
+				}
+				bw.write("\n");
+			}
+			bw.flush();
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+
+	}
+
 	public HashMap<String, Entity> getAllEntities(String handle){
 		HashMap<String, Entity> allEntities = new HashMap<String, Entity>();
 		try {
@@ -190,62 +273,102 @@ public class ExtractEntities {
 		return allEntities;
 	}
 
-	public static void main(String[] args) {
-		ExtractEntities ee = new ExtractEntities();
-		HashMap<String, Entity> allEntities = ee.getAllEntities(args[0]);
-		DocumentBuilder db = null;
-		DocumentBuilderFactory dbf = DocumentBuilderFactory.newInstance();
-		BufferedWriter bw = null;
-		try{
-			bw = new BufferedWriter(new FileWriter("data/"+args[0]+"_wiki_entities.txt"));
-		}catch(Exception e){
-			e.printStackTrace();
-		}
-		try {
-			db = dbf.newDocumentBuilder();
-		} catch (Exception e) {
-			e.printStackTrace();
-		}
+	
+//	public static void main(String[] args){
+//		ExtractEntities ee = new ExtractEntities();
+//		HashMap<String, Entity> allEntities = ee.getAllEntities(args[0]);
+//		BufferedWriter bw = null;
+//		FreebaseWrapper fb = FreebaseWrapper.getInstance(); 
+//		try{
+//			bw = new BufferedWriter(new FileWriter("data/"+args[0]+"_freebase_entities.txt"));
+//			for (String entity : allEntities.keySet()) {
+//				if(entity.trim().length()<2)
+//					continue;
+//				bw.write("=====================================================\n");
+//				bw.write("Entity: "+entity+"\n");
+//				System.out.println("Entity is "+entity);
+//				bw.write("=====================================================\n");
+//				List<JSON> rankedEntities = fb.getRankedEntities(entity, 10, allEntities.get(entity).tweets);
+//				for(int i=0; i<rankedEntities.size(); i++){
+//					JSON rentity = rankedEntities.get(i);
+//					bw.write("[Entity: "
+//							+ (String) rentity.get("name").value() + "  "
+//							+ (String) rentity.get("id").value()+"]");
+//				}
+//				Entity e = allEntities.get(entity);
+//				bw.write("\n-----------------------------------------------------\n");
+//				for(String tweet : e.tweets) {
+//					bw.write(tweet+"\n");
+//				}
+//				bw.write("\n");
+//			}
+//			bw.flush();
+//			
+//		}catch(Exception e){
+//			e.printStackTrace();
+//		}
+//		
+//	}
+//	
+	
+//	public static void main(String[] args) {
+//		ExtractEntities ee = new ExtractEntities();
+//		HashMap<String, Entity> allEntities = ee.getAllEntities(args[0]);
+//		DocumentBuilder db = null;
+//		DocumentBuilderFactory dbf = DocumentBuilderFactory.newInstance();
+//		BufferedWriter bw = null;
+//		try{
+//			bw = new BufferedWriter(new FileWriter("data/"+args[0]+"_wiki_entities.txt"));
+//		}catch(Exception e){
+//			e.printStackTrace();
+//		}
+//		try {
+//			db = dbf.newDocumentBuilder();
+//		} catch (Exception e) {
+//			e.printStackTrace();
+//		}
+//
+//		for (String entity : allEntities.keySet()) {
+//			String xml = "";
+//			if ((xml = Wikiminer.getXML(entity, false)) != null) {
+//				try {
+//					ArrayList<String[]> senses = Wikiminer.getWikipediaSenses(xml, true);
+//					bw.write("=====================================================\n");
+//					bw.write("Entity: "+entity+"\n");
+//					bw.write("=====================================================\n");
+//					
+//					ArrayList<String> contextPhrases = new ArrayList<String>();
+//					for(String tweet : allEntities.get(entity).tweets)	
+//						contextPhrases.addAll(ee.getEntitiesinTweet(tweet));
+//					
+//					PriorityQueue<String> sensesQueue = new PriorityQueue<String>();
+//					for(String[] sense : senses){
+//						if(sense[0].equalsIgnoreCase("wikipedia entry")) {
+//							bw.write(sense[0]+"\n");
+//							continue;
+//						}
+//						String xmlSense = Wikiminer.getXML(sense[1], true);							
+//						sensesQueue.add(sense[0], Wikiminer.getPMI(xmlSense, contextPhrases));
+//					}
+//					
+//					bw.write(sensesQueue.toString()+"\n");
+//					Entity e = allEntities.get(entity);
+//					bw.write("-----------------------------------------------------\n");
+//					for(String tweet : e.tweets) {
+//						bw.write(tweet+"\n");
+//					}
+//					bw.write("\n");
+//					bw.flush();
+//				} catch (Exception e) {
+//					e.printStackTrace();
+//					System.out.println(xml);
+//				}
+//			}
+//			
+//		}
+//	}
+	
+	
 
-		for (String entity : allEntities.keySet()) {
-			String xml = "";
-			if ((xml = Wikiminer.getXML(entity, false)) != null) {
-				try {
-					ArrayList<String[]> senses = Wikiminer.getWikipediaSenses(xml, true);
-					bw.write("=====================================================\n");
-					bw.write("Entity: "+entity+"\n");
-					bw.write("=====================================================\n");
-					
-					ArrayList<String> contextPhrases = new ArrayList<String>();
-					for(String tweet : allEntities.get(entity).tweets)	
-						contextPhrases.addAll(ee.getEntitiesinTweet(tweet));
-					
-					PriorityQueue<String> sensesQueue = new PriorityQueue<String>();
-					for(String[] sense : senses){
-						if(sense[0].equalsIgnoreCase("wikipedia entry")){
-							bw.write(sense+"\n");
-							continue;
-						}
-						String xmlSense = Wikiminer.getXML(sense[1], true);							
-						sensesQueue.add(sense[0], Wikiminer.getPMI(xmlSense, contextPhrases));
-					}
-					
-					
-					bw.write(sensesQueue.toString()+"\n");
-					Entity e = allEntities.get(entity);
-					bw.write("-----------------------------------------------------\n");
-					for(String tweet : e.tweets) {
-						bw.write(tweet+"\n");
-					}
-					bw.write("\n");
-					bw.flush();
-				} catch (Exception e) {
-					e.printStackTrace();
-					System.out.println(xml);
-				}
-			}
-			
-		}
-	}
-
+	
 }
