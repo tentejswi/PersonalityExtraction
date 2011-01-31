@@ -16,10 +16,7 @@ import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 import org.xml.sax.InputSource;
 
-
-/**
- * 
- */
+import wikipedia.Wikiminer;
 
 /**
  * @author akishore
@@ -44,21 +41,17 @@ public class PoorMansEntityExtractor {
 				filteredWords.add(null);
 				continue;
 			}
-			
 			boolean isStop = false;
-			
 			for(String sWord : stopWords) {
 				if(word.equalsIgnoreCase(sWord)) {
 					isStop = true;
 					break;
 				}
 			}
-			
 			if(isStop) {
 				filteredWords.add(null);
 				continue;
-			}
-			
+			}		
 			filteredWords.add(word.toLowerCase());
 		}
 		
@@ -72,8 +65,7 @@ public class PoorMansEntityExtractor {
 				}
 				consecutiveWords = new ArrayList<String>();
 				continue;
-			}
-			
+			}			
 			consecutiveWords.add(fw);
 		}
 		
@@ -84,13 +76,11 @@ public class PoorMansEntityExtractor {
 				System.out.println(entity);
 			}
 		}
-		
 		return allEntities;
 	}
 	
 	private static ArrayList<String> extractEntities(ArrayList<String> words) {
 		ArrayList<String> entities = new ArrayList<String>();
-		
 		DocumentBuilderFactory dbf = DocumentBuilderFactory.newInstance();
 		DocumentBuilder db = null;
 		try {
@@ -98,41 +88,42 @@ public class PoorMansEntityExtractor {
 		} catch (Exception e) {
 			return entities;
 		}
-
 		for(int i=0; i<words.size(); i++) {
 			StringBuffer buf = new StringBuffer();
 			for(int j=i; j<words.size(); j++) {
 				buf.append(words.get(j) + " ");
 				String entity = buf.toString().trim();
-//				String xml = null;
-//				if((xml = getXML(entity, false)) != null) {
-//					try {
-//						InputSource is = new InputSource();
-//				        is.setCharacterStream(new StringReader(xml));
-////				        System.out.println(xml);
-//						Document dom = db.parse(is);
-//						NodeList senseNodes = dom.getElementsByTagName("Sense");
-//						Node topSense = senseNodes.item(0);
-//						if(topSense != null) {
-//							NamedNodeMap attrs = topSense.getAttributes();
-//							Node commonness = attrs.getNamedItem("commonness");
-//							double relevance = Double.parseDouble(commonness.getTextContent());
-//							if(relevance >= 0.70) {
-//								entities.add(entity);
-//							}
-//						} else {
-//							NodeList articleNodes = dom.getElementsByTagName("Article");
-//							if(articleNodes != null && articleNodes.item(0) != null) {
+				if(entity.equalsIgnoreCase("data visualization")){
+					System.out.println("");
+				}
+				String xml = null;
+				if((xml = Wikiminer.getXML(entity, false)) != null) {
+					try {
+						InputSource is = new InputSource();
+				        is.setCharacterStream(new StringReader(xml));
+				        System.out.println(xml);
+						Document dom = db.parse(is);
+						NodeList senseNodes = dom.getElementsByTagName("Sense");
+						Node topSense = senseNodes.item(0);
+						if(topSense != null) {
+							NamedNodeMap attrs = topSense.getAttributes();
+							Node commonness = attrs.getNamedItem("commonness");
+							double relevance = Double.parseDouble(commonness.getTextContent());
+							if(relevance >= 0.70) {
 								entities.add(entity);
-//							}
-//						}
-//					} catch (Exception e) {
-//						e.printStackTrace();
-//					}
-//				}
+							}
+						} else {
+							NodeList articleNodes = dom.getElementsByTagName("Article");
+							if(articleNodes != null && articleNodes.item(0) != null) {
+								entities.add(entity);
+							}
+						}
+					} catch (Exception e) {
+						e.printStackTrace();
+					}
+				}
 			}
 		}
-		
 		return entities;
 	}
 	
@@ -162,7 +153,7 @@ public class PoorMansEntityExtractor {
 	        
 	        return buf.toString();
 		} catch(Exception e) {
-			//e.printStackTrace();
+			e.printStackTrace();
 		}
 		
 		return null;
@@ -172,11 +163,11 @@ public class PoorMansEntityExtractor {
 	 * @param args
 	 */
 	public static void main(String[] args) {
-//		PoorMansEntityExtractor pme = new PoorMansEntityExtractor();
+		PoorMansEntityExtractor pme = new PoorMansEntityExtractor();
 //		pme.extract("Preparing my end-of-internship talk at Microsoft. Pictures, no formula :)");
 //		pme.extract("Will soon be en route amman to Frankfurt.");
 //		pme.extract("New model of the universe fits data better than Big Bang");
-//		pme.extract("I wonder if Julian Assange will do the alternative Queen's Speech this Christmas? Will it leak, if so?");
+		extract("RT @LanceWeiler: Hubs & Connectors: Understanding Networks Through Data Visualization http://bit.ly/eegRqT HT @JeffClark");
 	}
 
 }
