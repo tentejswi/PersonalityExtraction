@@ -16,13 +16,15 @@ import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 import org.xml.sax.InputSource;
 
+import com.personalityextractor.entity.extraction.IEntityExtractor;
+
 import wikipedia.Wikiminer;
 
 /**
  * @author akishore
  *
  */
-public class PoorMansEntityExtractor {
+public class PoorMansEntityExtractor implements IEntityExtractor {
 	
 	final static List<String> stopWords = Arrays.asList(
 			   "a", "an", "and", "are", "as", "at", "be", "but", "by",
@@ -32,7 +34,7 @@ public class PoorMansEntityExtractor {
 			   "they", "this", "to", "was", "will", "with", "most", "needs"
 	);
 
-	public static ArrayList<String> extract(String line) {
+	public ArrayList<String> extract(String line) {
 		ArrayList<String> allEntities = new ArrayList<String>();
 		String[] words = line.split("[ :;'\"?/><,\\.!@#$%^&()-+=~`{}|]+");
 		ArrayList<String> filteredWords = new ArrayList<String>();
@@ -167,7 +169,7 @@ public class PoorMansEntityExtractor {
 //		pme.extract("Preparing my end-of-internship talk at Microsoft. Pictures, no formula :)");
 //		pme.extract("Will soon be en route amman to Frankfurt.");
 //		pme.extract("New model of the universe fits data better than Big Bang");
-		extract("RT @LanceWeiler: Hubs & Connectors: Understanding Networks Through Data Visualization http://bit.ly/eegRqT HT @JeffClark");
+		pme.extract("RT @LanceWeiler: Hubs & Connectors: Understanding Networks Through Data Visualization http://bit.ly/eegRqT HT @JeffClark");
 	}
 
 }
