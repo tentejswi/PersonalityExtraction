@@ -1,4 +1,4 @@
-package twitter;
+package com.personalityextractor.entity.extraction;
 
 import java.util.ArrayList;
 
