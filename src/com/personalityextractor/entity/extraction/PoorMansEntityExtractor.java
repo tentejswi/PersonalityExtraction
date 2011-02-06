@@ -35,6 +35,10 @@ public class PoorMansEntityExtractor implements IEntityExtractor {
 	);
 
 	public ArrayList<String> extract(String line) {
+		if(line == null) {
+			return null;
+		}
+		
 		ArrayList<String> allEntities = new ArrayList<String>();
 		String[] words = line.split("[ :;'\"?/><,\\.!@#$%^&()-+=~`{}|]+");
 		ArrayList<String> filteredWords = new ArrayList<String>();
@@ -63,7 +67,7 @@ public class PoorMansEntityExtractor implements IEntityExtractor {
 				ArrayList<String> entities = extractEntities(consecutiveWords);
 				allEntities.addAll(entities);
 				for(String entity : entities) {
-					System.out.println(entity);
+//					System.out.println(entity);
 				}
 				consecutiveWords = new ArrayList<String>();
 				continue;
@@ -75,7 +79,7 @@ public class PoorMansEntityExtractor implements IEntityExtractor {
 			ArrayList<String> entities = extractEntities(consecutiveWords);
 			allEntities.addAll(entities);
 			for(String entity : entities) {
-				System.out.println(entity);
+//				System.out.println(entity);
 			}
 		}
 		return allEntities;
@@ -96,23 +100,26 @@ public class PoorMansEntityExtractor implements IEntityExtractor {
 				buf.append(words.get(j) + " ");
 				String entity = buf.toString().trim();
 				if(entity.equalsIgnoreCase("data visualization")){
-					System.out.println("");
+//					System.out.println("");
 				}
 				String xml = null;
 				if((xml = Wikiminer.getXML(entity, false)) != null) {
 					try {
 						InputSource is = new InputSource();
 				        is.setCharacterStream(new StringReader(xml));
-				        System.out.println(xml);
+//				        System.out.println(xml);
 						Document dom = db.parse(is);
 						NodeList senseNodes = dom.getElementsByTagName("Sense");
 						Node topSense = senseNodes.item(0);
 						if(topSense != null) {
 							NamedNodeMap attrs = topSense.getAttributes();
 							Node commonness = attrs.getNamedItem("commonness");
-							double relevance = Double.parseDouble(commonness.getTextContent());
-							if(relevance >= 0.70) {
-								entities.add(entity);
+							try {
+								double relevance = Double.parseDouble(commonness.getTextContent());
+								if(relevance >= 0.70) {
+									entities.add(entity);
+								}
+							} catch (Exception e) {
 							}
 						} else {
 							NodeList articleNodes = dom.getElementsByTagName("Article");

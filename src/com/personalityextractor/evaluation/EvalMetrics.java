@@ -16,12 +16,14 @@ public class EvalMetrics {
 	double tp;
 	double tn;
 	double f1;
+	double err;
 
 	public EvalMetrics() {
 		fp = 0;
 		fn = 0;
 		tp = 0;
 		tn = 0;
+		err = 0;
 	}
 
 	public void incrFP() {
@@ -66,6 +68,15 @@ public class EvalMetrics {
 
 		f1 = 2 * (precision * recall) / (precision + recall);
 		return f1;
+	}
+	
+	public double calculateError() {
+		if((tp + fp) == 0) {
+			return 0;
+		}
+		
+		err = (fp/(tp+fp));
+		return err;
 	}
 	
 	private double calculatePrecision() {
