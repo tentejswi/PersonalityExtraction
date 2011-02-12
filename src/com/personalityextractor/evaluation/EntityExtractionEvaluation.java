@@ -47,21 +47,25 @@ public class EntityExtractionEvaluation {
 		for(int i=0; i<line.length(); i++) {
 			char c = line.charAt(i);
 			
-			if(c == '<') {
-				flag++;
-			} else if(c == 'E') {
-				flag++;
-			} else if(c == '>') {
-				flag++;
-			} else if(c == '/') {
-				flag++;
+			if(c == '<' && flag == 0) {
+				flag = 1;
+			} else if(c == 'E' && flag == 1) {
+				flag = 2;
+			} else if(c == '>' && flag == 2) {
+				flag = 3;
+			} else if(c == '/' && flag == 1) {
+				flag = 4;
+			} else if(c == 'E' && flag == 4) {
+				flag = 5;
+			} else if(c == '>' && flag == 5) {
+				flag = 6;
 			} else {
 				flag = 0;
 			}
 			
 			if(flag == 3 && sIndex == -1) {
 				sIndex = i + 1;
-			} else if(flag == 4) {
+			} else if(flag == 6) {
 				eIndex = i - 3;
 				r.entities.add(line.substring(sIndex, eIndex));
 				sIndex = -1;
