@@ -109,7 +109,8 @@ public class BaselineExtractor implements IEntityExtractor {
 				   "@dpolice Hard to say. If the user is geeky - Nexus S . Otherwise iPhone 4 . :) Both are great phones.",
 				   "About to embark on the unthinkable... Driving to New York City. Wish me luck.",
 				   "Best part of The Hurt Locker ? The lack of background music! Silence speaks quite loudly in this movie.",
-				   "I'm playing the Age of Empires."
+				   "I'm playing the Age of Empires.",
+				   "iTunes / ipod ecosystem needs to learn a thing or two from Doggcatcher. Seriously. This is the best solution for podcast listeners out there."
 		);
 		
 		for(String sentence : sentences) {
