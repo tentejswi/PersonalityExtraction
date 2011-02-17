@@ -5,6 +5,7 @@ import java.io.BufferedWriter;
 import java.io.FileReader;
 import java.io.FileWriter;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -19,11 +20,12 @@ import tathya.text.tokenizer.TwitterTokenizer;
 import wikipedia.Wikiminer;
 
 import com.personalityextractor.entity.Entity;
+import com.personalityextractor.entity.extractor.IEntityExtractor;
 
 import cs224n.util.Counter;
 import cs224n.util.PriorityQueue;
 
-public class ExtractEntities {
+public class ExtractEntities implements IEntityExtractor {
 
 	static final HashSet<String> stopWords = new HashSet<String>();
 	static {
@@ -38,6 +40,14 @@ public class ExtractEntities {
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
+	}
+	
+	public ArrayList<String> extract(String record){
+		ArrayList<String> allEntities = new ArrayList<String>();
+		for(String s : getEntitiesinTweet(record)){
+			allEntities.add(s.trim());
+		}
+		return allEntities;
 	}
 
 	public static HashSet<String> getCapitalizedWords(String token) {
