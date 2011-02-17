@@ -1,4 +1,4 @@
-package com.personalityextractor.entity.extraction;
+package com.personalityextractor.entity;
 
 import java.util.ArrayList;
 
@@ -9,7 +9,7 @@ import java.util.ArrayList;
 public class Entity {
 	String text = null;
 	double score = 0.0; 
-	ArrayList<String> tweets;
+	public ArrayList<String> tweets;
 	
 	public Entity(String text){
 		this.text= text;

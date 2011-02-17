@@ -1,7 +1,7 @@
 /**
  * 
  */
-package com.personalityextractor.entity.extraction;
+package com.personalityextractor.entity.extractor;
 
 import java.util.ArrayList;
 

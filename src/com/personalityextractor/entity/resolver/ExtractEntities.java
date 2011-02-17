@@ -1,16 +1,10 @@
-package com.personalityextractor.entity.extraction;
+package com.personalityextractor.entity.resolver;
 
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
 import java.io.FileReader;
 import java.io.FileWriter;
-import java.io.InputStreamReader;
-import java.io.StringReader;
-import java.net.URL;
-import java.net.URLConnection;
-import java.nio.Buffer;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -19,25 +13,15 @@ import java.util.regex.Pattern;
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 
-import org.w3c.dom.Document;
-import org.w3c.dom.NamedNodeMap;
-import org.w3c.dom.Node;
-import org.w3c.dom.NodeList;
-import org.xml.sax.InputSource;
+import stanford.NounPhraseExtractor;
+import tathya.db.YahooBOSS;
+import tathya.text.tokenizer.TwitterTokenizer;
+import wikipedia.Wikiminer;
 
-import com.freebase.api.Freebase;
-import com.freebase.json.JSON;
+import com.personalityextractor.entity.Entity;
 
 import cs224n.util.Counter;
 import cs224n.util.PriorityQueue;
-
-import net.sf.json.JSONObject;
-
-import stanford.NounPhraseExtractor;
-import tathya.db.YahooBOSS;
-import tathya.semantics.datasource.FreebaseWrapper;
-import tathya.text.tokenizer.TwitterTokenizer;
-import wikipedia.Wikiminer;
 
 public class ExtractEntities {
 

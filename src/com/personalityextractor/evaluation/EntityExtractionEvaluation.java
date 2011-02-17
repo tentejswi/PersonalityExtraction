@@ -8,8 +8,8 @@ import java.io.File;
 import java.io.FileReader;
 import java.util.ArrayList;
 
-import com.personalityextractor.entity.extraction.IEntityExtractor;
-import com.personalityextractor.entity.extraction.PoorMansEntityExtractor;
+import com.personalityextractor.entity.extractor.IEntityExtractor;
+import com.personalityextractor.entity.resolver.PoorMansEntityExtractor;
 
 /**
  * @author akishore
