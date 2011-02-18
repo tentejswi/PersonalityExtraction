@@ -14,13 +14,13 @@ import java.util.regex.Pattern;
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 
-import stanford.NounPhraseExtractor;
 import tathya.db.YahooBOSS;
 import tathya.text.tokenizer.TwitterTokenizer;
 import wikipedia.Wikiminer;
 
 import com.personalityextractor.entity.Entity;
 import com.personalityextractor.entity.extractor.IEntityExtractor;
+import com.personalityextractor.entity.extractor.NounPhraseExtractor;
 
 import cs224n.util.Counter;
 import cs224n.util.PriorityQueue;
@@ -28,6 +28,8 @@ import cs224n.util.PriorityQueue;
 public class ExtractEntities implements IEntityExtractor {
 
 	static final HashSet<String> stopWords = new HashSet<String>();
+	static NounPhraseExtractor npe = new NounPhraseExtractor();
+	
 	static {
 		try {
 			BufferedReader br = new BufferedReader(
@@ -37,6 +39,7 @@ public class ExtractEntities implements IEntityExtractor {
 			while ((line = br.readLine()) != null) {
 				stopWords.add(line.trim());
 			}
+			NounPhraseExtractor.initialize("/home/semanticvoid/PE/PersonalityExtraction/lair/englishPCFG.ser.gz");
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
@@ -86,7 +89,7 @@ public class ExtractEntities implements IEntityExtractor {
 				e.printStackTrace();
 			}
 
-			for (String np : NounPhraseExtractor.extract(token)) {
+			for (String np : npe.extract(token)) {
 				if (!stopWords.contains(np.trim().toLowerCase())){
 					entities.add(np.trim());
 				}
@@ -215,7 +218,7 @@ public class ExtractEntities implements IEntityExtractor {
 					bw.write("===============================================\n");
 					bw.write(token + "\n");
 					System.out.println("token: " + token);
-					for (String np : NounPhraseExtractor.extract(token)) {
+					for (String np : npe.extract(token)) {
 						if (!stopWords.contains(np.trim().toLowerCase())){
 							nPhrases.add(np.trim());
 							nPhraseCounter.incrementCount(np.trim(), 1.0);

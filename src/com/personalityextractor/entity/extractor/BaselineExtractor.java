@@ -23,7 +23,7 @@ public class BaselineExtractor implements IEntityExtractor {
 	);
 	
 	final static List<String> glueWords = Arrays.asList(
-			   "of", "&"
+			   "of", "&", "an"
 	);
 	
 	/* (non-Javadoc)
@@ -110,7 +110,11 @@ public class BaselineExtractor implements IEntityExtractor {
 				   "About to embark on the unthinkable... Driving to New York City. Wish me luck.",
 				   "Best part of The Hurt Locker ? The lack of background music! Silence speaks quite loudly in this movie.",
 				   "I'm playing the Age of Empires.",
-				   "iTunes / ipod ecosystem needs to learn a thing or two from Doggcatcher. Seriously. This is the best solution for podcast listeners out there."
+				   "iTunes / ipod ecosystem needs to learn a thing or two from Doggcatcher. Seriously. This is the best solution for podcast listeners out there.",
+				   "loved India New Land of Opportunity on Boxee http://bit.ly/ghYcfj",
+				   "@vjvegi Why this comment about Pakistan all of a sudden? :)",
+				   "Swapped the Elantra with a Santa Fe to deal with all that snow on the roads."
+				   
 		);
 		
 		for(String sentence : sentences) {

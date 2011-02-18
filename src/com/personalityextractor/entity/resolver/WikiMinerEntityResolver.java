@@ -26,7 +26,7 @@ import wikipedia.Wikiminer;
  * @author akishore
  *
  */
-public class PoorMansEntityExtractor implements IEntityExtractor {
+public class WikiMinerEntityResolver implements IEntityExtractor {
 	
 	final static List<String> stopWords = Arrays.asList(
 			   "a", "an", "and", "are", "as", "at", "be", "but", "by",
@@ -174,7 +174,7 @@ public class PoorMansEntityExtractor implements IEntityExtractor {
 	 * @param args
 	 */
 	public static void main(String[] args) {
-		PoorMansEntityExtractor pme = new PoorMansEntityExtractor();
+		WikiMinerEntityResolver pme = new WikiMinerEntityResolver();
 //		pme.extract("Preparing my end-of-internship talk at Microsoft. Pictures, no formula :)");
 //		pme.extract("Will soon be en route amman to Frankfurt.");
 //		pme.extract("New model of the universe fits data better than Big Bang");

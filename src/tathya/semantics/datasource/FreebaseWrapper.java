@@ -93,8 +93,9 @@ public class FreebaseWrapper {
 
 	public List<JSON> getRankedEntities(String entityStr, double relevance,
 			String context) {
-		List<String> contextPhrases = stanford.NounPhraseExtractor
-				.extract(context);
+//		List<String> contextPhrases = com.personalityextractor.entity.extractor.NounPhraseExtractor
+//				.extract(context);
+		List<String> contextPhrases = null;
 		ArrayList<JSON> rankedEntities = new ArrayList<JSON>();
 		List<JSON> entities = getEntities(entityStr, relevance);
 		PriorityQueue<JSON> queue = new PriorityQueue<JSON>();
@@ -178,7 +179,8 @@ public class FreebaseWrapper {
 
 
 	public List<String> getRankedTypes(JSON entity, String context) {
-		List<String> contextPhrases = stanford.NounPhraseExtractor.extract(context);
+//		List<String> contextPhrases = com.personalityextractor.entity.extractor.NounPhraseExtractor.extract(context);
+		List<String> contextPhrases = null;
 		ArrayList<String> rankedTypes = new ArrayList<String>();
 		List<JSON> types = getTypes(entity);
 		PriorityQueue<String> queue = new PriorityQueue<String>();

@@ -9,7 +9,7 @@ import java.io.FileReader;
 import java.util.ArrayList;
 
 import com.personalityextractor.entity.extractor.IEntityExtractor;
-import com.personalityextractor.entity.resolver.PoorMansEntityExtractor;
+import com.personalityextractor.entity.resolver.WikiMinerEntityResolver;
 
 /**
  * @author akishore
@@ -116,7 +116,7 @@ public class EntityExtractionEvaluation {
 		
 		try {
 			EntityExtractionEvaluation eval = new EntityExtractionEvaluation(args[0]);
-			EvalMetrics metrics = eval.evaluate(new PoorMansEntityExtractor());
+			EvalMetrics metrics = eval.evaluate(new WikiMinerEntityResolver());
 			System.out.println(metrics.calculateError());
 		} catch (Exception e) {
 			e.printStackTrace();
