@@ -90,10 +90,6 @@ public class WikiMinerEntityResolver implements IEntityExtractor {
 		return allEntities;
 	}
 	
-	/*
-	 * a basic method to resolve ambiguity between 2 entities one of which is a *substring* of the other. 
-	 * some example cases: 'New' or 'New York'?, 'short' or 'short story', '' 
-	 */
 	public boolean breakTies(String bigger_entity_id, String smaller_entity){
 		if(bigger_entity_id.equalsIgnoreCase("645042") && smaller_entity.equalsIgnoreCase("city")){
 			System.out.println("");
@@ -112,8 +108,10 @@ public class WikiMinerEntityResolver implements IEntityExtractor {
 	}
 	
 	/*
-	 * Takes as input only entities   
+	 * a basic method to resolve ambiguity between entities one of which is a *bigger entity* of all the other. 
+	 * some example cases: 'New' or 'New York'?, 'short' or 'short story', '' 
 	 */
+
 	private ArrayList<String> removeExtraneousEntities(ArrayList<String> entities){
 		ArrayList<String> extraneous = new ArrayList<String>();
 		HashMap<String, ArrayList<String>> sortedEntities = new HashMap<String, ArrayList<String>>();
@@ -143,7 +141,7 @@ public class WikiMinerEntityResolver implements IEntityExtractor {
 						continue;
 					}
 					/*
-					 * the higher entity has passed the test- so take only lower entities which contain links
+					 * the higher entity has passed the test- so remove all smaller entities which are not present in the links for this bigger entity
 					 */
 					for(int j=i-1; j >=0; j--){
 						ArrayList<String> arr_smaller = sortedEntities.get(keys[j]);
