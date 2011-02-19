@@ -8,7 +8,9 @@ import java.io.File;
 import java.io.FileReader;
 import java.util.ArrayList;
 
+import com.personalityextractor.entity.extractor.EntityExtractFactory;
 import com.personalityextractor.entity.extractor.IEntityExtractor;
+import com.personalityextractor.entity.extractor.EntityExtractFactory.Extracter;
 import com.personalityextractor.entity.resolver.WikiMinerEntityResolver;
 
 /**
@@ -116,11 +118,12 @@ public class EntityExtractionEvaluation {
 		
 		try {
 			EntityExtractionEvaluation eval = new EntityExtractionEvaluation(args[0]);
-			EvalMetrics metrics = eval.evaluate(new WikiMinerEntityResolver());
-			System.out.println(metrics.calculateError());
+			for(Extracter e : Extracter.values()) {
+				EvalMetrics metrics = eval.evaluate(EntityExtractFactory.produceExtractor(e));
+				System.out.println(e.name() + ":\t" + metrics.calculateError());
+			}
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
-		
 	}
 }

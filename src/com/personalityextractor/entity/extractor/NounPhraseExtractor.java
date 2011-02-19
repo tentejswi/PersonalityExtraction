@@ -12,15 +12,13 @@ public class NounPhraseExtractor implements IEntityExtractor {
 
 	private static LexicalizedParser lp;
 
-	public static boolean initialize(String pcfgPath) {
+	static {
 		try {
-			lp = new LexicalizedParser(pcfgPath);
+			lp = new LexicalizedParser("/home/semanticvoid/PE/PersonalityExtraction/lair/englishPCFG.ser.gz");
 			lp.setOptionFlags(new String[] { "-maxLength", "80",
 					"-retainTmpSubcategories" });
-			return true;
 		} catch (Exception e) {
 			e.printStackTrace();
-			return false;
 		}
 	}
 
@@ -66,8 +64,8 @@ public class NounPhraseExtractor implements IEntityExtractor {
 	}
 
 	public static void main(String[] args) {
-		NounPhraseExtractor
-				.initialize("/home/semanticvoid/PE/PersonalityExtraction/lair/englishPCFG.ser.gz");
+//		NounPhraseExtractor
+//				.initialize("/home/semanticvoid/PE/PersonalityExtraction/lair/englishPCFG.ser.gz");
 
 		IEntityExtractor e = new NounPhraseExtractor();
 		List<String> sentences = Arrays.asList(
