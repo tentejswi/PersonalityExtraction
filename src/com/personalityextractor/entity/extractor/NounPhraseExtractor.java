@@ -6,6 +6,7 @@ import java.util.List;
 
 import edu.stanford.nlp.parser.lexparser.LexicalizedParser;
 import edu.stanford.nlp.trees.Tree;
+import edu.stanford.nlp.trees.TreePrint;
 
 public class NounPhraseExtractor implements IEntityExtractor {
 
@@ -46,11 +47,10 @@ public class NounPhraseExtractor implements IEntityExtractor {
 					phrases.add(str.toString().trim());
 					str = new StringBuffer();
 				}
-			} 
-			else if(flag ==true){
+			} else if (flag == true) {
 				flag = false;
 				phrases.add(str.toString().trim());
-				str = new StringBuffer();				
+				str = new StringBuffer();
 			}
 			// add all children to queue regardless
 			for (Tree c : topNode.children()) {
@@ -66,27 +66,27 @@ public class NounPhraseExtractor implements IEntityExtractor {
 	}
 
 	public static void main(String[] args) {
-		NounPhraseExtractor.initialize("/home/semanticvoid/PE/PersonalityExtraction/lair/englishPCFG.ser.gz");
-		
-		IEntityExtractor e = new BaselineExtractor();
+		NounPhraseExtractor
+				.initialize("/home/semanticvoid/PE/PersonalityExtraction/lair/englishPCFG.ser.gz");
+
+		IEntityExtractor e = new NounPhraseExtractor();
 		List<String> sentences = Arrays.asList(
-				   "Rest in Peace!",
-				   "New blog post: 50 days with Google Nexus S: http://www.venu.in/blog/?p=314",
-				   "@dpolice Hard to say. If the user is geeky - Nexus S . Otherwise iPhone 4 . :) Both are great phones.",
-				   "About to embark on the unthinkable... Driving to New York City. Wish me luck.",
-				   "Best part of The Hurt Locker ? The lack of background music! Silence speaks quite loudly in this movie.",
-				   "I'm playing the Age of Empires.",
-				   "iTunes / ipod ecosystem needs to learn a thing or two from Doggcatcher. Seriously. This is the best solution for podcast listeners out there.",
-				   "loved India New Land of Opportunity on Boxee http://bit.ly/ghYcfj",
-				   "@vjvegi Why this comment about Pakistan all of a sudden? :)",
-				   "Swapped the Elantra with a Santa Fe to deal with all that snow on the roads."
-				   
+				"Rest in Peace!",
+				 "New blog post: 50 days with Google Nexus S: http://www.venu.in/blog/?p=314",
+				 "@dpolice Hard to say. If the user is geeky - Nexus S . Otherwise iPhone 4 . :) Both are great phones.",
+				 "About to embark on the unthinkable... Driving to New York City. Wish me luck.",
+				 "Best part of The Hurt Locker ? The lack of background music! Silence speaks quite loudly in this movie.",
+				 "I'm playing the Age of Empires.",
+				 "iTunes / ipod ecosystem needs to learn a thing or two from Doggcatcher. Seriously. This is the best solution for podcast listeners out there.",
+				 "loved India New Land of Opportunity on Boxee http://bit.ly/ghYcfj",
+				 "@vjvegi Why this comment about Pakistan all of a sudden? :)",
+				 "Swapped the Elantra with a Santa Fe to deal with all that snow on the roads."
 		);
-		
-		for(String sentence : sentences) {
+
+		for (String sentence : sentences) {
 			ArrayList<String> entities = e.extract(sentence);
-			
-			for(String entity : entities) {
+
+			for (String entity : entities) {
 				System.out.println("'" + entity + "'");
 			}
 		}
