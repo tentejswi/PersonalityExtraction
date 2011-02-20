@@ -39,7 +39,6 @@ public class ExtractEntities implements IEntityExtractor {
 			while ((line = br.readLine()) != null) {
 				stopWords.add(line.trim());
 			}
-			NounPhraseExtractor.initialize("/home/semanticvoid/PE/PersonalityExtraction/lair/englishPCFG.ser.gz");
 		} catch (Exception e) {
 			e.printStackTrace();
 		}

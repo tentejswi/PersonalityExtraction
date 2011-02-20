@@ -20,7 +20,9 @@ import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 import org.xml.sax.InputSource;
 
+import com.personalityextractor.entity.extractor.EntityExtractFactory;
 import com.personalityextractor.entity.extractor.IEntityExtractor;
+import com.personalityextractor.entity.extractor.EntityExtractFactory.Extracter;
 
 
 import wikipedia.Wikiminer;
@@ -29,65 +31,14 @@ import wikipedia.Wikiminer;
  * @author akishore
  *
  */
-public class WikiMinerEntityResolver implements IEntityExtractor {
+public class WikiMinerEntityResolver extends BaseEntityResolver {
 	
-	final static List<String> stopWords = Arrays.asList(
-			   "a", "an", "and", "are", "as", "at", "be", "but", "by",
-			   "for", "if", "in", "into", "is", "it",
-			   "no", "not", "of", "on", "or", "such",
-			   "that", "the", "their", "then", "there", "these",
-			   "they", "this", "to", "was", "will", "with", "most", "needs"
-	);
+	public WikiMinerEntityResolver(IEntityExtractor extractor) {
+		super(extractor);
+	}
 
 	public ArrayList<String> extract(String line) {
-		if(line == null) {
-			return null;
-		}
-		
-		ArrayList<String> allEntities = new ArrayList<String>();
-		String[] words = line.split("[ :;'\"?/><,\\.!@#$%^&()-+=~`{}|]+");
-		ArrayList<String> filteredWords = new ArrayList<String>();
-		for(String word : words) {
-			if(word.length() <= 0) {
-				filteredWords.add(null);
-				continue;
-			}
-			boolean isStop = false;
-			for(String sWord : stopWords) {
-				if(word.equalsIgnoreCase(sWord)) {
-					isStop = true;
-					break;
-				}
-			}
-			if(isStop) {
-				filteredWords.add(null);
-				continue;
-			}		
-			filteredWords.add(word.toLowerCase());
-		}
-		
-		ArrayList<String> consecutiveWords = new ArrayList<String>();
-		for(String fw : filteredWords) {
-			if(fw == null) {
-				ArrayList<String> entities = extractEntities(consecutiveWords);
-				allEntities.addAll(entities);
-				for(String entity : entities) {
-//					System.out.println(entity);
-				}
-				consecutiveWords = new ArrayList<String>();
-				continue;
-			}			
-			consecutiveWords.add(fw);
-		}
-		
-		if(consecutiveWords.size() > 0) {
-			ArrayList<String> entities = extractEntities(consecutiveWords);
-			allEntities.addAll(entities);
-			for(String entity : entities) {
-//				System.out.println(entity);
-			}
-		}
-		return allEntities;
+		return removeExtraneousEntities(extractEntities(extractor.extract(line)));
 	}
 	
 	public boolean breakTies(String bigger_entity_id, String smaller_entity){
@@ -299,6 +250,7 @@ public class WikiMinerEntityResolver implements IEntityExtractor {
 		
 		return links;
 	}
+	
 	private static ArrayList<String> extractEntities(ArrayList<String> words) {
 		ArrayList<String> entities = new ArrayList<String>();
 		DocumentBuilderFactory dbf = DocumentBuilderFactory.newInstance();
@@ -386,22 +338,25 @@ public class WikiMinerEntityResolver implements IEntityExtractor {
 	 * @param args
 	 */
 	public static void main(String[] args) {
-		WikiMinerEntityResolver pme = new WikiMinerEntityResolver();
-		ArrayList<String> entities = new ArrayList<String>();
-		entities.add("York City");
-		entities.add("City");
-		entities.add("New York City");
-		entities.add("New York");
-		System.out.println(pme.removeExtraneousEntities(entities));
+		WikiMinerEntityResolver pme = new WikiMinerEntityResolver(EntityExtractFactory.produceExtractor(Extracter.BASELINE));
+//		ArrayList<String> entities = new ArrayList<String>();
+//		entities.add("York City");
+//		entities.add("City");
+//		entities.add("New York City");
+//		entities.add("New York");
+//		System.out.println(pme.removeExtraneousEntities(entities));
+//		
+//		entities = new ArrayList<String>();
+//		entities.add("short story");
+//		entities.add("story");
+//		entities.add("short");
+//		System.out.println(pme.removeExtraneousEntities(entities));
 		
-		entities = new ArrayList<String>();
-		entities.add("short story");
-		entities.add("story");
-		entities.add("short");
-		System.out.println(pme.removeExtraneousEntities(entities));
 		
-		
-//		pme.extract("Preparing my end-of-internship talk at Microsoft. Pictures, no formula :)");
+		ArrayList<String> entities = pme.extract("Will soon be en route amman to Frankfurt.");
+		for(String e : entities) {
+			System.out.println(e);
+		}
 //		pme.extract("Will soon be en route amman to Frankfurt.");
 //		pme.extract("New model of the universe fits data better than Big Bang");
 		//pme.extract("RT @LanceWeiler: Hubs & Connectors: Understanding Networks Through Data Visualization http://bit.ly/eegRqT HT @JeffClark");
