@@ -15,4 +15,8 @@ public class Entity {
 		this.text= text;
 		tweets = new ArrayList<String>();
 	}
+	
+	public String getText(){
+		return this.text;
+	}
 }

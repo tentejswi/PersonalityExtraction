@@ -20,11 +20,16 @@ import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 import org.xml.sax.InputSource;
 
+import com.personalityextractor.entity.WikipediaEntity;
 import com.personalityextractor.entity.extractor.EntityExtractFactory;
 import com.personalityextractor.entity.extractor.IEntityExtractor;
 import com.personalityextractor.entity.extractor.EntityExtractFactory.Extracter;
+import com.sun.tools.javac.util.Pair;
+
+import cs224n.util.PriorityQueue;
 
 
+import tathya.db.YahooBOSS;
 import wikipedia.Wikiminer;
 
 /**
@@ -38,13 +43,10 @@ public class WikiMinerEntityResolver extends BaseEntityResolver {
 	}
 
 	public ArrayList<String> extract(String line) {
-		return removeExtraneousEntities(extractEntities(extractor.extract(line)));
+		return extractor.extract(line);
 	}
 	
 	public boolean breakTies(String bigger_entity_id, String smaller_entity){
-		if(bigger_entity_id.equalsIgnoreCase("645042") && smaller_entity.equalsIgnoreCase("city")){
-			System.out.println("");
-		}
 		String xml = null;
 		if((xml = Wikiminer.getXML(bigger_entity_id, true)) != null) {
 			ArrayList<String> links = getLinks(xml);
@@ -53,7 +55,6 @@ public class WikiMinerEntityResolver extends BaseEntityResolver {
 					return true;
 				}
 			}
-			
 		}
 		return false;
 	}
@@ -251,6 +252,7 @@ public class WikiMinerEntityResolver extends BaseEntityResolver {
 		return links;
 	}
 	
+	
 	private static ArrayList<String> extractEntities(ArrayList<String> words) {
 		ArrayList<String> entities = new ArrayList<String>();
 		DocumentBuilderFactory dbf = DocumentBuilderFactory.newInstance();
@@ -260,48 +262,131 @@ public class WikiMinerEntityResolver extends BaseEntityResolver {
 		} catch (Exception e) {
 			return entities;
 		}
-		for(int i=0; i<words.size(); i++) {
-			StringBuffer buf = new StringBuffer();
-			for(int j=i; j<words.size(); j++) {
-				buf.append(words.get(j) + " ");
-				String entity = buf.toString().trim();
-				if(entity.equalsIgnoreCase("driving")){
-					System.out.println("");
-				}
-				String xml = null;
-				if((xml = Wikiminer.getXML(entity, false)) != null) {
-					try {
-						InputSource is = new InputSource();
-				        is.setCharacterStream(new StringReader(xml));
-//				        System.out.println(xml);
-						Document dom = db.parse(is);
-						NodeList senseNodes = dom.getElementsByTagName("Sense");
-						Node topSense = senseNodes.item(0);
-						if(topSense != null) {
-							NamedNodeMap attrs = topSense.getAttributes();
-							Node commonness = attrs.getNamedItem("commonness");
-							try {
-								double relevance = Double.parseDouble(commonness.getTextContent());
-								if(relevance >= 0.70) {
-									entities.add(entity);
-								}
-							} catch (Exception e) {
-							}
-						} else {
-							NodeList articleNodes = dom.getElementsByTagName("Article");
-							if(articleNodes != null && articleNodes.item(0) != null) {
+		for (int i = 0; i < words.size(); i++) {
+			String entity = words.get(i).trim();
+			String xml = null;
+			if ((xml = Wikiminer.getXML(entity, false)) != null) {
+				try {
+					InputSource is = new InputSource();
+					is.setCharacterStream(new StringReader(xml));
+					Document dom = db.parse(is);
+					NodeList senseNodes = dom.getElementsByTagName("Sense");
+					Node topSense = senseNodes.item(0);
+					if (topSense != null) {
+						NamedNodeMap attrs = topSense.getAttributes();
+						Node commonness = attrs.getNamedItem("commonness");
+						try {
+							double relevance = Double.parseDouble(commonness.getTextContent());
+							if (relevance >= 0.70) {
 								entities.add(entity);
 							}
+						} catch (Exception e) {
 						}
-					} catch (Exception e) {
-						e.printStackTrace();
+					} else {
+						NodeList articleNodes = dom.getElementsByTagName("Article");
+						if (articleNodes != null && articleNodes.item(0) != null) {
+							entities.add(entity);
+						}
 					}
+				} catch (Exception e) {
+					e.printStackTrace();
 				}
 			}
 		}
 		return entities;
+
+		
 	}
 	
+
+	public static List<WikipediaEntity> getRankedEntities(String entity, List<String> contextPhrases){
+		List<WikipediaEntity> rankedEntities = new ArrayList<WikipediaEntity>();
+		PriorityQueue<WikipediaEntity> queue = new PriorityQueue<WikipediaEntity>();
+		contextPhrases.remove(entity);
+		StringBuffer contextQuery = new StringBuffer();
+		for (String c : contextPhrases) {
+			contextQuery.append("\"" + c + "\"" + " ");
+		}
+		int contextCount = YahooBOSS.makeQuery(contextQuery.toString());
+		String xml = "";
+		if((xml=Wikiminer.getXML(entity, false))!=null){
+			ArrayList<String[]> senses = Wikiminer.getWikipediaSenses(xml, true);
+			for(String[] senseArr : senses){
+				int senseCount = YahooBOSS.makeQuery('"' + senseArr[0] + "\" "+contextQuery.toString());	
+				WikipediaEntity we = new WikipediaEntity(senseArr[0],senseArr[1]);
+				queue.add(we, ((double) senseCount / (double) contextCount));
+			}
+		}
+		while(queue.hasNext()){
+			rankedEntities.add(queue.next());
+		}
+		
+		return rankedEntities;
+	}
+
+	public static List<String> getRankedTypes(String entity, String xml, List<String> contextPhrases, int numTypes){
+		int entityCount = YahooBOSS.makeQuery('"' + entity + '"');
+		StringBuffer contextQuery = new StringBuffer();
+		for (String c : contextPhrases) {
+			contextQuery.append("\"" + c + "\"" + " ");
+		}
+		
+		List<String> rankedCategories = new ArrayList<String>();
+		PriorityQueue<String> queue = new PriorityQueue<String>();
+		
+		DocumentBuilder db = null;
+		DocumentBuilderFactory dbf = DocumentBuilderFactory.newInstance();
+		try {
+			db = dbf.newDocumentBuilder();
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+
+		InputSource is = new InputSource();
+		is.setCharacterStream(new StringReader(xml));
+		try {
+			Document dom = db.parse(is);
+			NodeList senseNodes = dom.getElementsByTagName("Category");
+			if (senseNodes != null && senseNodes.getLength() != 0) {
+				for (int i = 0; i < senseNodes.getLength(); i++) {
+					Node topSense = senseNodes.item(i);
+					if(topSense!=null){
+						NamedNodeMap attrs = topSense.getAttributes();
+						String type = attrs.getNamedItem("title").getTextContent();
+						int count = YahooBOSS.makeQuery("\""+type+"\" \""+entity+"\" "+contextPhrases.toString());
+						queue.add(type, ((double)count/(double)entityCount));
+					}
+				}
+			}
+			while(queue.hasNext() && numTypes > 0 ){
+				numTypes--;
+				rankedCategories.add(queue.next());
+			}
+			
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+		return rankedCategories;
+	}
+
+	
+	private static List<WikipediaEntity> resolveEntities(ArrayList<String> entities) {
+		ArrayList<WikipediaEntity> resolvedEntities = new ArrayList<WikipediaEntity>();
+		List<String> contextPhrases = new ArrayList<String>(entities);
+		for(String entity : entities){
+			List<WikipediaEntity> rankedEntities = getRankedEntities(entity, contextPhrases);
+			for(WikipediaEntity we : rankedEntities){				
+				String xml = getXML(we.getWikiminerID(), true);
+				for(String s: getRankedTypes(we.getText(), xml, contextPhrases, 5)){
+
+					we.addCategory(s);
+				}
+				resolvedEntities.add(we);
+			}
+		}
+		return resolvedEntities;
+	}
+
 	private static String getXML(String query, boolean isId) {
 		try {
 			String urlStr = "http://wdm.cs.waikato.ac.nz:8080/service?task=search&xml";
@@ -338,7 +423,7 @@ public class WikiMinerEntityResolver extends BaseEntityResolver {
 	 * @param args
 	 */
 	public static void main(String[] args) {
-		WikiMinerEntityResolver pme = new WikiMinerEntityResolver(EntityExtractFactory.produceExtractor(Extracter.BASELINE));
+		WikiMinerEntityResolver pme = new WikiMinerEntityResolver(EntityExtractFactory.produceExtractor(Extracter.CONSECUTIVE_WORDS));
 //		ArrayList<String> entities = new ArrayList<String>();
 //		entities.add("York City");
 //		entities.add("City");
@@ -353,9 +438,12 @@ public class WikiMinerEntityResolver extends BaseEntityResolver {
 //		System.out.println(pme.removeExtraneousEntities(entities));
 		
 		
-		ArrayList<String> entities = pme.extract("Will soon be en route amman to Frankfurt.");
+		ArrayList<String> entities = pme.extract("Will soon be en route New York to Frankfurt.");
 		for(String e : entities) {
 			System.out.println(e);
+		}
+		for(WikipediaEntity we: resolveEntities(entities)){
+			we.print();
 		}
 //		pme.extract("Will soon be en route amman to Frankfurt.");
 //		pme.extract("New model of the universe fits data better than Big Bang");
