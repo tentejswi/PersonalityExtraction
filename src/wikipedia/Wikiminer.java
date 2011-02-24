@@ -110,41 +110,11 @@ public class Wikiminer {
 	}
 
 	
-	/*
-	 * Given the ID of an entity - look up the category nodes of the wikiminer xml 
-	 * and get the average PMI score of all the categories of this entity
-	 */
-	public static void getPMI(String entityID, String entity, List<String> context){
-		String xml = getXML(entityID, true);
-		DocumentBuilder db = null;
-		DocumentBuilderFactory dbf = DocumentBuilderFactory.newInstance();
-		try {
-			db = dbf.newDocumentBuilder();
-		} catch (Exception e) {
-			e.printStackTrace();
-		}
 
-		InputSource is = new InputSource();
-		is.setCharacterStream(new StringReader(xml));
-		try {
-			Document dom = db.parse(is);
-			NodeList categoryNodes = dom.getElementsByTagName("Category");
-			if (categoryNodes != null && categoryNodes.getLength() != 0) {
-				for (int i = 0; i < categoryNodes.getLength(); i++) {
-					String topSense = categoryNodes.item(i).getTextContent();
-					
-				}
-			}
-		} catch (Exception e) {
-			e.printStackTrace();
-		}
-	}
 	
 	//get the category nodes inside the xml 
 	public static List<String> getRankedTypes(String entity, String xml, List<String> contextPhrases, int numTypes){
-
 		int entityCount = YahooBOSS.makeQuery('"' + entity + '"');
-
 		StringBuffer contextQuery = new StringBuffer();
 		for (String c : contextPhrases) {
 			contextQuery.append("\"" + c + "\"" + " ");
@@ -231,6 +201,65 @@ public class Wikiminer {
 
 	}
 	
+	
+	public static String correctEncoding(String query){
+		StringBuffer correctEncoding = new StringBuffer();
+		String[] sensesplit = query.split("\\s+");
+		if(sensesplit.length>1)
+		for(String s : sensesplit){
+			correctEncoding.append(s+"%20");
+		}
+		if(correctEncoding.length()!=0){
+			query = correctEncoding.toString().substring(0, correctEncoding.toString().length()-3);
+		}
+		return query;
+	}
+	
+	public static double compare(String term1, String term2){
+		try{
+			String urlStr = "http://wdm.cs.waikato.ac.nz:8080/service?task=compare&xml&term1="
+							+correctEncoding(term1)+"&term2="+correctEncoding(term2);
+			
+			//http://wdm.cs.waikato.ac.nz:8080/service?task=compare&term1=president&term2=obama&xml=true
+			URL url = new URL(urlStr);
+	        URLConnection yc = url.openConnection();
+	        BufferedReader in = new BufferedReader(new InputStreamReader(yc.getInputStream()));
+	        String inputLine;
+	
+	        StringBuffer buf = new StringBuffer();
+	        while ((inputLine = in.readLine()) != null) 
+	        	buf.append(inputLine);
+	        in.close();
+	        if(buf.toString().contains("unknownTerm")) {
+	        	return 0.0;
+	        }
+	        
+			DocumentBuilder db = null;
+			DocumentBuilderFactory dbf = DocumentBuilderFactory.newInstance();
+			try {
+				db = dbf.newDocumentBuilder();
+			} catch (Exception e) {
+				e.printStackTrace();
+			}
+
+			InputSource is = new InputSource();
+			is.setCharacterStream(new StringReader(buf.toString()));
+			Document dom = db.parse(is);
+			NodeList relatednessNodes = dom.getElementsByTagName("RelatednessResponse");
+			Node relation = relatednessNodes.item(0);
+			if(relation!=null){
+				NamedNodeMap attrs = relation.getAttributes();
+				String relatedness = attrs.getNamedItem("relatedness").getTextContent();
+				return Double.parseDouble(relatedness);
+			}
+			
+		}catch(Exception e){
+			e.printStackTrace();
+		}
+		return 0.0;
+
+	}
+	
 	public static String getXML(String query, boolean isId) {
 		
 		if(query.equalsIgnoreCase("wikipedia entry"))
@@ -276,7 +305,8 @@ public class Wikiminer {
 	
 	public static void main(String args[]){
 		Wikiminer wm = new Wikiminer();
-		System.out.println(getXML("Model%20(person)", false));
+		//System.out.println(getXML("Model%20(person)", false));
+		System.out.println(compare("president", "Abdul Kalam"));
 	}
 
 
