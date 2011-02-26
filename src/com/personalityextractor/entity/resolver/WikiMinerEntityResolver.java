@@ -1,6 +1,5 @@
 package com.personalityextractor.entity.resolver;
 import java.io.BufferedReader;
-import java.io.FileReader;
 import java.io.InputStreamReader;
 import java.io.StringReader;
 import java.net.URL;
@@ -9,7 +8,6 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
@@ -20,17 +18,15 @@ import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 import org.xml.sax.InputSource;
 
-import com.personalityextractor.entity.WikipediaEntity;
-import com.personalityextractor.entity.extractor.EntityExtractFactory;
-import com.personalityextractor.entity.extractor.IEntityExtractor;
-import com.personalityextractor.entity.extractor.EntityExtractFactory.Extracter;
-import com.sun.tools.javac.util.Pair;
-
-import cs224n.util.PriorityQueue;
-
-
 import tathya.db.YahooBOSS;
 import wikipedia.Wikiminer;
+
+import com.personalityextractor.entity.WikipediaEntity;
+import com.personalityextractor.entity.extractor.EntityExtractFactory;
+import com.personalityextractor.entity.extractor.EntityExtractFactory.Extracter;
+import com.personalityextractor.entity.extractor.IEntityExtractor;
+
+import cs224n.util.PriorityQueue;
 
 /**
  * @author akishore
