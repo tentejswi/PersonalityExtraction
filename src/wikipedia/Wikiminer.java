@@ -51,6 +51,80 @@ public class Wikiminer {
 		return (overlap/union.size());
 	}
 	
+	public static double compareArticlesWithJaccard(String id1, String id2){
+		double overlap = 0.0;
+		ArrayList<String> links1 = getLinks(id1);
+		ArrayList<String> links2 = getLinks(id2);
+		HashSet<String> union = new HashSet<String>();
+		for(String s: links1){
+			union.add(s);
+			if(links2.contains(s)){
+				overlap++;
+			}
+		}
+		for(String s: links2){
+			union.add(s);
+		}
+		
+		return (overlap/union.size());
+	}
+	
+	public static ArrayList<String> getLinks(String wikiminer_id){
+	
+		String xml = getXML(wikiminer_id, true);
+		ArrayList<String> links = new ArrayList<String>();		
+		DocumentBuilder db = null;
+		DocumentBuilderFactory dbf = DocumentBuilderFactory.newInstance();
+		try {
+			db = dbf.newDocumentBuilder();
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+
+		InputSource is = new InputSource();
+		is.setCharacterStream(new StringReader(xml));
+		try {
+			Document dom = db.parse(is);
+			NodeList outNodes = dom.getElementsByTagName("LinkOut");
+			if (outNodes != null && outNodes.getLength() != 0) {
+				for (int i = 0; i < outNodes.getLength(); i++) {
+					Node link = outNodes.item(i);
+					if (link != null) {
+						NamedNodeMap attrs = link.getAttributes();
+						Node commonness = attrs.getNamedItem("relatedness");
+						double relevance = Double.parseDouble(commonness
+								.getTextContent());
+						if (relevance >= 0.1) {
+							links.add(attrs.getNamedItem("id")
+									.getTextContent());
+						}
+					}
+				}
+			}
+
+			NodeList inNodes = dom.getElementsByTagName("LinkIn");
+			if (inNodes != null && inNodes.getLength() != 0) {
+				for (int i = 0; i < inNodes.getLength(); i++) {
+					Node link = inNodes.item(i);
+					if (link != null) {
+						NamedNodeMap attrs = link.getAttributes();
+						Node commonness = attrs.getNamedItem("relatedness");
+						double relevance = Double.parseDouble(commonness
+								.getTextContent());
+						if (relevance >= 0.1) {
+							links.add(attrs.getNamedItem("id")
+									.getTextContent());
+						}
+					}
+				}
+			}
+		}catch(Exception e){
+			e.printStackTrace();
+		}
+		
+		return links;
+	}
+	
 	public static double getJaccard(String xml, List<String> contextPhrases){
 		
 		ArrayList<String> links = new ArrayList<String>();		
@@ -217,9 +291,9 @@ public class Wikiminer {
 	
 	public static double compare(String term1, String term2){
 		try{
-			String urlStr = "http://wdm.cs.waikato.ac.nz:8080/service?task=compare&xml&term1="
-							+correctEncoding(term1)+"&term2="+correctEncoding(term2);
-			
+//			String urlStr = "http://wdm.cs.waikato.ac.nz:8080/service?task=compare&xml&term1="
+//							+correctEncoding(term1)+"&term2="+correctEncoding(term2);
+			String urlStr = "http://wdm.cs.waikato.ac.nz:8080/service?task=compare&ids=11370%2C32927";
 			//http://wdm.cs.waikato.ac.nz:8080/service?task=compare&term1=president&term2=obama&xml=true
 			URL url = new URL(urlStr);
 	        URLConnection yc = url.openConnection();
@@ -233,7 +307,7 @@ public class Wikiminer {
 	        if(buf.toString().contains("unknownTerm")) {
 	        	return 0.0;
 	        }
-	        
+	        System.out.println(buf.toString());
 			DocumentBuilder db = null;
 			DocumentBuilderFactory dbf = DocumentBuilderFactory.newInstance();
 			try {
@@ -306,7 +380,9 @@ public class Wikiminer {
 	public static void main(String args[]){
 		Wikiminer wm = new Wikiminer();
 		//System.out.println(getXML("Model%20(person)", false));
-		System.out.println(compare("president", "Abdul Kalam"));
+		//System.out.println(compare("president", "Abdul Kalam"));
+		System.out.println(compareArticlesWithJaccard("24113", "534366"));
+		System.out.println(compareArticlesWithJaccard("24113", "328670"));
 	}
 
 
