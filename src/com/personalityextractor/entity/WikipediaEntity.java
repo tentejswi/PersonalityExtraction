@@ -8,6 +8,7 @@ public class WikipediaEntity extends Entity{
 	String wikiminer_id;
 	ArrayList<String> categories;
 	
+	
 	public WikipediaEntity(String text) {
 		super(text);
 		wikiminer_id=null;
