@@ -6,6 +6,7 @@ import java.io.StringReader;
 import java.net.URL;
 import java.net.URLConnection;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 
@@ -23,6 +24,8 @@ import tathya.db.YahooBOSS;
 import cs224n.util.PriorityQueue;
 
 public class Wikiminer {
+	
+	static HashMap<String, String> cache = new HashMap<String, String>();
 	
 	//caution ahead: mix up the order of the args at your own peril 
 	public static double calculateJaccard(List<String> links, List<String> contextPhrases){
@@ -291,11 +294,19 @@ public class Wikiminer {
 	}
 	
 	public static double compare(String id1, String id2){
+		String urlStr = "http://wdm.cs.waikato.ac.nz:8080/service?task=compare&xml&ids1="+id1+";"+id2;
+		
 		try{
 //			String urlStr = "http://wdm.cs.waikato.ac.nz:8080/service?task=compare&xml&term1="
 //							+correctEncoding(term1)+"&term2="+correctEncoding(term2);
-			String urlStr = "http://wdm.cs.waikato.ac.nz:8080/service?task=compare&xml&ids1="+id1+";"+id2;
+			
 			//http://wdm.cs.waikato.ac.nz:8080/service?task=compare&term1=president&term2=obama&xml=true
+			
+			// return from cache
+			if(cache.containsKey(urlStr)) {
+				return Double.parseDouble(cache.get(urlStr));
+			}
+			
 			URL url = new URL(urlStr);
 	        URLConnection yc = url.openConnection();
 	        BufferedReader in = new BufferedReader(new InputStreamReader(yc.getInputStream()));
@@ -306,6 +317,7 @@ public class Wikiminer {
 	        	buf.append(inputLine);
 	        in.close();
 	        if(buf.toString().contains("unknownTerm")) {
+	        	cache.put(urlStr, "0");
 	        	return 0.0;
 	        }
 	        //System.out.println(buf.toString());
@@ -324,19 +336,21 @@ public class Wikiminer {
 			NodeList relatednessNodes = dom.getElementsByTagName("RelatednessResponse");
 			Node relation = relatednessNodes.item(0);
 			if(relation!=null){
-				//System.out.println(relation.getTextContent());
-				return Double.parseDouble(relation.getTextContent().trim().split(",")[2]);
+				String str = relation.getTextContent().trim().split(",")[2];
+				cache.put(urlStr, str);
+				return Double.parseDouble(str);
 			}
 			
 		}catch(Exception e){
 			e.printStackTrace();
 		}
+		
+		cache.put(urlStr, "0");
 		return 0.0;
 
 	}
 	
 	public static String getXML(String query, boolean isId) {
-		
 		if(query.equalsIgnoreCase("wikipedia entry"))
 			return null;
 		StringBuffer correctEncoding = new StringBuffer();
@@ -356,6 +370,12 @@ public class Wikiminer {
 			} else {
 				urlStr += "&term=" + query;
 			}
+			
+			// return from cache
+			if(cache.containsKey(urlStr)) {
+				return cache.get(urlStr);
+			}
+			
 			URL url = new URL(urlStr);
 	        URLConnection yc = url.openConnection();
 	        BufferedReader in = new BufferedReader(new InputStreamReader(yc.getInputStream()));
@@ -370,7 +390,9 @@ public class Wikiminer {
 	        	return null;
 	        }
 	        
-	        return buf.toString();
+	        String xml = buf.toString();
+	        cache.put(urlStr, xml);
+	        return xml;
 		} catch(Exception e) {
 			e.printStackTrace();
 		}
