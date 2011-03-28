@@ -5,8 +5,8 @@ import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 
-import wikipedia.Wikiminer;
 
+import com.personalityextractor.data.source.Wikiminer;
 import com.personalityextractor.entity.WikipediaEntity;
 import com.personalityextractor.entity.extractor.EntityExtractFactory;
 import com.personalityextractor.entity.extractor.EntityExtractFactory.Extracter;
@@ -141,8 +141,9 @@ public class ViterbiResolver extends BaseEntityResolver {
 
 		// read through data
 		// String tweet = "Kamran Akmal Pakistan";
-		 String tweet = "India Obama Pakistan";
-		// String tweet = "mouse monitor cheese";
+//		 String tweet = "India Obama Pakistan";
+		 String tweet = "monitor mouse cheese";
+//		String tweet = "Twitterati, you're waking up the the news that the two fastest cars in Oz today - Lewis Hamilton and Jenson Button.";
 
 		// extract entities
 		ViterbiResolver vr = new ViterbiResolver(

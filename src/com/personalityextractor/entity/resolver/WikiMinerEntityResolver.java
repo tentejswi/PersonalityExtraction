@@ -19,8 +19,8 @@ import org.w3c.dom.NodeList;
 import org.xml.sax.InputSource;
 
 import tathya.db.YahooBOSS;
-import wikipedia.Wikiminer;
 
+import com.personalityextractor.data.source.Wikiminer;
 import com.personalityextractor.entity.WikipediaEntity;
 import com.personalityextractor.entity.extractor.EntityExtractFactory;
 import com.personalityextractor.entity.extractor.EntityExtractFactory.Extracter;

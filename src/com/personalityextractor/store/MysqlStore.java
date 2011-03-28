@@ -40,4 +40,15 @@ public class MysqlStore {
 		
 		return rs;
 	}
+	
+	public boolean executeUpdate(String query) {
+		try {
+			Statement stmt = conn.createStatement();
+			return stmt.execute(query);
+		} catch(Exception e) {
+			e.printStackTrace();
+		}
+		
+		return false;
+	}
 }

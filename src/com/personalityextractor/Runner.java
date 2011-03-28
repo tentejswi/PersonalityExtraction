@@ -4,7 +4,9 @@
 package com.personalityextractor;
 
 import java.sql.ResultSet;
+import java.util.List;
 
+import com.personalityextractor.data.source.Twitter;
 import com.personalityextractor.store.MysqlStore;
 
 /**
@@ -31,10 +33,16 @@ public class Runner {
 		return null;
 	}
 	
+	public static boolean updateUser(String handle) {
+		return store.executeUpdate("UPDATE user_queue SET done = 1 WHERE handle like \"" + handle + "\"");
+	}
+	
 	public static void run() {
 		String handle = popUserFromQueue();
+		Twitter t = new Twitter();
 		if(handle != null) {
-			// process tweets TODO
+			List<String> tweets = t.fetchTweets(handle);
+			// TODO pass tweets via extractor and resolver
 		}
 	}
 	

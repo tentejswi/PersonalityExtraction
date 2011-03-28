@@ -6,7 +6,6 @@ import java.util.List;
 
 import edu.stanford.nlp.parser.lexparser.LexicalizedParser;
 import edu.stanford.nlp.trees.Tree;
-import edu.stanford.nlp.trees.TreePrint;
 
 public class NounPhraseExtractor implements IEntityExtractor {
 

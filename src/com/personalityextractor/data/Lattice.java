@@ -7,8 +7,8 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 
-import wikipedia.Wikiminer;
 
+import com.personalityextractor.data.source.Wikiminer;
 import com.personalityextractor.entity.WikipediaEntity;
 
 /**

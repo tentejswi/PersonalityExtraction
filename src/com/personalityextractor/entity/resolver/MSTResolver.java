@@ -4,20 +4,17 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.HashSet;
-import java.util.Iterator;
 import java.util.List;
-import java.util.Set;
 
-import wikipedia.Wikiminer;
 
+import com.personalityextractor.data.source.Wikiminer;
 import com.personalityextractor.entity.WikipediaEntity;
 import com.personalityextractor.entity.extractor.EntityExtractFactory;
-import com.personalityextractor.entity.extractor.IEntityExtractor;
 import com.personalityextractor.entity.extractor.EntityExtractFactory.Extracter;
+import com.personalityextractor.entity.extractor.IEntityExtractor;
 
 import cs224n.util.Counter;
 import cs224n.util.CounterMap;
-import cs224n.util.MapFactory;
 
 /*
  * resolve entities by finding the maximum spanning tree

@@ -9,9 +9,8 @@ import java.io.FileReader;
 import java.util.ArrayList;
 
 import com.personalityextractor.entity.extractor.EntityExtractFactory;
-import com.personalityextractor.entity.extractor.IEntityExtractor;
 import com.personalityextractor.entity.extractor.EntityExtractFactory.Extracter;
-import com.personalityextractor.entity.resolver.WikiMinerEntityResolver;
+import com.personalityextractor.entity.extractor.IEntityExtractor;
 
 /**
  * @author akishore

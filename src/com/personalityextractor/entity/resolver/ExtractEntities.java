@@ -5,7 +5,6 @@ import java.io.BufferedWriter;
 import java.io.FileReader;
 import java.io.FileWriter;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -16,8 +15,8 @@ import javax.xml.parsers.DocumentBuilderFactory;
 
 import tathya.db.YahooBOSS;
 import tathya.text.tokenizer.TwitterTokenizer;
-import wikipedia.Wikiminer;
 
+import com.personalityextractor.data.source.Wikiminer;
 import com.personalityextractor.entity.Entity;
 import com.personalityextractor.entity.extractor.IEntityExtractor;
 import com.personalityextractor.entity.extractor.NounPhraseExtractor;
