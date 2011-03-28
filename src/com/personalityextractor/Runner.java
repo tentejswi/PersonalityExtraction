@@ -43,6 +43,8 @@ public class Runner {
 		if(handle != null) {
 			List<String> tweets = t.fetchTweets(handle);
 			// TODO pass tweets via extractor and resolver
+			// update status
+			updateUser(handle);
 		}
 	}
 	
