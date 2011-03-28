@@ -5,8 +5,8 @@ import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 
-
 import com.personalityextractor.data.source.Wikiminer;
+import com.personalityextractor.entity.Entity;
 import com.personalityextractor.entity.WikipediaEntity;
 import com.personalityextractor.entity.extractor.EntityExtractFactory;
 import com.personalityextractor.entity.extractor.EntityExtractFactory.Extracter;
@@ -16,18 +16,13 @@ import cs224n.util.CounterMap;
 
 public class ViterbiResolver extends BaseEntityResolver {
 
-	public ViterbiResolver(IEntityExtractor e) {
-		super(e);
-	}
-
-	public ArrayList<String> extract(String line) {
-		return extractor.extract(line);
+	public ViterbiResolver() {
 	}
 
 	/*
 	 * get wikimimer compare() scores between all entities
 	 */
-	public CounterMap<String, String> populateCompareScores(
+	private CounterMap<String, String> populateCompareScores(
 			List<String> twEntities,
 			HashMap<String, ArrayList<WikipediaEntity>> tweetEntityTowikiEntities) {
 		CounterMap<String, String> probabilites = new CounterMap<String, String>();
@@ -72,7 +67,7 @@ public class ViterbiResolver extends BaseEntityResolver {
 
 	}
 
-	public HashMap<String, String> buildwikiIDToTweetEntityMap(
+	private HashMap<String, String> buildwikiIDToTweetEntityMap(
 			HashMap<String, ArrayList<WikipediaEntity>> tweetEntityTowikiEntities) {
 		// assuming that wikipedia ids are unique
 		HashMap<String, String> wikiIDToTweetEntity = new HashMap<String, String>();
@@ -89,8 +84,8 @@ public class ViterbiResolver extends BaseEntityResolver {
 		return wikiIDToTweetEntity;
 	}
 
-	public HashMap<String, ArrayList<WikipediaEntity>> getWikiSenses(
-			ArrayList<String> entities) {
+	private HashMap<String, ArrayList<WikipediaEntity>> getWikiSenses(
+			List<String> entities) {
 		HashMap<String, ArrayList<WikipediaEntity>> tweetEntityTowikiEntities = new HashMap<String, ArrayList<WikipediaEntity>>();
 		for (String entity : entities) {
 			List<WikipediaEntity> wikiEntities = new ArrayList<WikipediaEntity>();
@@ -115,48 +110,33 @@ public class ViterbiResolver extends BaseEntityResolver {
 
 		return tweetEntityTowikiEntities;
 	}
-	
-	public static List<String> swap(List<String> l, int p) {
+
+	private static List<String> swap(List<String> l, int p) {
 		int x = p;
-		int y = p+1;
-		if(p == l.size()-1) {
+		int y = p + 1;
+		if (p == l.size() - 1) {
 			y = 0;
 		}
-		
+
 		List<String> sList = new ArrayList<String>();
-		for(int i=0; i<l.size(); i++) {
-			if(i == x) {
+		for (int i = 0; i < l.size(); i++) {
+			if (i == x) {
 				sList.add(l.get(y));
-			} else if(i == y) {
+			} else if (i == y) {
 				sList.add(l.get(x));
 			} else {
 				sList.add(l.get(i));
 			}
 		}
-		
+
 		return sList;
 	}
 
-	public static void main(String args[]) {
-
-		// read through data
-		// String tweet = "Kamran Akmal Pakistan";
-//		 String tweet = "India Obama Pakistan";
-		 String tweet = "monitor mouse cheese";
-//		String tweet = "Twitterati, you're waking up the the news that the two fastest cars in Oz today - Lewis Hamilton and Jenson Button.";
-
-		// extract entities
-		ViterbiResolver vr = new ViterbiResolver(
-				EntityExtractFactory
-						.produceExtractor(Extracter.CONSECUTIVE_WORDS));
-		ArrayList<String> entities = vr.extract(tweet);
+	public List<Entity> resolve(List<String> entities) {
+		ArrayList<Entity> entityList = new ArrayList<Entity>();
 
 		// find potential wiki entities for each entity
-		HashMap<String, ArrayList<WikipediaEntity>> tweetEntityTowikiEntities = vr
-				.getWikiSenses(entities);
-
-		// HashMap<String, String> wikiIDToTweetEntity =
-		// vr.buildwikiIDToTweetEntityMap(tweetEntityTowikiEntities);
+		HashMap<String, ArrayList<WikipediaEntity>> tweetEntityTowikiEntities = getWikiSenses(entities);
 
 		// remove entities which have no wikipedia senses
 		Object[] objArray = tweetEntityTowikiEntities.keySet().toArray();
@@ -172,100 +152,108 @@ public class ViterbiResolver extends BaseEntityResolver {
 		twEntities = entities;
 
 		// try all permutations of entities
-		for (int x = 0; x < entities.size(); x++) {			
-			for(int z=0; z<entities.size()-1; z++) {
-				twEntities = swap(twEntities, z);
-	
+//		for (int x = 0; x < entities.size(); x++) {
+		for (int x = 0; x < 1; x++) {
+//			for (int z = 0; z < entities.size() - 1; z++) {
+			for (int z = 0; z < 1; z++) {
+//				twEntities = swap(twEntities, z);
+
 				// pre-calculate all compare scores between wikipedia entities.
-				CounterMap<String, String> probabilites = vr.populateCompareScores(
-						twEntities, tweetEntityTowikiEntities);
-	
+				CounterMap<String, String> probabilites = populateCompareScores(twEntities,
+								tweetEntityTowikiEntities);
+
 				// declare the dp matrix and initialize it for the first state
 				HashMap<String, String[]> prev_BestPaths = new HashMap<String, String[]>();
 				ArrayList<WikipediaEntity> first_entities = tweetEntityTowikiEntities
 						.get(twEntities.get(0));
-				String init_prob = String.valueOf((1.0 / first_entities.size()));
+				String init_prob = String
+						.valueOf((1.0 / first_entities.size()));
 				for (WikipediaEntity we : first_entities) {
 					prev_BestPaths.put(we.getWikiminerID(), new String[] {
 							init_prob, we.getWikiminerID(), init_prob });
 				}
-	
-	//			System.out.println("Start viterbi");
+
+				// System.out.println("Start viterbi");
 				// not worrying about the order of entities for now
 				for (int i = 1; i < twEntities.size(); i++) {
-	
+
 					for (String key : prev_BestPaths.keySet()) {
-	//					System.out.println(Arrays.asList(prev_BestPaths.get(key)));
+						// System.out.println(Arrays.asList(prev_BestPaths.get(key)));
 					}
-	
+
 					HashMap<String, String[]> next_BestPaths = new HashMap<String, String[]>();
 					ArrayList<WikipediaEntity> next_WikiSenses = tweetEntityTowikiEntities
 							.get(twEntities.get(i));
-	
+
 					for (int j = 0; j < next_WikiSenses.size(); j++) {
 						double total = 0;
 						String maxpath = "";
 						double maxprob = (-1) * Integer.MAX_VALUE;
-	
+
 						double prob = 1;
 						String v_path = "";
 						double v_prob = 1;
 						ArrayList<WikipediaEntity> previous_WikiSenses = tweetEntityTowikiEntities
 								.get(twEntities.get(i - 1));
-	
+
 						for (int k = 0; k < previous_WikiSenses.size(); k++) {
-							String[] objs = prev_BestPaths.get(previous_WikiSenses
-									.get(k).getWikiminerID());
+							String[] objs = prev_BestPaths
+									.get(previous_WikiSenses.get(k)
+											.getWikiminerID());
 							prob = Double.parseDouble(objs[0]);
 							v_path = (String) objs[1];
 							v_prob = Double.parseDouble(objs[2]);
-							double count = probabilites.getCount(
-									previous_WikiSenses.get(k).getWikiminerID(),
-									next_WikiSenses.get(j).getWikiminerID());
-	//						System.out.println("Comparing "
-	//								+ previous_WikiSenses.get(k).getWikiminerID()
-	//								+ ", "
-	//								+ next_WikiSenses.get(j).getWikiminerID()
-	//								+ " : " + count);
-	
+							double count = probabilites
+									.getCount(previous_WikiSenses.get(k)
+											.getWikiminerID(), next_WikiSenses
+											.get(j).getWikiminerID());
+							// System.out.println("Comparing "
+							// + previous_WikiSenses.get(k).getWikiminerID()
+							// + ", "
+							// + next_WikiSenses.get(j).getWikiminerID()
+							// + " : " + count);
+
 							double compareScore;
 							if (count == 0.0) {
 								compareScore = (-1) * Integer.MAX_VALUE;
 							} else {
 								compareScore = Math.log(count);
 							}
-	
+
 							prob += compareScore;
 							v_prob += (compareScore);
-	
+
 							total += Math.exp(prob);
 							double check = Math.log(total);
 							if (v_prob > maxprob) {
 								maxprob = v_prob;
-								maxpath = v_path + ","
-										+ next_WikiSenses.get(j).getWikiminerID();
+								maxpath = v_path
+										+ ","
+										+ next_WikiSenses.get(j)
+												.getWikiminerID();
 							}
 						}
-						next_BestPaths.put(next_WikiSenses.get(j).getWikiminerID(),
+						next_BestPaths.put(next_WikiSenses.get(j)
+								.getWikiminerID(),
 								new String[] { String.valueOf(Math.log(total)),
 										maxpath, String.valueOf(maxprob) });
 					}
 					prev_BestPaths = next_BestPaths;
 				}
-	
+
 				for (String key : prev_BestPaths.keySet()) {
-	//				System.out.println("Entity: " + key);
-	//				System.out.println(Arrays.asList(prev_BestPaths.get(key)));
+					// System.out.println("Entity: " + key);
+					// System.out.println(Arrays.asList(prev_BestPaths.get(key)));
 				}
-	
+
 				double total = 0;
 				String maxpath = "";
 				double maxprob = (-1) * Integer.MAX_VALUE;
-	
+
 				double prob = 1;
 				String v_path = "";
 				double v_prob = 1;
-	
+
 				for (String s : prev_BestPaths.keySet()) {
 					String[] info = prev_BestPaths.get(s);
 					prob = Double.parseDouble(info[0]);
@@ -278,10 +266,16 @@ public class ViterbiResolver extends BaseEntityResolver {
 					}
 				}
 				System.out.println("Entities : " + twEntities);
-				System.out.println("MaxPath: " + maxpath + "\tMaxProb: " + maxprob
-						+ "\n");
+				System.out.println("MaxPath: " + maxpath + "\tMaxProb: "
+						+ maxprob + "\n");
 			}
 		}
+		
+		return entityList;
+	}
+
+	public static void main(String args[]) {
+
 	}
 
 }

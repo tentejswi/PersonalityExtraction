@@ -21,10 +21,8 @@ import org.xml.sax.InputSource;
 import tathya.db.YahooBOSS;
 
 import com.personalityextractor.data.source.Wikiminer;
+import com.personalityextractor.entity.Entity;
 import com.personalityextractor.entity.WikipediaEntity;
-import com.personalityextractor.entity.extractor.EntityExtractFactory;
-import com.personalityextractor.entity.extractor.EntityExtractFactory.Extracter;
-import com.personalityextractor.entity.extractor.IEntityExtractor;
 
 import cs224n.util.PriorityQueue;
 
@@ -33,14 +31,6 @@ import cs224n.util.PriorityQueue;
  *
  */
 public class WikiMinerEntityResolver extends BaseEntityResolver {
-	
-	public WikiMinerEntityResolver(IEntityExtractor extractor) {
-		super(extractor);
-	}
-
-	public ArrayList<String> extract(String line) {
-		return extractor.extract(line);
-	}
 	
 	public boolean breakTies(String bigger_entity_id, String smaller_entity){
 		String xml = null;
@@ -366,8 +356,8 @@ public class WikiMinerEntityResolver extends BaseEntityResolver {
 	}
 
 	
-	private static List<WikipediaEntity> resolveEntities(ArrayList<String> entities) {
-		ArrayList<WikipediaEntity> resolvedEntities = new ArrayList<WikipediaEntity>();
+	public List<Entity> resolve(List<String> entities) {
+		ArrayList<Entity> resolvedEntities = new ArrayList<Entity>();
 		List<String> contextPhrases = new ArrayList<String>(entities);
 		for(String entity : entities){
 			List<WikipediaEntity> rankedEntities = getRankedEntities(entity, contextPhrases);
@@ -419,7 +409,7 @@ public class WikiMinerEntityResolver extends BaseEntityResolver {
 	 * @param args
 	 */
 	public static void main(String[] args) {
-		WikiMinerEntityResolver pme = new WikiMinerEntityResolver(EntityExtractFactory.produceExtractor(Extracter.CONSECUTIVE_WORDS));
+//		WikiMinerEntityResolver pme = new WikiMinerEntityResolver(EntityExtractFactory.produceExtractor(Extracter.CONSECUTIVE_WORDS));
 //		ArrayList<String> entities = new ArrayList<String>();
 //		entities.add("York City");
 //		entities.add("City");
@@ -434,13 +424,13 @@ public class WikiMinerEntityResolver extends BaseEntityResolver {
 //		System.out.println(pme.removeExtraneousEntities(entities));
 		
 		
-		ArrayList<String> entities = pme.extract("Will soon be en route New York to Frankfurt.");
-		for(String e : entities) {
-			System.out.println(e);
-		}
-		for(WikipediaEntity we: resolveEntities(entities)){
-			we.print();
-		}
+//		ArrayList<String> entities = pme.extract("Will soon be en route New York to Frankfurt.");
+//		for(String e : entities) {
+//			System.out.println(e);
+//		}
+//		for(WikipediaEntity we: resolveEntities(entities)){
+//			we.print();
+//		}
 //		pme.extract("Will soon be en route amman to Frankfurt.");
 //		pme.extract("New model of the universe fits data better than Big Bang");
 		//pme.extract("RT @LanceWeiler: Hubs & Connectors: Understanding Networks Through Data Visualization http://bit.ly/eegRqT HT @JeffClark");

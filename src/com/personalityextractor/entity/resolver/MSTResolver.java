@@ -6,8 +6,8 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 
-
 import com.personalityextractor.data.source.Wikiminer;
+import com.personalityextractor.entity.Entity;
 import com.personalityextractor.entity.WikipediaEntity;
 import com.personalityextractor.entity.extractor.EntityExtractFactory;
 import com.personalityextractor.entity.extractor.EntityExtractFactory.Extracter;
@@ -21,17 +21,11 @@ import cs224n.util.CounterMap;
  */
 public class MSTResolver extends BaseEntityResolver {
 
-	public MSTResolver(IEntityExtractor e){
-		super(e);
+	public MSTResolver() {
 	}
 	
-	public static void main(String[] args) {
-		//read through data
-		String tweet = "";
-		
-		//extract entities
-		MSTResolver msr = new MSTResolver(EntityExtractFactory.produceExtractor(Extracter.CONSECUTIVE_WORDS));
-		ArrayList<String> entities = msr.extract(tweet);
+	public List<Entity> resolve(List<String> entities) {
+		ArrayList<Entity> entityList = new ArrayList<Entity>();
 		
 		//find potential wiki entities for each entity
 		HashMap<String, ArrayList<WikipediaEntity>> tweetEntityTowikiEntities= new HashMap<String, ArrayList<WikipediaEntity>>();
@@ -84,6 +78,7 @@ public class MSTResolver extends BaseEntityResolver {
 			}
 		}
 		
+		return entityList;
 	}
 	
 	public HashMap<String, String> buildwikiIDToTweetEntityMap(HashMap<String, ArrayList<WikipediaEntity>> tweetEntityTowikiEntities){
@@ -149,10 +144,6 @@ public class MSTResolver extends BaseEntityResolver {
 				}								
 			}			
 		}
-	}
-	@Override
-	public ArrayList<String> extract(String line) {
-		return this.extractor.extract(line);
 	}
 
 }

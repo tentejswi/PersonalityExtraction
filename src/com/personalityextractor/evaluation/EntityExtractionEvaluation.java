@@ -7,6 +7,7 @@ import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileReader;
 import java.util.ArrayList;
+import java.util.List;
 
 import com.personalityextractor.entity.extractor.EntityExtractFactory;
 import com.personalityextractor.entity.extractor.EntityExtractFactory.Extracter;
@@ -81,7 +82,7 @@ public class EntityExtractionEvaluation {
 		EvalMetrics metrics = new EvalMetrics();
 		
 		for(Record r : records) {
-			ArrayList<String> extractedEntities = extractor.extract(r.text);
+			List<String> extractedEntities = extractor.extract(r.text);
 			for(String exEntity : extractedEntities) {
 				if(r.entities.size() > 0) {
 					for(String entity : r.entities) {

@@ -21,7 +21,7 @@ public class NounPhraseExtractor implements IEntityExtractor {
 		}
 	}
 
-	public ArrayList<String> extract(String text) {
+	public List<String> extract(String text) {
 		ArrayList<String> phrases = new ArrayList<String>();
 		String[] sent = text.split(" ");
 		Tree parse = (Tree) lp.apply(Arrays.asList(sent));
@@ -81,7 +81,7 @@ public class NounPhraseExtractor implements IEntityExtractor {
 		);
 
 		for (String sentence : sentences) {
-			ArrayList<String> entities = e.extract(sentence);
+			List<String> entities = e.extract(sentence);
 
 			for (String entity : entities) {
 				System.out.println("'" + entity + "'");

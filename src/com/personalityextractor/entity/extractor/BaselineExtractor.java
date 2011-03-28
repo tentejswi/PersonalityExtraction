@@ -118,7 +118,7 @@ public class BaselineExtractor implements IEntityExtractor {
 		);
 		
 		for(String sentence : sentences) {
-			ArrayList<String> entities = e.extract(sentence);
+			List<String> entities = e.extract(sentence);
 			
 			for(String entity : entities) {
 				System.out.println("'" + entity + "'");

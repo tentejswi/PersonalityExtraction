@@ -3,7 +3,7 @@
  */
 package com.personalityextractor.entity.extractor;
 
-import java.util.ArrayList;
+import java.util.List;
 
 /**
  * @author akishore
@@ -11,6 +11,6 @@ import java.util.ArrayList;
  */
 public interface IEntityExtractor {
 
-	public ArrayList<String> extract(String line);
+	public List<String> extract(String line);
 
 }
