@@ -8,6 +8,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import com.personalityextractor.data.source.Twitter;
+import com.personalityextractor.entity.Entity;
 import com.personalityextractor.entity.extractor.EntityExtractFactory;
 import com.personalityextractor.entity.extractor.EntityExtractFactory.Extracter;
 import com.personalityextractor.entity.extractor.IEntityExtractor;
@@ -57,7 +58,7 @@ public class Runner {
 			
 			for(String tweet : tweets) {
 				List<String> entities = extractor.extract(tweet);
-				resolver.resolve(entities);
+				List<Entity> resolvedEntities = resolver.resolve(entities);
 			}
 			// update status
 			updateUser(handle);

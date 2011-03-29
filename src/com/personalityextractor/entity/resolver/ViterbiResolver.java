@@ -265,9 +265,15 @@ public class ViterbiResolver extends BaseEntityResolver {
 						maxprob = v_prob;
 					}
 				}
+				
 				System.out.println("Entities : " + twEntities);
 				System.out.println("MaxPath: " + maxpath + "\tMaxProb: "
 						+ maxprob + "\n");
+				
+				String[] ids = maxpath.split(",");
+				for(int l=0; l<ids.length; l++) {
+					entityList.add(new WikipediaEntity(twEntities.get(l), ids[l]));
+				}
 			}
 		}
 		
