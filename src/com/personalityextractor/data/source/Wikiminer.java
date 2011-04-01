@@ -125,10 +125,10 @@ public class Wikiminer {
 		return links;
 	}
 
-	public static ArrayList<String> getCategories(String wikiminer_id) {
+	public static ArrayList<String[]> getCategories(String wikiminer_id) {
 
 		String xml = getXML(wikiminer_id, true);
-		ArrayList<String> categories = new ArrayList<String>();
+		ArrayList<String[]> categories = new ArrayList<String[]>();
 		DocumentBuilder db = null;
 		DocumentBuilderFactory dbf = DocumentBuilderFactory.newInstance();
 		try {
@@ -147,8 +147,10 @@ public class Wikiminer {
 					Node cat = catNodes.item(i);
 					if (cat != null) {
 						NamedNodeMap attrs = cat.getAttributes();
-						categories.add(attrs.getNamedItem("id")
-								.getTextContent());
+						String[] values = new String[2];
+						values[0] = attrs.getNamedItem("id").getTextContent();
+						values[1] = attrs.getNamedItem("title").getTextContent();
+						categories.add(values);
 					}
 				}
 			}
