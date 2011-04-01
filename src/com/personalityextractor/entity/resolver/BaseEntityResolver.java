@@ -6,6 +6,7 @@ package com.personalityextractor.entity.resolver;
 import java.util.List;
 
 import com.personalityextractor.entity.Entity;
+import com.personalityextractor.entity.WikipediaEntity;
 import com.personalityextractor.entity.extractor.IEntityExtractor;
 
 /**
@@ -18,7 +19,7 @@ public class BaseEntityResolver implements IEntityResolver {
 	 * @see com.personalityextractor.entity.extractor.IEntityExtractor#extract(java.lang.String)
 	 */
 	@Override
-	public List<Entity> resolve(List<String> entities) {
+	public List<WikipediaEntity> resolve(List<String> entities) {
 		// TODO Auto-generated method stub
 		return null;
 	}

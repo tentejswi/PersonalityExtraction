@@ -6,6 +6,7 @@ package com.personalityextractor.entity.resolver;
 import java.util.List;
 
 import com.personalityextractor.entity.Entity;
+import com.personalityextractor.entity.WikipediaEntity;
 
 /**
  * @author akishore
@@ -13,6 +14,6 @@ import com.personalityextractor.entity.Entity;
  */
 public interface IEntityResolver {
 
-	public List<Entity> resolve(List<String> entities);
+	public List<WikipediaEntity> resolve(List<String> entities);
 
 }

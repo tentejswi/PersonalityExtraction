@@ -356,8 +356,8 @@ public class WikiMinerEntityResolver extends BaseEntityResolver {
 	}
 
 	
-	public List<Entity> resolve(List<String> entities) {
-		ArrayList<Entity> resolvedEntities = new ArrayList<Entity>();
+	public List<WikipediaEntity> resolve(List<String> entities) {
+		ArrayList<WikipediaEntity> resolvedEntities = new ArrayList<WikipediaEntity>();
 		List<String> contextPhrases = new ArrayList<String>(entities);
 		for(String entity : entities){
 			List<WikipediaEntity> rankedEntities = getRankedEntities(entity, contextPhrases);

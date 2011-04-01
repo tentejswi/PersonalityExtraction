@@ -132,8 +132,8 @@ public class ViterbiResolver extends BaseEntityResolver {
 		return sList;
 	}
 
-	public List<Entity> resolve(List<String> entities) {
-		ArrayList<Entity> entityList = new ArrayList<Entity>();
+	public List<WikipediaEntity> resolve(List<String> entities) {
+		ArrayList<WikipediaEntity> entityList = new ArrayList<WikipediaEntity>();
 
 		// find potential wiki entities for each entity
 		HashMap<String, ArrayList<WikipediaEntity>> tweetEntityTowikiEntities = getWikiSenses(entities);
