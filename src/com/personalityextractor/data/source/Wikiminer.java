@@ -267,57 +267,49 @@ public class Wikiminer {
 		return rankedCategories;
 	}
 
-	public static ArrayList<String[]> getWikipediaSenses(String xml,
-			boolean getId) {
-		ArrayList<String[]> senses = new ArrayList<String[]>();
-		DocumentBuilder db = null;
-		DocumentBuilderFactory dbf = DocumentBuilderFactory.newInstance();
-		try {
-			db = dbf.newDocumentBuilder();
-		} catch (Exception e) {
-			e.printStackTrace();
-		}
+    public static ArrayList<String[]> getWikipediaSenses(String xml, boolean getId){
+        ArrayList<String[]> senses = new ArrayList<String[]>();
+        DocumentBuilder db = null;
+        DocumentBuilderFactory dbf = DocumentBuilderFactory.newInstance();
+        try {
+            db = dbf.newDocumentBuilder();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
 
-		InputSource is = new InputSource();
-		is.setCharacterStream(new StringReader(xml));
-		// System.out.println(xml);
-		try {
-			Document dom = db.parse(is);
-			NodeList senseNodes = dom.getElementsByTagName("Sense");
-			if (senseNodes != null && senseNodes.getLength() != 0) {
-				for (int i = 0; i < senseNodes.getLength(); i++) {
-					Node topSense = senseNodes.item(i);
-					if (topSense != null) {
-						NamedNodeMap attrs = topSense.getAttributes();
-						Node commonness = attrs.getNamedItem("commonness");
-						double relevance = Double.parseDouble(commonness
-								.getTextContent());
-						if (relevance >= 0.001) {
-							String[] senseArray = {
-									attrs.getNamedItem("title")
-											.getTextContent(),
-									attrs.getNamedItem("id").getTextContent() };
-							senses.add(senseArray);
-						}
-					}
-				}
-			} else {
-				NodeList articleNodes = dom.getElementsByTagName("Article");
-				if (articleNodes != null && articleNodes.item(0) != null) {
-					Node article = articleNodes.item(0);
-					NamedNodeMap attrs = article.getAttributes();
-					senses.add(new String[] {
-							attrs.getNamedItem("title").getTextContent(),
-							attrs.getNamedItem("id").getTextContent() });
-				}
-			}
-		} catch (Exception e) {
-			e.printStackTrace();
-		}
-		return senses;
+        InputSource is = new InputSource();
+        is.setCharacterStream(new StringReader(xml));
+        // System.out.println(xml);
+        try{
+        Document dom = db.parse(is);
+        NodeList senseNodes = dom.getElementsByTagName("Sense");
+        if (senseNodes != null && senseNodes.getLength() != 0) {
+            for (int i = 0; i < senseNodes.getLength(); i++) {
+                Node topSense = senseNodes.item(i);
+                if (topSense != null) {
+                    NamedNodeMap attrs = topSense.getAttributes();
+                    Node commonness = attrs.getNamedItem("commonness");
+                    double relevance = Double.parseDouble(commonness.getTextContent());
+                    if (relevance >= 0.01) {
+                        String[] senseArray = {attrs.getNamedItem("title").getTextContent(), attrs.getNamedItem("id").getTextContent(), String.valueOf(relevance)};
+                        senses.add(senseArray);
+                    }
+                }
+            }
+        } else {
+            NodeList articleNodes = dom.getElementsByTagName("Article");
+            if (articleNodes != null && articleNodes.item(0) != null) {
+                Node article = articleNodes.item(0);
+                NamedNodeMap attrs = article.getAttributes();
+                senses.add(new String[]{attrs.getNamedItem("title").getTextContent(), attrs.getNamedItem("id").getTextContent(), "1.0"});
+            }
+        }
+        }catch(Exception e){
+            e.printStackTrace();
+        }
+        return senses;
 
-	}
-
+    }
 	public static String correctEncoding(String query) {
 		StringBuffer correctEncoding = new StringBuffer();
 		String[] sensesplit = query.split("\\s+");
