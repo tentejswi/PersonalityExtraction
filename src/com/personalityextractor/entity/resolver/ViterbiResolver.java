@@ -147,7 +147,7 @@ public class ViterbiResolver extends BaseEntityResolver {
     }
 
     public List<WikipediaEntity> resolve(List<String> entities) {
-        ArrayList<Entity> entityList = new ArrayList<Entity>();
+        List<WikipediaEntity> entityList = new ArrayList<WikipediaEntity>();
         double bestProbability = (-1)*Integer.MAX_VALUE;
         String bestPath = "";
         List<String> bestSequence=null;
