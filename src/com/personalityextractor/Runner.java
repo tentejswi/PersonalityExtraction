@@ -5,14 +5,18 @@ package com.personalityextractor;
 
 import java.sql.ResultSet;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 
 import com.personalityextractor.data.source.Twitter;
-import com.personalityextractor.entity.Entity;
 import com.personalityextractor.entity.WikipediaEntity;
 import com.personalityextractor.entity.extractor.EntityExtractFactory;
 import com.personalityextractor.entity.extractor.EntityExtractFactory.Extracter;
 import com.personalityextractor.entity.extractor.IEntityExtractor;
+import com.personalityextractor.entity.graph.Graph;
+import com.personalityextractor.entity.graph.Node;
+import com.personalityextractor.entity.graph.ranking.IRanker;
+import com.personalityextractor.entity.graph.ranking.WeightGraphRanker;
 import com.personalityextractor.entity.resolver.ViterbiResolver;
 import com.personalityextractor.store.MysqlStore;
 
@@ -53,6 +57,7 @@ public class Runner {
 		Twitter t = new Twitter();
 		IEntityExtractor extractor = EntityExtractFactory.produceExtractor(Extracter.CONSECUTIVE_WORDS);
 		ViterbiResolver resolver = new ViterbiResolver();
+		HashMap<String, WikipediaEntity> allEntities = new HashMap<String, WikipediaEntity>();
 		
 		if(handle != null) {
 			List<String> tweets = t.fetchTweets(handle);
@@ -60,7 +65,23 @@ public class Runner {
 			for(String tweet : tweets) {
 				List<String> entities = extractor.extract(tweet);
 				List<WikipediaEntity> resolvedEntities = resolver.resolve(entities);
+				
+				for(WikipediaEntity e : resolvedEntities) {
+					if(!allEntities.containsKey(e.getText())) {
+						allEntities.put(e.getText(), e);
+					} else {
+						(allEntities.get(e.getText())).incrCount();
+					}
+				}
 			}
+			
+			List<WikipediaEntity> entities = new ArrayList<WikipediaEntity>();
+			entities.addAll(allEntities.values());
+			Graph g = new Graph(entities);
+			g.build();
+			IRanker ranker = new WeightGraphRanker(g);
+			List<Node> topNodes = ranker.getTopRankedNodes(1);
+			
 			// update status
 			updateUser(handle);
 		}

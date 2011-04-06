@@ -6,6 +6,7 @@ package com.personalityextractor.entity.graph;
 import java.util.ArrayList;
 import java.util.List;
 
+import com.personalityextractor.entity.Entity;
 import com.personalityextractor.entity.WikipediaEntity;
 
 /**
@@ -17,11 +18,13 @@ public class Node {
 	private String id;
 	private List<Edge> edges;
 	private WikipediaEntity entity;
+	private double weight = 0;
 	
 	public Node(WikipediaEntity entity) {
 		this.id = entity.getWikiminerID();
 		this.entity = entity;
 		this.edges = new ArrayList<Edge>();
+		this.weight = entity.getCount();
 	}
 	
 	public void addEdge(Edge e) {
@@ -30,5 +33,21 @@ public class Node {
 	
 	public String getId() {
 		return id;
+	}
+	
+	public void addWeight(double w) {
+		this.weight += w;
+	}
+	
+	public double getWeight() {
+		return weight;
+	}
+	
+	public List<Edge> getEdges() {
+		return edges;
+	}
+	
+	public WikipediaEntity getEntity() {
+		return entity;
 	}
 }

@@ -9,6 +9,7 @@ import java.util.ArrayList;
 public class Entity {
 	String text = null;
 	double score = 0.0; 
+	int count = 0;
 	public ArrayList<String> tweets;
 	
 	public Entity(String text){
@@ -18,5 +19,13 @@ public class Entity {
 	
 	public String getText(){
 		return this.text;
+	}
+	
+	public void incrCount() {
+		count++;
+	}
+	
+	public int getCount() {
+		return count;
 	}
 }

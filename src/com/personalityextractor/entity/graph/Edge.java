@@ -53,4 +53,7 @@ public class Edge {
 		this.weight = weight;
 	}
 
+	public String toString() {
+		return id + "\t" + weight + "\t" + nodeId1 + "\t" + nodeId2 + "\n";
+	}
 }
