@@ -6,6 +6,8 @@ package com.personalityextractor.entity.graph;
 import java.util.ArrayList;
 import java.util.List;
 
+import net.sf.json.JSONObject;
+
 import com.personalityextractor.entity.Entity;
 import com.personalityextractor.entity.WikipediaEntity;
 
@@ -49,5 +51,17 @@ public class Node {
 	
 	public WikipediaEntity getEntity() {
 		return entity;
+	}
+	
+	public String toJSONString() {
+		return toJSONObject().toString();
+	}
+	
+	public JSONObject toJSONObject() {
+		JSONObject json = new JSONObject();
+		json.put("id", id);
+		json.put("text", entity.getText());
+		json.put("weight", weight);
+		return json;
 	}
 }

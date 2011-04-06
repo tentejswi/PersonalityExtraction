@@ -8,6 +8,9 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 
+import net.sf.json.JSONArray;
+import net.sf.json.JSONObject;
+
 import com.personalityextractor.data.source.Twitter;
 import com.personalityextractor.entity.WikipediaEntity;
 import com.personalityextractor.entity.extractor.EntityExtractFactory;
@@ -51,6 +54,21 @@ public class Runner {
 				.executeUpdate("UPDATE user_queue SET done = 1 WHERE handle like \""
 						+ handle + "\"");
 	}
+	
+	public static boolean setUserInterests(String handle, String json) {
+		return store
+				.executeUpdate("INSERT INTO user_interests(handle, json) values ('" + handle + "','" + json + "')");
+	}
+	
+	public static String nodesToJson(List<Node> nodes) {
+		JSONArray json = new JSONArray();
+		
+		for(Node n : nodes) {
+			json.add(n.toJSONObject());
+		}
+		
+		return json.toString();
+	}
 
 	public static void run() {
 		String handle = popUserFromQueue();
@@ -80,8 +98,8 @@ public class Runner {
 			Graph g = new Graph(entities);
 			g.build();
 			IRanker ranker = new WeightGraphRanker(g);
-			List<Node> topNodes = ranker.getTopRankedNodes(1);
-			
+			List<Node> topNodes = ranker.getTopRankedNodes(2);
+			setUserInterests(handle, nodesToJson(topNodes));
 			// update status
 			updateUser(handle);
 		}
