@@ -297,20 +297,24 @@ public class ViterbiResolver extends BaseEntityResolver {
                 + bestProbability + "\n");
 
         String[] ids = bestPath.split(",");
-        for(int l=0; l<ids.length; l++) {
+        for(int l=1; l<ids.length-1; l++) {
             entityList.add(new WikipediaEntity(idToWikiEntityText.get(ids[l]), ids[l]));
         }
-
+        System.out.println("entitylist length"+entityList.size());
         return entityList;
     }
 
     public static void main(String args[]) {
         ViterbiResolver vr = new ViterbiResolver();
         ArrayList<String> entities = new ArrayList<String>();
-        entities.add("apple");
-        entities.add("iphone");
-        entities.add("jobs");
-
+        //turned, snaps, turned out, out, really, good, colors
+        entities.add("turned");
+        entities.add("snaps");
+        entities.add("turned out");
+        entities.add("out");
+        entities.add("really");
+        entities.add("good");
+        entities.add("colors");
         vr.resolve(entities);
 
     }
