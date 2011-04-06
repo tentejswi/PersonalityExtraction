@@ -289,6 +289,13 @@ public class Wikiminer {
                 if (topSense != null) {
                     NamedNodeMap attrs = topSense.getAttributes();
                     Node commonness = attrs.getNamedItem("commonness");
+
+                    if(commonness==null && xml.contains("Disambiguation") && xml.contains("This is a disambiguation page")){
+                    	double commonnessScore = (1.0/senseNodes.getLength()); 
+                        String[] senseArray = {attrs.getNamedItem("title").getTextContent(), attrs.getNamedItem("id").getTextContent(), String.valueOf(commonnessScore)};
+                        senses.add(senseArray);
+                        continue;
+                    }
                     double relevance = Double.parseDouble(commonness.getTextContent());
                     if (relevance >= 0.01) {
                         String[] senseArray = {attrs.getNamedItem("title").getTextContent(), attrs.getNamedItem("id").getTextContent(), String.valueOf(relevance)};
@@ -310,6 +317,7 @@ public class Wikiminer {
         return senses;
 
     }
+    
 	public static String correctEncoding(String query) {
 		StringBuffer correctEncoding = new StringBuffer();
 		String[] sensesplit = query.split("\\s+");
