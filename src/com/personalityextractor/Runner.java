@@ -57,14 +57,15 @@ public class Runner {
 	
 	public static boolean setUserInterests(String handle, String json) {
 		return store
-				.executeUpdate("INSERT INTO user_interests(handle, json) values ('" + handle + "','" + json + "')");
+				.executeUpdate("INSERT INTO user_interests(handle, json) values ('" + handle + "','" + json + "')" +
+						"ON DUPLICATE KEY UPDATE json = '" + json + "'");
 	}
 	
 	public static String nodesToJson(List<Node> nodes) {
-		JSONArray json = new JSONArray();
+		JSONObject json = new JSONObject();
 		
 		for(Node n : nodes) {
-			json.add(n.toJSONObject());
+			json.put(n.getEntity().getText(), 1);
 		}
 		
 		return json.toString();
@@ -72,6 +73,11 @@ public class Runner {
 
 	public static void run() {
 		String handle = popUserFromQueue();
+		
+		if(handle == null) {
+			return;
+		}
+		
 		Twitter t = new Twitter();
 		IEntityExtractor extractor = EntityExtractFactory.produceExtractor(Extracter.CONSECUTIVE_WORDS);
 		ViterbiResolver resolver = new ViterbiResolver();
@@ -80,6 +86,8 @@ public class Runner {
 		if(handle != null) {
 			List<String> tweets = t.fetchTweets(handle);
 			
+//			tweets.clear();
+//			tweets.add("The mouse ate the cheese.");
 			for(String tweet : tweets) {
 				List<String> entities = extractor.extract(tweet);
 				List<WikipediaEntity> resolvedEntities = resolver.resolve(entities);
@@ -91,6 +99,7 @@ public class Runner {
 						(allEntities.get(e.getText())).incrCount();
 					}
 				}
+				break;
 			}
 			
 			List<WikipediaEntity> entities = new ArrayList<WikipediaEntity>();
