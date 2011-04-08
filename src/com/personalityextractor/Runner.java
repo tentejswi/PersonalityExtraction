@@ -57,14 +57,15 @@ public class Runner {
 	
 	public static boolean setUserInterests(String handle, String json) {
 		return store
-				.executeUpdate("INSERT INTO user_interests(handle, json) values ('" + handle + "','" + json + "')");
+				.executeUpdate("INSERT INTO user_interests(handle, json) values ('" + handle + "','" + json + "')" +
+						"ON DUPLICATE KEY UPDATE json = '" + json + "'");
 	}
 	
 	public static String nodesToJson(List<Node> nodes) {
-		JSONArray json = new JSONArray();
+		JSONObject json = new JSONObject();
 		
 		for(Node n : nodes) {
-			json.add(n.toJSONObject());
+			json.put(n.getEntity().getText(), 1);
 		}
 		
 		return json.toString();
