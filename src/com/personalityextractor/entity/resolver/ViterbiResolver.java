@@ -183,9 +183,9 @@ public class ViterbiResolver extends BaseEntityResolver {
         }
 
         // try all permutations of entities
-//        for (int x = 0; x < entities.size(); x++) {
- //           for (int z = 0; z < entities.size() - 1; z++) {
-//                twEntities = swap(twEntities, z);
+        for (int x = 0; x < entities.size(); x++) {
+            for (int z = 0; z < entities.size() - 1; z++) {
+                twEntities = swap(twEntities, z);
 
                 //add start and end nodes
                 twEntities.add(0, "start_node");
@@ -206,18 +206,12 @@ public class ViterbiResolver extends BaseEntityResolver {
                 }
 
                 for (int i = 1; i < twEntities.size(); i++) {
-                	
-                	if(i==2){
-                		System.out.println("");
-                	}
                     HashMap<String, String[]> next_BestPaths = new HashMap<String, String[]>();
                     ArrayList<WikipediaEntity> next_WikiSenses = tweetEntityTowikiEntities.get(twEntities.get(i));
                     
                     for (int j = 0; j < next_WikiSenses.size(); j++) {
                     	idToWikiEntityText.put(next_WikiSenses.get(j).getWikiminerID(), next_WikiSenses.get(j).getText());
-                    	if(j==1 || j==6){
-                    		System.out.println("");
-                    	}
+
                         double total = 0;
                         String maxpath = "";
                         double maxprob = (-1) * Integer.MAX_VALUE;
@@ -290,18 +284,18 @@ public class ViterbiResolver extends BaseEntityResolver {
                    // bestSequence = new ArrayList<String>(twEntities);
                 }
                
-                System.out.println("Entities : " + twEntities);
-                System.out.println("MaxPath: " + maxpath + "\tMaxProb: "
-                        + maxprob + "\n");
+//                System.out.println("Entities : " + twEntities);
+//                System.out.println("MaxPath: " + maxpath + "\tMaxProb: "
+//                        + maxprob + "\n");
 
                                
                 twEntities.remove(0);
                 twEntities.remove(twEntities.size()-1);
-  //          }
- //       }
+            }
+        }
 
-        System.out.println("BestPath: " + bestPath + "\tBestProb: "
-                + bestProbability + "\n");
+//        System.out.println("BestPath: " + bestPath + "\tBestProb: "
+//                + bestProbability + "\n");
 
         String[] ids = bestPath.split(",");
         for(int l=1; l<ids.length-1; l++) {
@@ -317,19 +311,19 @@ public class ViterbiResolver extends BaseEntityResolver {
         	BufferedReader br = new BufferedReader(new FileReader(args[0]));
         	String line = "";
     		IEntityExtractor extractor = EntityExtractFactory.produceExtractor(Extracter.NOUNPHRASE);
-    		List<String> ents = extractor.extract("Elantra with a Santa Fe");
-    		System.out.println(ents);
-    		List<WikipediaEntity> wes = vr.resolve(ents);
+//    		List<String> ents = extractor.extract("Elantra with a Santa Fe");
+//    		System.out.println(ents);
+//    		List<WikipediaEntity> wes = vr.resolve(ents);
     		
-//        	while((line=br.readLine())!=null){
-//        		System.out.println("tweet: "+ line);
-//        		List<String> entities = extractor.extract(line);
-//        		System.out.println("entities: "+entities);
-//        		List<WikipediaEntity> wes = vr.resolve(entities);
-//        		for(WikipediaEntity we : wes){
-//        			System.out.println(we.getText());
-//        		}
-//        	}
+        	while((line=br.readLine())!=null){
+        		System.out.println("tweet: "+ line);
+        		List<String> entities = extractor.extract(line);
+        		System.out.println("entities: "+entities);
+        		List<WikipediaEntity> wes = vr.resolve(entities);
+        		for(WikipediaEntity we : wes){
+        			System.out.println(we.getText());
+        		}
+        	}
         } catch(Exception e){
         	e.printStackTrace();
         }

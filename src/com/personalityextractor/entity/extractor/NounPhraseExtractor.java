@@ -13,52 +13,62 @@ public class NounPhraseExtractor implements IEntityExtractor {
 
 	static {
 		try {
-			lp = new LexicalizedParser("/home/semanticvoid/PE/PersonalityExtraction/lair/englishPCFG.ser.gz");
+			lp = new LexicalizedParser("/Users/tejaswi/Documents/workspace/PersonalityExtraction/lair/englishPCFG.ser.gz");
 			lp.setOptionFlags(new String[] { "-maxLength", "80",
 					"-retainTmpSubcategories" });
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
 	}
+	
 
 	public List<String> extract(String text) {
+		
+		
+		String[] lines = text.split("[:;'\"?/><,\\.!@#$%^&()-+=~`{}|]+");
 		ArrayList<String> phrases = new ArrayList<String>();
-		String[] sent = text.split(" ");
-		Tree parse = (Tree) lp.apply(Arrays.asList(sent));
-//		TreePrint tp = new TreePrint("penn,typedDependenciesCollapsed");
-//		tp.printTree(parse);
-		ArrayList<Tree> queue = new ArrayList<Tree>();
-		queue.add(parse);
+		
+		for (String line : lines) {
+			if(line.trim().length()==0)
+				continue;
+			String[] sent = line.split(" ");
+			Tree parse = (Tree) lp.apply(Arrays.asList(sent));
+			// TreePrint tp = new TreePrint("penn,typedDependenciesCollapsed");
+			// tp.printTree(parse);
+			ArrayList<Tree> queue = new ArrayList<Tree>();
+			queue.add(parse);
 
-		StringBuffer str = new StringBuffer();
-		boolean flag = false;
-		while (!queue.isEmpty()) {
-			Tree topNode = queue.remove(0);
+			StringBuffer str = new StringBuffer();
+			boolean flag = false;
+			while (!queue.isEmpty()) {
+				Tree topNode = queue.remove(0);
 
-			if (topNode.isPreTerminal()) {
-				if (topNode.value().startsWith("NNP")) {
-					str.append(topNode.children()[0].value() + " ");
-					flag = true;
+				if (topNode.isPreTerminal()) {
+					if (topNode.value().startsWith("NN")) {
+						str.append(topNode.children()[0].value() + " ");
+						flag = true;
+					} else if (flag == true) {
+						flag = false;
+						phrases
+								.add(str.toString().trim()
+										.replaceAll("\\.", ""));
+						str = new StringBuffer();
+					}
 				} else if (flag == true) {
 					flag = false;
-					phrases.add(str.toString().trim());
+					phrases.add(str.toString().trim().replaceAll("\\.", ""));
 					str = new StringBuffer();
 				}
-			} else if (flag == true) {
-				flag = false;
-				phrases.add(str.toString().trim());
-				str = new StringBuffer();
+				// add all children to queue regardless
+				for (Tree c : topNode.children()) {
+					queue.add(c);
+				}
 			}
-			// add all children to queue regardless
-			for (Tree c : topNode.children()) {
-				queue.add(c);
+
+			if (flag == true) {
+				phrases.add(str.toString().trim().replaceAll("\\.", ""));
 			}
 		}
-
-		if (flag == true) {
-			phrases.add(str.toString().trim());
-		}
-
 		return phrases;
 	}
 
@@ -68,16 +78,18 @@ public class NounPhraseExtractor implements IEntityExtractor {
 
 		IEntityExtractor e = new NounPhraseExtractor();
 		List<String> sentences = Arrays.asList(
-				"Rest in Peace!",
-				 "New blog post: 50 days with Google Nexus S: http://www.venu.in/blog/?p=314",
-				 "@dpolice Hard to say. If the user is geeky - Nexus S . Otherwise iPhone 4 . :) Both are great phones.",
-				 "About to embark on the unthinkable... Driving to New York City. Wish me luck.",
-				 "Best part of The Hurt Locker ? The lack of background music! Silence speaks quite loudly in this movie.",
-				 "I'm playing the Age of Empires.",
-				 "iTunes / ipod ecosystem needs to learn a thing or two from Doggcatcher. Seriously. This is the best solution for podcast listeners out there.",
-				 "loved India New Land of Opportunity on Boxee http://bit.ly/ghYcfj",
-				 "@vjvegi Why this comment about Pakistan all of a sudden? :)",
-				 "Swapped the Elantra with a Santa Fe to deal with all that snow on the roads."
+				"@Kv @Ushu My cousin told a Hyderabadi auto driver \"Station jaane ki aavashyakatha hai\" apparently yet to come out of the Madhyamika hangover"
+				//"Ushu My cousin told a Hyderabadi auto driver ."
+//				"Rest in Peace!",
+//				 "New blog post: 50 days with Google Nexus S: http://www.venu.in/blog/?p=314",
+//				 "@dpolice Hard to say. If the user is geeky - Nexus S . Otherwise iPhone 4 . :) Both are great phones.",
+//				 "About to embark on the unthinkable... Driving to New York City. Wish me luck.",
+//				 "Best part of The Hurt Locker ? The lack of background music! Silence speaks quite loudly in this movie.",
+//				 "I'm playing the Age of Empires.",
+//				 "iTunes / ipod ecosystem needs to learn a thing or two from Doggcatcher. Seriously. This is the best solution for podcast listeners out there.",
+//				 "loved India New Land of Opportunity on Boxee http://bit.ly/ghYcfj",
+//				 "@vjvegi Why this comment about Pakistan all of a sudden? :)",
+//				 "Swapped the Elantra with a Santa Fe to deal with all that snow on the roads."
 		);
 
 		for (String sentence : sentences) {
