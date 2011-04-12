@@ -1,5 +1,7 @@
 package senna;
 
+import java.io.File;
+import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
@@ -10,23 +12,31 @@ import java.util.regex.Pattern;
 public class Senna {
 	
 	String[] lineArr;
-	
 
-	/*
-	 * Flatten Senna features to suit Maxent output
-	 * Input: ArrayList<HashMap<String, Verb>> -  Arraylist containing for each sentence in the tweet a Hashmap of verbs inside it to the
-	 * arguments of the verb stored in Verb class
-	 * Ouput: List of strings
-	 */
-	public void flattenSennaFeatures(ArrayList<HashMap<String, Verb>> verbArgsinTweet){
-		ArrayList<String> features = new ArrayList<String>();
-		for(HashMap<String, Verb> verbArgsinSentence : verbArgsinTweet){
-			for(String verbText : verbArgsinSentence.keySet()){
-				
+	File sennaInstallationDir = new File("/Users/tejaswi/Documents/StanfordCourses/SRL/senna-v2.0");
+
+	public String getSennaOutput(String line) {
+		try {
+			String cmd = "echo " + line + " | " + sennaInstallationDir
+					+ "/senna ";
+			ProcessBuilder pb = new ProcessBuilder("bash", "-c", cmd);
+			pb.directory(sennaInstallationDir);
+			Process shell = pb.start();
+			InputStream shellIn = shell.getInputStream();
+			int shellExitStatus = shell.waitFor();
+			int c;
+			StringBuffer s = new StringBuffer();
+			while ((c = shellIn.read()) != -1) {
+				// System.out.write(c);
+				s.append((char) c);
 			}
+			return s.toString();
+		} catch (Exception e) {
+			e.printStackTrace();
 		}
-		
+		return null;
 	}
+
 	public HashMap<String, Verb>  parseSennaLines(String allText, String sentence){	
 		lineArr = allText.split("\n");
 		HashMap<String, Verb> verbsToArgs = new HashMap<String, Verb>();
@@ -37,15 +47,61 @@ public class Senna {
 			String line = lineArr[i].trim();
 			lineArr[i] = line;
 			Pattern p = Pattern.compile("VB[A-Z]?\t");
-			Matcher  m = p.matcher(line);
 			//System.out.println(line);
 			if(( !line.split("\\s+")[4].trim().equalsIgnoreCase("-"))  ){
-				Verb v = getVerbArguments(++verbCount, line.split("\\s+")[0].trim(), sentence);
+				//Verb v = getVerbArguments(++verbCount, line.split("\\s+")[0].trim(), sentence);
+				Verb v = getVerbArgumentNPs(++verbCount, line.split("\\s+")[0].trim(), sentence);
+
 				verbs.add(v);
 				verbsToArgs.put(v.text, v);
 			}
 		}
 		return verbsToArgs; 
+	}
+	
+	public Verb getVerbArgumentNPs(int index, String verb, String sentence){
+
+		Verb v = new Verb();
+		v.text = verb;
+		HashMap<String, String> argumentToText = new HashMap<String, String>();
+		index = index + 4;
+		
+		for(int i=0; i < lineArr.length; i++){			
+			String[] lineTokens =  lineArr[i].trim().split("\\s+");			
+			String token = lineTokens[0].trim();
+			String pos = lineTokens[1].trim();
+			String value = lineTokens[index].trim();
+			
+			if(value.equals("O")){
+				continue;
+			} else if(value.startsWith("S-") && !value.contains("S-V") && pos.contains("NN")){
+				String arg = value.split("S-")[1];
+				argumentToText.put(arg, token);
+			} else if(value.startsWith("B-") && Character.isDigit(value.charAt(value.length()-1))){
+				String arg = value.split("B-")[1];
+				StringBuilder text = new StringBuilder();
+				if(pos.contains("NN"))
+				  text.append(token);
+				while(!value.startsWith("E-")){
+					 i++;
+					 lineTokens =  lineArr[i].trim().split("\\s+");						
+					 token = lineTokens[0].trim();
+					 pos = lineTokens[1].trim();
+					 value = lineTokens[index];
+					 if(pos.contains("NN"))
+						 text.append(" "+token);
+				}				
+				
+				if(argumentToText.containsKey(arg))
+					arg = arg + "-1";
+				
+				argumentToText.put(arg, text.toString().trim());
+			}
+		}
+		
+		v.argumentToText = argumentToText;
+		return v;
+
 	}
 	
 	//get the arguments of a verb
@@ -69,7 +125,8 @@ public class Senna {
 				String text = words.get(i).trim();
 				argumentToText.put(arg, text);
 			}
-			else if(value.startsWith("B-")){
+			else if(value.startsWith("B-") && Character.isDigit(value.charAt(value.length()))){
+				System.out.println(value);
 				String arg = value.split("B-")[1];
 				//String text = lineArr[i].trim().split("\\s+")[0].trim();
 				String text = words.get(i).trim();
