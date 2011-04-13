@@ -27,7 +27,6 @@ public class Senna {
 			int c;
 			StringBuffer s = new StringBuffer();
 			while ((c = shellIn.read()) != -1) {
-				// System.out.write(c);
 				s.append((char) c);
 			}
 			return s.toString();
@@ -51,7 +50,6 @@ public class Senna {
 			if(( !line.split("\\s+")[4].trim().equalsIgnoreCase("-"))  ){
 				//Verb v = getVerbArguments(++verbCount, line.split("\\s+")[0].trim(), sentence);
 				Verb v = getVerbArgumentNPs(++verbCount, line.split("\\s+")[0].trim(), sentence);
-
 				verbs.add(v);
 				verbsToArgs.put(v.text, v);
 			}
@@ -63,7 +61,7 @@ public class Senna {
 
 		Verb v = new Verb();
 		v.text = verb;
-		HashMap<String, String> argumentToText = new HashMap<String, String>();
+		HashMap<String, List<String>> argumentToText = new HashMap<String, List<String>>();
 		index = index + 4;
 		
 		for(int i=0; i < lineArr.length; i++){			
@@ -74,32 +72,62 @@ public class Senna {
 			
 			if(value.equals("O")){
 				continue;
-			} else if(value.startsWith("S-") && !value.contains("S-V") && pos.contains("NN")){
+			} else if(value.startsWith("S-") && !value.contains("S-V") && pos.contains("NN")) {
 				String arg = value.split("S-")[1];
-				argumentToText.put(arg, token);
-			} else if(value.startsWith("B-") && Character.isDigit(value.charAt(value.length()-1))){
+				ArrayList<String> arr_token = new ArrayList<String>();
+				arr_token.add(token);
+				argumentToText.put(arg, arr_token);
+//			} else if(value.startsWith("B-") && Character.isDigit(value.charAt(value.length()-1))) {
+			} else if(value.startsWith("B-")) {
+
 				String arg = value.split("B-")[1];
 				StringBuilder text = new StringBuilder();
-				if(pos.contains("NN"))
+				boolean flag = false;
+				if(pos.contains("NN")){
 				  text.append(token);
+				  flag = true;
+				}
 				while(!value.startsWith("E-")){
 					 i++;
 					 lineTokens =  lineArr[i].trim().split("\\s+");						
 					 token = lineTokens[0].trim();
 					 pos = lineTokens[1].trim();
 					 value = lineTokens[index];
-					 if(pos.contains("NN"))
+					 if(pos.contains("NN")){
 						 text.append(" "+token);
-				}				
+						 flag = true;
+					 }
+					 else if(flag==true){
+						 if(argumentToText.containsKey(arg))
+							 argumentToText.get(arg).add(text.toString().trim());
+						 else{
+							 ArrayList<String> nps = new ArrayList<String>();
+							 nps.add(text.toString().trim());
+							 argumentToText.put(arg, nps);
+						 }
+						 text = new StringBuilder();
+						 flag = false;
+					 }
+				}
+				
+				if(value.startsWith("E-") && flag==true){					
+					 if(argumentToText.containsKey(arg))
+						 argumentToText.get(arg).add(text.toString().trim());
+					 else{
+						 ArrayList<String> nps = new ArrayList<String>();
+						 nps.add(text.toString().trim());
+						 argumentToText.put(arg, nps);
+					 }
+					 flag = false;
+				}
 				
 				if(argumentToText.containsKey(arg))
 					arg = arg + "-1";
 				
-				argumentToText.put(arg, text.toString().trim());
 			}
 		}
 		
-		v.argumentToText = argumentToText;
+		v.argumentToNPs = argumentToText;
 		return v;
 
 	}
