@@ -44,9 +44,9 @@ public class Twitter {
 		}
 	}
 
-	public List<String> fetchTweets(String user) {
+	public List<String> fetchTweets(String user, int count) {
 		ArrayList<String> tweets = new ArrayList<String>();
-		String urlStr = "http://twitter.com/statuses/user_timeline/" + user + ".json?count=10";
+		String urlStr = "http://twitter.com/statuses/user_timeline/" + user + ".json?count=" + count;
 		
 		try {
 			URL url = new URL(urlStr);

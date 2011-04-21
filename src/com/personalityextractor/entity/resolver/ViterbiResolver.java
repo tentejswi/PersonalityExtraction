@@ -13,6 +13,7 @@ import com.personalityextractor.entity.WikipediaEntity;
 import com.personalityextractor.entity.extractor.EntityExtractFactory;
 import com.personalityextractor.entity.extractor.IEntityExtractor;
 import com.personalityextractor.entity.extractor.EntityExtractFactory.Extracter;
+import com.personalityextractor.store.WikiminerDB;
 
 
 import cs224n.util.CounterMap;
@@ -20,6 +21,7 @@ import cs224n.util.CounterMap;
 public class ViterbiResolver extends BaseEntityResolver {
 
     public ViterbiResolver() {
+    	
     }
 
     
@@ -30,6 +32,13 @@ public class ViterbiResolver extends BaseEntityResolver {
     private CounterMap<String, String> populateCompareScores(
             List<String> twEntities,
             HashMap<String, ArrayList<WikipediaEntity>> tweetEntityTowikiEntities) {
+    	WikiminerDB db = null;
+    	try {
+    		db = WikiminerDB.getInstance("localhost", "root", "", "wikiminer");
+		} catch (Exception e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
         CounterMap<String, String> probabilites = new CounterMap<String, String>();
         for(int i=0;i<tweetEntityTowikiEntities.get(twEntities.get(1)).size();i++){
             probabilites.setCount("-1", tweetEntityTowikiEntities.get(twEntities.get(1)).get(i).getWikiminerID(), 0.0000001);
@@ -57,16 +66,25 @@ public class ViterbiResolver extends BaseEntityResolver {
                                     0.0000001);
                             continue;
                         }
+//                        probabilites.setCount(wikiEntities.get(j)
+//                                .getWikiminerID(), wEntity.getWikiminerID(),
+//                                Wikiminer.compare(wikiEntities.get(j)
+//                                        .getWikiminerID(), wEntity
+//                                        .getWikiminerID()));
+//                        probabilites.setCount(wEntity.getWikiminerID(),
+//                                wikiEntities.get(j).getWikiminerID(), Wikiminer
+//                                        .compare(wikiEntities.get(j)
+//                                                .getWikiminerID(), wEntity
+//                                                .getWikiminerID()));
                         probabilites.setCount(wikiEntities.get(j)
-                                .getWikiminerID(), wEntity.getWikiminerID(),
-                                Wikiminer.compare(wikiEntities.get(j)
-                                        .getWikiminerID(), wEntity
-                                        .getWikiminerID()));
-                        probabilites.setCount(wEntity.getWikiminerID(),
-                                wikiEntities.get(j).getWikiminerID(), Wikiminer
-                                        .compare(wikiEntities.get(j)
-                                                .getWikiminerID(), wEntity
-                                                .getWikiminerID()));
+                              .getWikiminerID(), wEntity.getWikiminerID(),
+                              db.compare(wikiEntities.get(j)
+                                      .getWikiminerID(), wEntity
+                                      .getWikiminerID()));
+                      probabilites.setCount(wEntity.getWikiminerID(),
+                              wikiEntities.get(j).getWikiminerID(), db.compare(wikiEntities.get(j)
+                                              .getWikiminerID(), wEntity
+                                              .getWikiminerID()));
 
                     }
                 }
@@ -95,6 +113,14 @@ public class ViterbiResolver extends BaseEntityResolver {
     }
 
     private HashMap<String, ArrayList<WikipediaEntity>> getWikiSenses(List<String> entities) {
+    	WikiminerDB db = null;
+    	
+    	try {
+			db = WikiminerDB.getInstance("localhost", "root", "", "wikiminer");
+		} catch (Exception e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
        
         HashMap<String, ArrayList<WikipediaEntity>> tweetEntityTowikiEntities = new HashMap<String, ArrayList<WikipediaEntity>>();
         //start node
@@ -109,20 +135,20 @@ public class ViterbiResolver extends BaseEntityResolver {
        
        
         for (String entity : entities) {
-            List<WikipediaEntity> wikiEntities = new ArrayList<WikipediaEntity>();
-            String xml = Wikiminer.getXML(entity, false);
-            if (xml == null)
-                continue;
-            ArrayList<String[]> weentities = Wikiminer.getWikipediaSenses(xml, true);
-            if (weentities.size() == 0)
-                continue;
+//            List<WikipediaEntity> wikiEntities = new ArrayList<WikipediaEntity>();
+//            String xml = Wikiminer.getXML(entity, false);
+//            if (xml == null)
+//                continue;
+//            ArrayList<String[]> weentities = Wikiminer.getWikipediaSenses(xml, true);
+//            if (weentities.size() == 0)
+//                continue;
             ArrayList<WikipediaEntity> ids = new ArrayList<WikipediaEntity>();
-            for (String[] arr : weentities) {
-                WikipediaEntity we = new WikipediaEntity(arr[0], arr[1], arr[2]);
-                ids.add(we);
-                wikiEntities.add(we);
-            }
-            
+//            for (String[] arr : weentities) {
+//                WikipediaEntity we = new WikipediaEntity(arr[0], arr[1], arr[2]);
+//                ids.add(we);
+//                wikiEntities.add(we);
+//            }
+            ids.addAll(db.search(entity));
             // adding a void entity
             WikipediaEntity we = new WikipediaEntity("void_node", "0", "0.0000001");
             ids.add(we);
