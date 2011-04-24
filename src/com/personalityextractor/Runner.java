@@ -84,10 +84,10 @@ public class Runner {
 		HashMap<String, WikipediaEntity> allEntities = new HashMap<String, WikipediaEntity>();
 		
 		if(handle != null) {
-			List<String> tweets = t.fetchTweets(handle);
+			List<String> tweets = t.fetchTweets(handle, 20);
 			
 //			tweets.clear();
-//			tweets.add("The mouse ate the cheese.");
+//			tweets.add("CNN reports Twitter.");
 			for(String tweet : tweets) {
 				List<String> entities = extractor.extract(tweet);
 				List<WikipediaEntity> resolvedEntities = resolver.resolve(entities);
@@ -111,6 +111,7 @@ public class Runner {
 			setUserInterests(handle, nodesToJson(topNodes));
 			// update status
 			updateUser(handle);
+			System.exit(0);
 		}
 	}
 
@@ -127,6 +128,7 @@ public class Runner {
 
 		while (true) {
 			run();
+			break;
 		}
 	}
 

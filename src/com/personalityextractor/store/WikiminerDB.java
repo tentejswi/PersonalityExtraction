@@ -28,13 +28,14 @@ public class WikiminerDB {
 
 	public List<WikipediaEntity> search(String terms) {
 		List<WikipediaEntity> entities = new ArrayList<WikipediaEntity>();
-		String query = "SELECT page_id, page_title FROM page_indexed WHERE MATCH(page_title) AGAINST('" + terms + "') limit 50";
+		String query = "SELECT page_id, page_title, MATCH(page_title) AGAINST('" + terms + "') as relevance FROM page_indexed WHERE MATCH(page_title) AGAINST('" + terms + "' IN BOOLEAN MODE) limit 10";
 		ResultSet rs = db.execute(query);
 		try {
 			while(rs.next()) {
 				String id = rs.getString("page_id");
 				String title = rs.getString("page_title");
-				entities.add(new WikipediaEntity(title, id));
+				String score = rs.getString("relevance");
+				entities.add(new WikipediaEntity(title, id, score));
 			}
 		} catch (SQLException e) {
 			// TODO Auto-generated catch block
@@ -45,6 +46,7 @@ public class WikiminerDB {
 	}
 	
 	public double compare(String id1, String id2) {
+		System.out.println("comparing " + id1 + ":" + id2);
 		double sim  = 0;
 		if(id1 == null || id2 == null || id1.equals("") || id2.equals("")) {
 			return sim;
