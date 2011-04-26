@@ -11,7 +11,7 @@ import com.personalityextractor.entity.WikipediaEntity;
 
 public class WikiminerDB {
 
-	private MysqlStore db = null;
+	private static MysqlStore db = null;
 	private static WikiminerDB instance = null;
 	
 	private WikiminerDB(String host, String user, String passwd, String database) throws Exception {
@@ -28,7 +28,7 @@ public class WikiminerDB {
 
 	public List<WikipediaEntity> search(String terms) {
 		List<WikipediaEntity> entities = new ArrayList<WikipediaEntity>();
-		String query = "SELECT page_id, page_title, MATCH(page_title) AGAINST('" + terms + "') as relevance FROM page_indexed WHERE MATCH(page_title) AGAINST('" + terms + "' IN BOOLEAN MODE) limit 10";
+		String query = "SELECT page_id, page_title, MATCH(page_title) AGAINST('" + terms + "') as relevance FROM page_indexed WHERE MATCH(page_title) AGAINST('" + terms + "' IN BOOLEAN MODE) limit 20";
 		ResultSet rs = db.execute(query);
 		try {
 			while(rs.next()) {
@@ -46,7 +46,8 @@ public class WikiminerDB {
 	}
 	
 	public double compare(String id1, String id2) {
-		System.out.println("comparing " + id1 + ":" + id2);
+//		System.out.println("comparing " + id1 + ":" + id2);
+		System.gc();
 		double sim  = 0;
 		if(id1 == null || id2 == null || id1.equals("") || id2.equals("")) {
 			return sim;
@@ -54,8 +55,11 @@ public class WikiminerDB {
 		Set<String> categories1 = new HashSet<String>();
 		Set<String> categories2 = new HashSet<String>();
 		
-		String query1 = "SELECT cl_parent FROM categorylink WHERE cl_child = " + id1 + " LIMIT 300";
-		String query2 = "SELECT cl_parent FROM categorylink WHERE cl_child = " + id2 + " LIMIT 300";
+		String query1 = "SELECT cl_parent FROM categorylink WHERE cl_child = " + id1 + " LIMIT 200";
+		String query2 = "SELECT cl_parent FROM categorylink WHERE cl_child = " + id2 + " LIMIT 200";
+		
+//		System.out.println(query1);
+//		System.out.println(query2);
 		
 		ResultSet rs = db.execute(query1);
 		try {
@@ -63,6 +67,7 @@ public class WikiminerDB {
 				String id = rs.getString("cl_parent");
 				categories1.add(id);
 			}
+			rs.close();
 		} catch(Exception e) {
 			e.printStackTrace();
 			return 0;
@@ -74,6 +79,7 @@ public class WikiminerDB {
 				String id = rs.getString("cl_parent");
 				categories2.add(id);
 			}
+			rs.close();
 		} catch(Exception e) {
 			e.printStackTrace();
 			return 0;

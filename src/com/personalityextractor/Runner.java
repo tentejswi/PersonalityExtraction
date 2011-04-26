@@ -22,6 +22,7 @@ import com.personalityextractor.entity.graph.ranking.IRanker;
 import com.personalityextractor.entity.graph.ranking.WeightGraphRanker;
 import com.personalityextractor.entity.resolver.ViterbiResolver;
 import com.personalityextractor.store.MysqlStore;
+import java.util.Date;
 
 /**
  * Main Class
@@ -84,10 +85,18 @@ public class Runner {
 		HashMap<String, WikipediaEntity> allEntities = new HashMap<String, WikipediaEntity>();
 		
 		if(handle != null) {
-			List<String> tweets = t.fetchTweets(handle, 20);
-			
-//			tweets.clear();
-//			tweets.add("CNN reports Twitter.");
+                        Date start = new Date();
+                        System.out.print("processing " + handle + "...\t");
+//			List<String> tweets = t.fetchTweets(handle, 20);
+			List<String> tweets = new ArrayList<String>();
+			tweets.clear();
+			tweets.add("this could be great source for data if it gets popular - yahoo 4cast http://bit.ly/hBQ74W");
+			tweets.add("this could be great source for data if it gets popular - yahoo 4cast http://bit.ly/hBQ74W");
+			tweets.add("this could be great source for data if it gets popular - yahoo 4cast http://bit.ly/hBQ74W");
+			tweets.add("this could be great source for data if it gets popular - yahoo 4cast http://bit.ly/hBQ74W");
+			tweets.add("this could be great source for data if it gets popular - yahoo 4cast http://bit.ly/hBQ74W");
+			tweets.add("this could be great source for data if it gets popular - yahoo 4cast http://bit.ly/hBQ74W");
+			tweets.add("this could be great source for data if it gets popular - yahoo 4cast http://bit.ly/hBQ74W");
 			for(String tweet : tweets) {
 				List<String> entities = extractor.extract(tweet);
 				List<WikipediaEntity> resolvedEntities = resolver.resolve(entities);
@@ -99,7 +108,7 @@ public class Runner {
 						(allEntities.get(e.getText())).incrCount();
 					}
 				}
-				break;
+//				break;
 			}
 			
 			List<WikipediaEntity> entities = new ArrayList<WikipediaEntity>();
@@ -111,7 +120,9 @@ public class Runner {
 			setUserInterests(handle, nodesToJson(topNodes));
 			// update status
 			updateUser(handle);
-			System.exit(0);
+//			System.exit(0);
+                        Date end = new Date();
+                        System.out.print("[ DONE ] { time taken: " + (end.getTime()-start.getTime())/1000 + "s }\n");
 		}
 	}
 
