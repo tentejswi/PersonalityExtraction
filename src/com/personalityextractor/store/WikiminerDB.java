@@ -46,7 +46,7 @@ public class WikiminerDB {
 	}
 	
 	public double compare(String id1, String id2) {
-//		System.out.println("comparing " + id1 + ":" + id2);
+		System.out.println("comparing " + id1 + ":" + id2);
 		System.gc();
 		double sim  = 0;
 		if(id1 == null || id2 == null || id1.equals("") || id2.equals("")) {
@@ -96,5 +96,30 @@ public class WikiminerDB {
 			sim = intersection*2/(categories1.size()+categories2.size());
 		}
 		return sim;
+	}
+
+	public void populateInLinks() {
+		int index = 0;
+		ResultSet rs = null;
+		
+		do {
+			String query = "SELECT * from pagelink_in LIMIT " + index + ", 100";
+			
+			try {
+				rs = db.execute(query);
+				while(rs.next()) {
+					String id = rs.getString("li_id");
+					String data = rs.getString("li_data");
+					String[] ids = data.split(":");
+					db.executeUpdate("UPDATE page_indexed set inlinks = " + (ids.length-1) 
+							+ " WHERE page_id = " + id);
+					System.out.println(id);
+				}
+			} catch (Exception e) {
+				e.printStackTrace();
+			}
+			
+			index += 100;
+		} while(rs != null);
 	}
 }
