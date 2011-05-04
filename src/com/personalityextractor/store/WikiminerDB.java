@@ -40,6 +40,14 @@ public class WikiminerDB {
 		} catch (SQLException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
+		} finally {
+			if(rs != null) {
+				try {
+					rs.close();
+				} catch(Exception e) {
+					e.printStackTrace();
+				}
+			}
 		}
 		
 		return entities;
@@ -98,8 +106,7 @@ public class WikiminerDB {
 		return sim;
 	}
 
-	public void populateInLinks() {
-		int index = 0;
+	public void populateInLinks(int index) {
 		ResultSet rs = null;
 		
 		do {
@@ -116,6 +123,14 @@ public class WikiminerDB {
 				}
 			} catch (Exception e) {
 				e.printStackTrace();
+			} finally {
+				if(rs != null) {
+					try {
+						rs.close();
+					} catch(Exception e) {
+						e.printStackTrace();
+					}
+				}
 			}
 			
 			System.out.println(index);
