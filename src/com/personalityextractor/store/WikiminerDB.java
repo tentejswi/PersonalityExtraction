@@ -113,12 +113,12 @@ public class WikiminerDB {
 					String[] ids = data.split(":");
 					db.executeUpdate("UPDATE page_indexed set inlinks = " + (ids.length-1) 
 							+ " WHERE page_id = " + id);
-					System.out.println(id);
 				}
 			} catch (Exception e) {
 				e.printStackTrace();
 			}
 			
+			System.out.println(index);
 			index += 100;
 		} while(rs != null);
 	}
