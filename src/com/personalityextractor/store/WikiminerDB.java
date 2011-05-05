@@ -145,6 +145,9 @@ public class WikiminerDB {
 			}
 			
 			System.out.println(index);
+//			if(index%1000000 == 0 && refresh != 0) {
+//				break;
+//			}
 			index += 1000;
 			refresh++;
 			if(refresh == 5) {
