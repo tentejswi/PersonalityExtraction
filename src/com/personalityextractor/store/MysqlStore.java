@@ -6,6 +6,7 @@ package com.personalityextractor.store;
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.ResultSet;
+import java.sql.SQLException;
 import java.sql.Statement;
 
 
@@ -16,6 +17,7 @@ import java.sql.Statement;
 public class MysqlStore {
 	
 	private Connection conn = null;
+	private Statement stmt = null;
 
 	public MysqlStore(String host, String user, String passwd, String database) throws Exception {
 		try {
@@ -31,7 +33,7 @@ public class MysqlStore {
 		ResultSet rs;
 		
 		try {
-			Statement stmt = conn.createStatement();
+			stmt = conn.createStatement();
 			rs = stmt.executeQuery(query);
 		} catch(Exception e) {
 			e.printStackTrace();
@@ -43,12 +45,22 @@ public class MysqlStore {
 	
 	public boolean executeUpdate(String query) {
 		try {
-			Statement stmt = conn.createStatement();
-			return stmt.execute(query);
+			stmt = conn.createStatement();
+			boolean val = stmt.execute(query);
+			stmt.close();
+			return val;
 		} catch(Exception e) {
 			e.printStackTrace();
 		}
 		
 		return false;
+	}
+	
+	public void closeStmt() {
+		try {
+			stmt.close();
+		} catch (SQLException e) {
+			e.printStackTrace();
+		}
 	}
 }

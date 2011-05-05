@@ -13,6 +13,10 @@ public class WikiminerDB {
 
 	private static MysqlStore db = null;
 	private static WikiminerDB instance = null;
+	private static String host;
+	private static String user;
+	private static String passwd;
+	private static String database;
 	
 	private WikiminerDB(String host, String user, String passwd, String database) throws Exception {
 		db = new MysqlStore(host, user, passwd, database);
@@ -20,6 +24,10 @@ public class WikiminerDB {
 	
 	public static WikiminerDB getInstance(String host, String user, String passwd, String database) throws Exception {
 		if(instance == null) {
+			WikiminerDB.database = database;
+			WikiminerDB.user = user;
+			WikiminerDB.passwd = passwd;
+			WikiminerDB.host = host;
 			instance = new WikiminerDB(host, user, passwd, database);
 		}
 		
@@ -76,6 +84,7 @@ public class WikiminerDB {
 				categories1.add(id);
 			}
 			rs.close();
+			db.closeStmt();
 		} catch(Exception e) {
 			e.printStackTrace();
 			return 0;
@@ -88,6 +97,7 @@ public class WikiminerDB {
 				categories2.add(id);
 			}
 			rs.close();
+			db.closeStmt();
 		} catch(Exception e) {
 			e.printStackTrace();
 			return 0;
@@ -108,9 +118,9 @@ public class WikiminerDB {
 
 	public void populateInLinks(int index) {
 		ResultSet rs = null;
-		
+		int refresh = 0;
 		do {
-			String query = "SELECT * from pagelink_in LIMIT " + index + ", 100";
+			String query = "SELECT * from pagelink_in LIMIT " + index + ", 1000";
 			
 			try {
 				rs = db.execute(query);
@@ -127,6 +137,7 @@ public class WikiminerDB {
 				if(rs != null) {
 					try {
 						rs.close();
+						db.closeStmt();
 					} catch(Exception e) {
 						e.printStackTrace();
 					}
@@ -134,7 +145,23 @@ public class WikiminerDB {
 			}
 			
 			System.out.println(index);
-			index += 100;
+			index += 1000;
+			refresh++;
+			if(refresh == 5) {
+//				this.reconnect();
+			}
 		} while(rs != null);
+	}
+	
+	private boolean reconnect() {
+		this.db = null;
+		try {
+			db = new MysqlStore(host, user, passwd, database);
+		} catch (Exception e) {
+			e.printStackTrace();
+			return false;
+		}
+		System.gc();
+		return true;
 	}
 }
