@@ -80,7 +80,7 @@ public class Runner {
 		}
 		
 		Twitter t = new Twitter();
-		IEntityExtractor extractor = EntityExtractFactory.produceExtractor(Extracter.CONSECUTIVE_WORDS);
+		IEntityExtractor extractor = EntityExtractFactory.produceExtractor(Extracter.NOUNPHRASE);
 		ViterbiResolver resolver = new ViterbiResolver();
 		HashMap<String, WikipediaEntity> allEntities = new HashMap<String, WikipediaEntity>();
 		
@@ -90,17 +90,14 @@ public class Runner {
 //			List<String> tweets = t.fetchTweets(handle, 20);
 			List<String> tweets = new ArrayList<String>();
 			tweets.clear();
-			tweets.add("this could be great source for data if it gets popular - yahoo 4cast http://bit.ly/hBQ74W");
-			tweets.add("this could be great source for data if it gets popular - yahoo 4cast http://bit.ly/hBQ74W");
-			tweets.add("this could be great source for data if it gets popular - yahoo 4cast http://bit.ly/hBQ74W");
-			tweets.add("this could be great source for data if it gets popular - yahoo 4cast http://bit.ly/hBQ74W");
-			tweets.add("this could be great source for data if it gets popular - yahoo 4cast http://bit.ly/hBQ74W");
-			tweets.add("this could be great source for data if it gets popular - yahoo 4cast http://bit.ly/hBQ74W");
-			tweets.add("this could be great source for data if it gets popular - yahoo 4cast http://bit.ly/hBQ74W");
+			tweets.add("Obama is the President of United States.");
+			tweets.add("Obama is the President of United States.");
+			int count = 0;
 			for(String tweet : tweets) {
+//				System.out.println(++count);
 				List<String> entities = extractor.extract(tweet);
 				List<WikipediaEntity> resolvedEntities = resolver.resolve(entities);
-				
+								
 				for(WikipediaEntity e : resolvedEntities) {
 					if(!allEntities.containsKey(e.getText())) {
 						allEntities.put(e.getText(), e);
@@ -114,7 +111,7 @@ public class Runner {
 			List<WikipediaEntity> entities = new ArrayList<WikipediaEntity>();
 			entities.addAll(allEntities.values());
 			Graph g = new Graph(entities);
-			g.build();
+			g.build(2);
 			IRanker ranker = new WeightGraphRanker(g);
 			List<Node> topNodes = ranker.getTopRankedNodes(2);
 			setUserInterests(handle, nodesToJson(topNodes));

@@ -13,6 +13,7 @@ import java.util.Set;
 import com.personalityextractor.data.source.Wikiminer;
 import com.personalityextractor.entity.WikipediaEntity;
 import com.personalityextractor.entity.graph.ranking.WeightGraphRanker;
+import com.personalityextractor.store.WikiminerDB;
 
 /**
  * @author semanticvoid
@@ -31,7 +32,8 @@ public class Graph {
 		}
 	}
 
-	public void build() {
+	public void build(int depth) {
+		int currentDepth = 0;
 		Set<String> prevCategories = new HashSet<String>();
 		
 		// add leaf node categories
@@ -45,21 +47,21 @@ public class Graph {
 			for(String cid : prevCategories) {
 				Node cNode = nodes.get(cid);
 				
-				List<String[]> categories = Wikiminer.getCategories(cid);
+				List<WikipediaEntity> categories = WikiminerDB.getInstance().getCategories(cid);
 				
-				for(String[] tuple : categories) {
+				for(WikipediaEntity category : categories) {
 					Node n2 = null;
 					
-					if(cid.equalsIgnoreCase(tuple[0])) {
+					if(cid.equalsIgnoreCase(category.getWikiminerID())) {
 						continue;
 					}
 					
-					if(!prevCategories.contains(tuple[0]) && !currCategories.contains(tuple[0])) {
-						currCategories.add(tuple[0]);
-						n2 = new Node(new WikipediaEntity(tuple[1], tuple[0]));
+					if(!prevCategories.contains(category.getWikiminerID()) && !currCategories.contains(category.getWikiminerID())) {
+						currCategories.add(category.getWikiminerID());
+						n2 = new Node(category);
 						nodes.put(n2.getId(), n2);
-					} else if(prevCategories.contains(tuple[0]) || currCategories.contains(tuple[0])) {
-						n2 = nodes.get(tuple[0]);
+					} else if(prevCategories.contains(category.getWikiminerID()) || currCategories.contains(category.getWikiminerID())) {
+						n2 = nodes.get(category.getWikiminerID());
 					}
 					
 					formEdge(cNode, n2);
@@ -67,7 +69,8 @@ public class Graph {
 			}
 			
 			prevCategories = currCategories;
-		} while(prevCategories.size() > 0);
+			currentDepth++;
+		} while(prevCategories.size() > 0 && currentDepth < depth);
 		
 	}
 
@@ -93,7 +96,7 @@ public class Graph {
 		nodes.add(e2);
 		
 		Graph g = new Graph(nodes);
-		g.build();
+		g.build(1);
 		for(Node n : g.getNodes()) {
 			System.out.println("Node: " + n.getId());
 			System.out.println("Entity: " + n.getEntity().getText());

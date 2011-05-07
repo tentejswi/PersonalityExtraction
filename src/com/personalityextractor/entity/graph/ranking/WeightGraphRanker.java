@@ -40,7 +40,7 @@ public class WeightGraphRanker extends AbstractRanker {
 		nodes.addAll(graph.getNodes());
 		Collections.sort(nodes, new Comparator<Node>() {
 			public int compare(Node n1, Node n2) {
-				if(n1.getWeight() > n2.getWeight()) {
+				if(n1.getWeight() < n2.getWeight()) {
 					return 1;
 				} else {
 					return -1;
