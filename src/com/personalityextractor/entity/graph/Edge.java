@@ -32,6 +32,14 @@ public class Edge {
 	public long getId() {
 		return id;
 	}
+	
+	public String getNode1() {
+		return nodeId1;
+	}
+	
+	public String getNode2() {
+		return nodeId2;
+	}
 
 	public void setId(long id) {
 		this.id = id;

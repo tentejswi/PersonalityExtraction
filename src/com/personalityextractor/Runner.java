@@ -3,12 +3,17 @@
  */
 package com.personalityextractor;
 
+import java.io.BufferedInputStream;
+import java.io.BufferedReader;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileReader;
 import java.sql.ResultSet;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 
-import net.sf.json.JSONArray;
 import net.sf.json.JSONObject;
 
 import com.personalityextractor.data.source.Twitter;
@@ -22,7 +27,6 @@ import com.personalityextractor.entity.graph.ranking.IRanker;
 import com.personalityextractor.entity.graph.ranking.WeightGraphRanker;
 import com.personalityextractor.entity.resolver.ViterbiResolver;
 import com.personalityextractor.store.MysqlStore;
-import java.util.Date;
 
 /**
  * Main Class
@@ -55,71 +59,89 @@ public class Runner {
 				.executeUpdate("UPDATE user_queue SET done = 1 WHERE handle like \""
 						+ handle + "\"");
 	}
-	
+
 	public static boolean setUserInterests(String handle, String json) {
 		return store
-				.executeUpdate("INSERT INTO user_interests(handle, json) values ('" + handle + "','" + json + "')" +
-						"ON DUPLICATE KEY UPDATE json = '" + json + "'");
+				.executeUpdate("INSERT INTO user_interests(handle, json) values ('"
+						+ handle
+						+ "','"
+						+ json
+						+ "')"
+						+ "ON DUPLICATE KEY UPDATE json = '" + json + "'");
 	}
-	
+
 	public static String nodesToJson(List<Node> nodes) {
 		JSONObject json = new JSONObject();
-		
-		for(Node n : nodes) {
+
+		for (Node n : nodes) {
 			json.put(n.getEntity().getText(), 1);
 		}
-		
+
 		return json.toString();
 	}
 
 	public static void run() {
 		String handle = popUserFromQueue();
-		
-		if(handle == null) {
+
+		if (handle == null) {
 			return;
 		}
-		
+
 		Twitter t = new Twitter();
-		IEntityExtractor extractor = EntityExtractFactory.produceExtractor(Extracter.NOUNPHRASE);
+		IEntityExtractor extractor = EntityExtractFactory
+				.produceExtractor(Extracter.NOUNPHRASE);
 		ViterbiResolver resolver = new ViterbiResolver();
 		HashMap<String, WikipediaEntity> allEntities = new HashMap<String, WikipediaEntity>();
-		
-		if(handle != null) {
-                        Date start = new Date();
-                        System.out.print("processing " + handle + "...\t");
-//			List<String> tweets = t.fetchTweets(handle, 20);
+
+		if (handle != null) {
+			Date start = new Date();
+			System.out.print("processing " + handle + "...\t");
+			// List<String> tweets = t.fetchTweets(handle, 20);
+
 			List<String> tweets = new ArrayList<String>();
 			tweets.clear();
-			tweets.add("Obama is the President of United States.");
-			tweets.add("Obama is the President of United States.");
-			int count = 0;
-			for(String tweet : tweets) {
-//				System.out.println(++count);
-				List<String> entities = extractor.extract(tweet);
-				List<WikipediaEntity> resolvedEntities = resolver.resolve(entities);
-								
-				for(WikipediaEntity e : resolvedEntities) {
-					if(!allEntities.containsKey(e.getText())) {
-						allEntities.put(e.getText(), e);
-					} else {
-						(allEntities.get(e.getText())).incrCount();
-					}
+			try {
+				BufferedReader rdr = new BufferedReader(new FileReader(
+						new File("/Users/semanticvoid/Downloads/mohit.txt")));
+				String line = null;
+				while ((line = rdr.readLine()) != null) {
+					tweets.add(line);
 				}
-//				break;
+			} catch (Exception e) {
+				// TODO: handle exception
 			}
-			
+
+			int count = 0;
+			for (String tweet : tweets) {
+				System.out.println(++count);
+				List<String> entities = extractor.extract(tweet);
+				List<WikipediaEntity> resolvedEntities = resolver
+						.resolve(entities);
+
+				for (WikipediaEntity e : resolvedEntities) {
+					if (!allEntities.containsKey(e.getText())) {
+						allEntities.put(e.getText(), e);
+					}
+					
+					(allEntities.get(e.getText())).incrCount();
+				}
+				// break;
+			}
+
 			List<WikipediaEntity> entities = new ArrayList<WikipediaEntity>();
 			entities.addAll(allEntities.values());
 			Graph g = new Graph(entities);
-			g.build(2);
+			g.build(1);
+			System.out.println(g.toJSON());
 			IRanker ranker = new WeightGraphRanker(g);
 			List<Node> topNodes = ranker.getTopRankedNodes(2);
 			setUserInterests(handle, nodesToJson(topNodes));
 			// update status
 			updateUser(handle);
-//			System.exit(0);
-                        Date end = new Date();
-                        System.out.print("[ DONE ] { time taken: " + (end.getTime()-start.getTime())/1000 + "s }\n");
+			// System.exit(0);
+			Date end = new Date();
+			System.out.print("[ DONE ] { time taken: "
+					+ (end.getTime() - start.getTime()) / 1000 + "s }\n");
 		}
 	}
 
