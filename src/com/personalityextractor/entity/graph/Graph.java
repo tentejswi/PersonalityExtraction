@@ -102,12 +102,16 @@ public class Graph {
 	}
 
 	public String toJSON() {
-		return generateJSON(root, null).toString();
+		return generateJSON(root, null, new HashSet<String>()).toString();
 	}
 
-	private JSONObject generateJSON(Node root, Node parent) {
+	private JSONObject generateJSON(Node root, Node parent, Set<String> seen) {
 		JSONObject json = new JSONObject();
 		List<Edge> edges = root.getEdges();
+		
+//		if(root != null && root.getId() != null && root.getId().equals("38809")) {
+//			System.out.print("");
+//		}
 
 		if (edges.size() > 2) {
 			for (Edge e : edges) {
@@ -116,10 +120,14 @@ public class Graph {
 					continue;
 				}
 
-				if (e.getNode1().equals(root.getId())) {
+				if (e.getNode1() == null || e.getNode1().equals(root.getId())) {
 					if(e.getNode2() != null) {
-						JSONObject cJson = generateJSON(nodes.get(e.getNode2()),
-								root);
+						JSONObject cJson = null;
+						if(!seen.contains(e.getNode2())) {
+							seen.add(e.getNode2());
+							cJson = generateJSON(nodes.get(e.getNode2()),
+								root, seen);
+						}
 						if (cJson != null) {
 							json.put(nodes.get(e.getNode2()).getEntity().getText(), cJson);
 						} else {
@@ -129,8 +137,12 @@ public class Graph {
 					}
 				} else {
 					if(e.getNode1() != null) {
-						JSONObject cJson = generateJSON(nodes.get(e.getNode1()),
-								root);
+						JSONObject cJson = null;
+						if(!seen.contains(e.getNode1())) {
+							seen.add(e.getNode1());
+							cJson = generateJSON(nodes.get(e.getNode1()),
+								root, seen);
+						}
 						if (cJson != null) {
 							json.put(nodes.get(e.getNode1()).getEntity().getText(), cJson);
 						} else {
