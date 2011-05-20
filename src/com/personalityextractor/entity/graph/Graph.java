@@ -62,16 +62,11 @@ public class Graph {
 						continue;
 					}
 
-					if (!prevCategories.contains(category.getWikiminerID())
-							&& !currCategories.contains(category
-									.getWikiminerID())) {
+					if (!nodes.containsKey(category.getWikiminerID())) {
 						currCategories.add(category.getWikiminerID());
 						n2 = new Node(category);
 						nodes.put(n2.getId(), n2);
-					} else if (prevCategories.contains(category
-							.getWikiminerID())
-							|| currCategories.contains(category
-									.getWikiminerID())) {
+					} else {
 						n2 = nodes.get(category.getWikiminerID());
 					}
 
@@ -91,10 +86,11 @@ public class Graph {
 	}
 
 	private void formEdge(Node n1, Node n2) {
-		Edge e = new Edge(edgeCount++, n1.getId(), n2.getId());
-		n1.addEdge(e);
-		n2.addEdge(e);
-		n2.addWeight(n1.getWeight());
+		Edge e1 = new Edge(edgeCount++, n1.getId(), n2.getId());
+		Edge e2 = new Edge(edgeCount++, n2.getId(), n1.getId());
+		n1.addEdge(e1);
+		n2.addEdge(e2);
+		//n2.addWeight(n1.getWeight());
 	}
 
 	public Collection<Node> getNodes() {
@@ -113,15 +109,9 @@ public class Graph {
 //			System.out.print("");
 //		}
 
-		if (edges.size() > 2) {
+		if (edges.size() > 0) {
 			for (Edge e : edges) {
-				if (parent != null && (e.getNode1() != null && e.getNode1().equals(parent.getId()))
-						|| (e.getNode2() != null && e.getNode2().equals(parent.getId()))) {
-					continue;
-				}
-
-				if (e.getNode1() == null || e.getNode1().equals(root.getId())) {
-					if(e.getNode2() != null) {
+				if(e.getNode2() != null) {
 						JSONObject cJson = null;
 						if(!seen.contains(e.getNode2())) {
 							seen.add(e.getNode2());
@@ -135,23 +125,7 @@ public class Graph {
 									.getWeight());
 						}
 					}
-				} else {
-					if(e.getNode1() != null) {
-						JSONObject cJson = null;
-						if(!seen.contains(e.getNode1())) {
-							seen.add(e.getNode1());
-							cJson = generateJSON(nodes.get(e.getNode1()),
-								root, seen);
-						}
-						if (cJson != null) {
-							json.put(nodes.get(e.getNode1()).getEntity().getText(), cJson);
-						} else {
-							json.put(nodes.get(e.getNode1()).getEntity().getText(), nodes.get(e.getNode1())
-									.getWeight());
-						}
-					}
 				}
-			}
 		} else {
 			return null;
 		}
