@@ -29,7 +29,7 @@ public class Graph {
 	int edgeCount = 0;
 
 	public Graph(List<WikipediaEntity> leafEntities) {
-		this.root = new Node(new WikipediaEntity("__ROOT__"));
+		this.root = new Node(new WikipediaEntity("__ROOT__", "-1"));
 		this.nodes = new HashMap<String, Node>();
 		for (WikipediaEntity we : leafEntities) {
 			Node n = new Node(we);
@@ -70,7 +70,7 @@ public class Graph {
 						n2 = nodes.get(category.getWikiminerID());
 					}
 
-					formEdge(cNode, n2);
+					formEdge(cNode, n2, cNode.getWeight()/categories.size());
 				}
 			}
 
@@ -81,16 +81,16 @@ public class Graph {
 		// link to roo
 		for (String cid : prevCategories) {
 			Node cNode = nodes.get(cid);
-			formEdge(cNode, root);
+			formEdge(cNode, root, 0);
 		}
 	}
 
-	private void formEdge(Node n1, Node n2) {
+	private void formEdge(Node n1, Node n2, double weight) {
 		Edge e1 = new Edge(edgeCount++, n1.getId(), n2.getId());
 		Edge e2 = new Edge(edgeCount++, n2.getId(), n1.getId());
 		n1.addEdge(e1);
 		n2.addEdge(e2);
-		//n2.addWeight(n1.getWeight());
+		n2.addWeight(weight);
 	}
 
 	public Collection<Node> getNodes() {
@@ -99,6 +99,35 @@ public class Graph {
 
 	public String toJSON() {
 		return generateJSON(root, null, new HashSet<String>()).toString();
+	}
+	
+	public void printWeights() {
+		List<Node> queue = new ArrayList<Node>();
+		Set<String> seen = new HashSet<String>();
+		
+		queue.add(root);
+		seen.add(root.getId());
+		
+		while(queue.size() > 0) {
+			Node node = queue.remove(0);
+			if(node != null) {
+				System.out.println(node.getId() + "\t" + node.getEntity().getText() + "\t" + node.getWeight());
+			} else {
+				continue;
+			}
+			
+			if(node.getId().equals("776875")) {
+				System.out.print("");
+			}
+			
+			for(Edge e: node.getEdges()) {
+				Node node1 = nodes.get(e.getNode2());
+				if(node1 != null && !seen.contains(node1.getId())) {
+					queue.add(node1);
+					seen.add(node1.getId());
+				}
+			}
+		}
 	}
 
 	private JSONObject generateJSON(Node root, Node parent, Set<String> seen) {
