@@ -42,16 +42,17 @@ public class WikiminerDB {
 
 	public List<WikipediaEntity> search(String terms) {
 		List<WikipediaEntity> entities = new ArrayList<WikipediaEntity>();
-		String query = "SELECT page_id, page_title, inlinks FROM page_indexed WHERE MATCH(page_title) AGAINST('"
+		String query = "SELECT page_id, page_title, page_type, inlinks FROM page_indexed WHERE MATCH(page_title) AGAINST('"
 				+ terms.toLowerCase()
-				+ "' IN BOOLEAN MODE) ORDER BY inlinks desc limit 20";
+				+ "' IN BOOLEAN MODE) AND page_type = 1 ORDER BY inlinks desc limit 20";
 		ResultSet rs = db.execute(query);
 		try {
 			while (rs.next()) {
 				String id = rs.getString("page_id");
 				String title = rs.getString("page_title");
 				String inlinks = rs.getString("inlinks");
-				entities.add(new WikipediaEntity(title, id, inlinks));
+				int type = Integer.valueOf(rs.getString("page_type"));
+				entities.add(new WikipediaEntity(title, id, type, inlinks));
 			}
 		} catch (SQLException e) {
 			// TODO Auto-generated catch block
@@ -169,7 +170,7 @@ public class WikiminerDB {
 
 	public List<WikipediaEntity> getCategories(String id) {
 		List<WikipediaEntity> categories = new ArrayList<WikipediaEntity>();
-		String query = "SELECT page_id, page_title FROM categorylink, page_indexed WHERE cl_child = "
+		String query = "SELECT page_id, page_title, page_type, inlinks FROM categorylink, page_indexed WHERE cl_child = "
 				+ id + " AND page_id = cl_parent LIMIT 50";
 		ResultSet rs = db.execute(query);
 
@@ -177,12 +178,33 @@ public class WikiminerDB {
 			while (rs.next()) {
 				String cid = rs.getString("page_id");
 				String ctitle = rs.getString("page_title");
-				categories.add(new WikipediaEntity(ctitle, cid));
+				int type = Integer.valueOf(rs.getString("page_type"));
+				categories.add(new WikipediaEntity(ctitle, cid, type));
 			}
 			rs.close();
 			db.closeStmt();
 		} catch (Exception e) {
 			e.printStackTrace();
+		}
+		
+		for(WikipediaEntity c : categories) {
+			query = "SELECT page_type, page_title, MATCH(page_title) AGAINST(\"" + c.getText() + "\") as relevance" +
+					" FROM page_indexed WHERE MATCH(page_title) AGAINST(\"" + c.getText() + "\") " +
+							"AND page_type = 1 order by relevance desc limit 25";
+			rs = db.execute(query);
+			try {
+				while(rs.next()) {
+					String title = rs.getString("page_title");
+					if(title.equalsIgnoreCase(c.getText())) {
+						c.setType(1);
+						break;
+					}
+				}
+				rs.close();
+				db.closeStmt();
+			} catch(Exception e) {
+				e.printStackTrace();
+			}
 		}
 		
 		return categories;

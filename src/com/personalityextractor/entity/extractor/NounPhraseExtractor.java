@@ -13,7 +13,7 @@ public class NounPhraseExtractor implements IEntityExtractor {
 
 	static {
 		try {
-			lp = new LexicalizedParser("/Users/tejaswi/Documents/workspace/PersonalityExtraction/lair/englishPCFG.ser.gz");
+			lp = new LexicalizedParser("/Users/semanticvoid/projects/PE/lair/englishPCFG.ser.gz");
 			lp.setOptionFlags(new String[] { "-maxLength", "80",
 					"-retainTmpSubcategories" });
 		} catch (Exception e) {
@@ -25,7 +25,7 @@ public class NounPhraseExtractor implements IEntityExtractor {
 	public List<String> extract(String text) {
 		
 		
-		String[] lines = text.split("[:;'\"?/><,\\.!@#$%^&()-+=~`{}|]+");
+		String[] lines = text.split("[;'\"?><,\\.!$%^&()-+=~`{}|]+");
 		ArrayList<String> phrases = new ArrayList<String>();
 		
 		for (String line : lines) {
