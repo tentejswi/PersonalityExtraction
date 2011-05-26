@@ -10,13 +10,14 @@ public class Tweet {
 	private List<String> sentences =null;
 	private List<String> links =null;
 	private List<String> hashTags =null;
+	private boolean isReply=false;
 	
 	public Tweet(String text){
 		this.text = text;
 		tokenize();
 	}
 	
-	public boolean isNewsArticle(String text){
+	private boolean isNewsArticle(String text){
 		String[] split = text.split("\\s+");
 		double numCaps =0.0;
 		Pattern p = Pattern.compile("^[A-Z]+.*");
@@ -31,7 +32,32 @@ public class Tweet {
 		return false;
 	}
 	
+	private static String analyzeHashTags(String tag){
+		char[] arr = tag.toCharArray();
+		List<String> words = new ArrayList<String>(); 
+		StringBuffer sb = new StringBuffer();
+		for(int i=0; i < arr.length; i++){
+			if(!Character.isLowerCase(arr[i])){
+				if(sb.length()>0)
+					words.add(sb.toString());
+				sb = new StringBuffer();
+			}
+			sb.append(arr[i]);
+		}
+		words.add(sb.toString());
+		
+		sb = new StringBuffer();
+		for(String s : words){
+			sb.append(s+" ");
+		}
+		return sb.toString();
+	}
+	
 	private void tokenize(){
+		
+		if(this.text.startsWith("@")){
+			this.isReply= true;
+		}
 		String[] tokens = this.text.split("\\s+");
 		StringBuffer plainText = new StringBuffer();
 		//Pattern p = Pattern.compile("^(http)://[-a-zA-Z0-9+&@#/%?=~_|!:,.;]*[-a-zA-Z0-9+&@#/%=~_|]");
@@ -48,10 +74,17 @@ public class Tweet {
 				links.add(token);
 				continue;
 			}
+			
+			if(token.startsWith("#")){
+				if(this.hashTags==null)
+					this.hashTags= new ArrayList<String>();
+				this.hashTags.add(analyzeHashTags(token.replace("#","")));
+			}
+			
 			plainText.append(token+" ");
 		}
 		
-		String[] sentences = plainText.toString().trim().split("[:;\"?/><,\\.!@#%^()\\-+=~`{}|]+");
+		String[] sentences = plainText.toString().trim().split("[:;\"?/><,\\.!@%^()\\-+=~`{}|]+");
 		this.sentences = new ArrayList<String>();
 		for(String sentence : sentences){
 			if((sentence=sentence.trim()).length()!=0){
@@ -70,10 +103,21 @@ public class Tweet {
 		return this.sentences;
 	}
 	
+	public List<String> getHashTagsEntities(){
+		return this.hashTags;
+	}
+	
+	public boolean isReply(){
+		return this.isReply;
+	}
+	
 	public static void main(String[] args){
-		String text = "Are you a do-good geek? @EFF is hiring a \"Technology Generalist\": http://bit.ly/jeb8x7";
-		Tweet t = new Tweet(text);
-		System.out.println(t.sentences);
+		String s = "alaskaNan";
+		System.out.println(analyzeHashTags(s));
+//		String text = "Are you a do-good geek? @EFF is hiring a \"Technology Generalist\": http://bit.ly/jeb8x7";
+//		Tweet t = new Tweet(text);
+//		System.out.println(t.sentences);
+//		System.out.println(t.links);
 	}
 
 }
