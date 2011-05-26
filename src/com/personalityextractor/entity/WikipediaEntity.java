@@ -3,30 +3,40 @@ package com.personalityextractor.entity;
 import java.util.ArrayList;
 
 
-public class WikipediaEntity extends Entity{
+public class WikipediaEntity extends Entity {
 
     String wikiminer_id;
     String commonnness;
     ArrayList<String> categories;
+    int type;
    
+    private void debug() {
+//    	System.out.println("init:\t" + type + "\t" + wikiminer_id + "\t" + text);
+    }
    
-    public WikipediaEntity(String text) {
+    public WikipediaEntity(String text, int type) {
         super(text);
         wikiminer_id=null;
         categories = new ArrayList<String>();
+        this.type = type;
+        debug();
     }
    
-    public WikipediaEntity(String text, String wikiminer_id) {
+    public WikipediaEntity(String text, String wikiminer_id, int type) {
         super(text);
         this.wikiminer_id=wikiminer_id;
         categories = new ArrayList<String>();
+        this.type = type;
+        debug();
     }
 
-    public WikipediaEntity(String text, String wikiminer_id, String commonness) {
+    public WikipediaEntity(String text, String wikiminer_id, int type, String commonness) {
         super(text);
         this.wikiminer_id=wikiminer_id;
         this.commonnness = commonness;
         categories = new ArrayList<String>();
+        this.type = type;
+        debug();
     }
 
    
@@ -40,6 +50,14 @@ public class WikipediaEntity extends Entity{
    
     public String getCommonness(){
         return String.valueOf(Math.log(Double.parseDouble(this.commonnness)));
+    }
+    
+    public int getType() {
+    	return type;
+    }
+    
+    public void setType(int type) {
+    	this.type = type;
     }
    
     public void print(){

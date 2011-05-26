@@ -119,12 +119,12 @@ public class ViterbiResolver extends BaseEntityResolver {
 		HashMap<String, ArrayList<WikipediaEntity>> tweetEntityTowikiEntities = new HashMap<String, ArrayList<WikipediaEntity>>();
 		// start node
 		ArrayList<WikipediaEntity> start = new ArrayList<WikipediaEntity>();
-		start.add(new WikipediaEntity("start_node", "-1", "0.0000001"));
+		start.add(new WikipediaEntity("start_node", "-1", -1, "0.0000001"));
 		tweetEntityTowikiEntities.put("start_node", start);
 
 		// end node
 		ArrayList<WikipediaEntity> end = new ArrayList<WikipediaEntity>();
-		end.add(new WikipediaEntity("end_node", "-2", "0.0000001"));
+		end.add(new WikipediaEntity("end_node", "-2", -1, "0.0000001"));
 		tweetEntityTowikiEntities.put("end_node", end);
 
 		for (String entity : entities) {
@@ -146,7 +146,7 @@ public class ViterbiResolver extends BaseEntityResolver {
 			ids.addAll(db.search(entity));
 			// adding a void entity
 			WikipediaEntity we = new WikipediaEntity("void_node", "0",
-					"0.0000001");
+					-1, "0.0000001");
 			ids.add(we);
 			tweetEntityTowikiEntities.put(entity, ids);
 		}
@@ -335,7 +335,7 @@ public class ViterbiResolver extends BaseEntityResolver {
 		String[] ids = bestPath.split(",");
 		for (int l = 1; l < ids.length - 1; l++) {
 			entityList.add(new WikipediaEntity(idToWikiEntityText.get(ids[l]),
-					ids[l]));
+					ids[l], 1));
 		}
 		// System.out.println("entitylist length"+entityList.size());
 		return entityList;

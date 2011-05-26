@@ -299,7 +299,7 @@ public class WikiMinerEntityResolver extends BaseEntityResolver {
 			ArrayList<String[]> senses = Wikiminer.getWikipediaSenses(xml, true);
 			for(String[] senseArr : senses){
 				int senseCount = YahooBOSS.makeQuery('"' + senseArr[0] + "\" "+contextQuery.toString());	
-				WikipediaEntity we = new WikipediaEntity(senseArr[0],senseArr[1]);
+				WikipediaEntity we = new WikipediaEntity(senseArr[0],senseArr[1], -1);
 				queue.add(we, ((double) senseCount / (double) contextCount));
 			}
 		}

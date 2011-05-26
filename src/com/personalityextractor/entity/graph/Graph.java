@@ -29,7 +29,7 @@ public class Graph {
 	int edgeCount = 0;
 
 	public Graph(List<WikipediaEntity> leafEntities) {
-		this.root = new Node(new WikipediaEntity("__ROOT__", "-1"));
+		this.root = new Node(new WikipediaEntity("__ROOT__", "-1", -1));
 		this.nodes = new HashMap<String, Node>();
 		for (WikipediaEntity we : leafEntities) {
 			Node n = new Node(we);
@@ -102,30 +102,11 @@ public class Graph {
 	}
 	
 	public void printWeights() {
-		List<Node> queue = new ArrayList<Node>();
-		Set<String> seen = new HashSet<String>();
-		
-		queue.add(root);
-		seen.add(root.getId());
-		
-		while(queue.size() > 0) {
-			Node node = queue.remove(0);
-			if(node != null) {
-				System.out.println(node.getId() + "\t" + node.getEntity().getText() + "\t" + node.getWeight());
-			} else {
-				continue;
-			}
-			
-			if(node.getId().equals("776875")) {
-				System.out.print("");
-			}
-			
-			for(Edge e: node.getEdges()) {
-				Node node1 = nodes.get(e.getNode2());
-				if(node1 != null && !seen.contains(node1.getId())) {
-					queue.add(node1);
-					seen.add(node1.getId());
-				}
+		for(String id : nodes.keySet()) {
+			Node n = nodes.get(id);
+			if(n.getEntity().getType() == 1) {
+				System.out.println(n.getId() + "\t" + n.getEntity().getText() + "\t"
+						+ n.getEntity().getType() + "\t" + n.getWeight());
 			}
 		}
 	}
@@ -161,41 +142,5 @@ public class Graph {
 
 		return json;
 	}
-
-	public static void main(String[] args) {
-		List<WikipediaEntity> nodes = new ArrayList<WikipediaEntity>();
-		WikipediaEntity e1 = new WikipediaEntity("mouse", "18845");
-		e1.incrCount();
-		nodes.add(e1);
-
-		WikipediaEntity e2 = new WikipediaEntity("monitor", "2351503");
-		e2.incrCount();
-		nodes.add(e2);
-
-		Graph g = new Graph(nodes);
-		g.build(1);
-		for (Node n : g.getNodes()) {
-			System.out.println("Node: " + n.getId());
-			System.out.println("Entity: " + n.getEntity().getText());
-			System.out.println("Weight: " + n.getWeight());
-			for (Edge e : n.getEdges()) {
-				System.out.println("edge: " + e.toString());
-			}
-			System.out.println("\n\n");
-		}
-
-		WeightGraphRanker ranker = new WeightGraphRanker(g);
-		List<Node> topNodes = ranker.getTopRankedNodes(1);
-		System.out.println("---------- TOP NODES -------------\n");
-		for (Node n : topNodes) {
-			System.out.println("Node: " + n.getId());
-			System.out.println("Entity: " + n.getEntity().getText());
-			System.out.println("Weight: " + n.getWeight());
-			for (Edge e : n.getEdges()) {
-				System.out.println("edge: " + e.toString());
-			}
-			System.out.println("\n\n");
-		}
-		System.out.println("");
-	}
+	
 }
