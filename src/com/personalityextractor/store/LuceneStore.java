@@ -9,7 +9,7 @@ import org.apache.lucene.analysis.Analyzer;
 import org.apache.lucene.analysis.standard.StandardAnalyzer;
 import org.apache.lucene.document.Document;
 import org.apache.lucene.document.Field;
-import org.apache.lucene.index.IndexReader;
+import org.apache.lucene.index.CorruptIndexException;
 import org.apache.lucene.index.IndexWriter;
 import org.apache.lucene.index.IndexWriter.MaxFieldLength;
 import org.apache.lucene.queryParser.QueryParser;
@@ -18,6 +18,7 @@ import org.apache.lucene.search.Query;
 import org.apache.lucene.search.TopDocs;
 import org.apache.lucene.store.Directory;
 import org.apache.lucene.store.FSDirectory;
+import org.apache.lucene.store.RAMDirectory;
 import org.apache.lucene.store.SimpleFSDirectory;
 import org.apache.lucene.util.Version;
 
@@ -33,7 +34,19 @@ public class LuceneStore {
 		}
 	}
 
-	IndexSearcher searcher = null; // the searcher used to open/search the index
+	static IndexSearcher searcher = null; // the searcher used to open/search the index
+	
+	static {
+		try {
+			searcher = new IndexSearcher(new RAMDirectory(FSDirectory.open(new File("/tmp/lucene_index"))));
+		} catch (CorruptIndexException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+	}
 
 	Query query = null; // the Query created by the QueryParser
 	TopDocs hits = null; // the search results
@@ -42,9 +55,9 @@ public class LuceneStore {
 		System.out.println("Searching.... '" + searchString + "'");
 
 		try {
-			IndexReader reader = IndexReader.open(
-					FSDirectory.open(new File("/tmp/lucene_index")), true);
-			searcher = new IndexSearcher(reader);
+//			IndexReader reader = IndexReader.open(
+//					FSDirectory.open(new File("/tmp/lucene_index")), true);
+			
 
 			Analyzer analyzer = new StandardAnalyzer(Version.LUCENE_30);// construct
 																		// our
@@ -61,13 +74,13 @@ public class LuceneStore {
 			if (hits.totalHits == 0) {
 				System.out.println("No data found.");
 			} else {
-				for (int i = 0; i < hits.totalHits; i++) {
-					Document doc = searcher.doc(hits.scoreDocs[i].doc); // get
-																		// the
-																		// next
-					String text = doc.get("text"); // get its path field
-//					System.out.println("Found in :: " + text);
-				}
+//				for (int i = 0; i < hits.totalHits; i++) {
+//					Document doc = searcher.doc(hits.scoreDocs[i].doc); // get
+//																		// the
+//																		// next
+//					String text = doc.get("text"); // get its path field
+////					System.out.println("Found in :: " + text);
+//				}
 			}
 		} catch (Exception e) {
 			e.printStackTrace();
