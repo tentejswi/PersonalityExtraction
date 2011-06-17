@@ -90,6 +90,28 @@ public class LuceneStore {
 
 		return entities;
 	}
+	
+	public List<String> getCategoryIds(String id) {
+		List<String> categoryIds = new ArrayList<String>();
+		try {
+			Analyzer analyzer = new StandardAnalyzer(Version.LUCENE_30);
+			QueryParser qp = new QueryParser(Version.LUCENE_30, "child",
+					analyzer);
+			query = qp.parse(id);
+			hits = catSearcher.search(query, 50);
+
+			if (hits.totalHits != 0) {
+				for (int i = 0; i < hits.totalHits-1; i++) {
+					Document doc = catSearcher.doc(hits.scoreDocs[i].doc);
+					categoryIds.add(doc.get("parent")); 
+				}
+			}
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+
+		return categoryIds;
+	}
 
 	public void indexPages(int index) {
 		ResultSet rs = null;
