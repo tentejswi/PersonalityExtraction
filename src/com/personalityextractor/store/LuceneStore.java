@@ -28,8 +28,8 @@ import com.personalityextractor.entity.WikipediaEntity;
 
 public class LuceneStore {
 
-	private static final String PAGE_INDEX_PATH = "/tmp/lucene_pages";
-	private static final String CATEGORY_INDEX_PATH = "/tmp/lucene_categories";
+	private static final String PAGE_INDEX_PATH = "/Users/semanticvoid/projects/PE/indicies/pages";
+	private static final String CATEGORY_INDEX_PATH = "/Users/semanticvoid/projects/PE/indicies/categories";
 	private static MysqlStore db = null;
 	static {
 		try {
@@ -77,11 +77,11 @@ public class LuceneStore {
 			hits = pgSearcher.search(query, 20);
 
 			if (hits.totalHits != 0) {
-				for (int i = 0; i < hits.totalHits-1; i++) {
+				for (int i = 0; i < hits.totalHits - 1; i++) {
 					Document doc = pgSearcher.doc(hits.scoreDocs[i].doc);
 					entities.add(new WikipediaEntity(doc.get("text"), doc
 							.get("id"), Integer.valueOf(doc.get("type")), doc
-							.get("inlinks"))); 
+							.get("inlinks")));
 				}
 			}
 		} catch (Exception e) {
@@ -90,8 +90,43 @@ public class LuceneStore {
 
 		return entities;
 	}
-	
-	public List<String> getCategoryIds(String id) {
+
+	public WikipediaEntity searchPageId(String id) {
+		try {
+			Analyzer analyzer = new StandardAnalyzer(Version.LUCENE_30);
+			QueryParser qp = new QueryParser(Version.LUCENE_30, "id", analyzer);
+			query = qp.parse(id);
+			hits = pgSearcher.search(query, 1);
+
+			if (hits.totalHits != 0) {
+				Document doc = pgSearcher.doc(hits.scoreDocs[0].doc);
+				return new WikipediaEntity(doc.get("text"), doc.get("id"),
+						Integer.valueOf(doc.get("type")), doc.get("inlinks"));
+			}
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+
+		return null;
+	}
+
+	public List<WikipediaEntity> getCategories(String id) {
+		List<WikipediaEntity> categories = new ArrayList<WikipediaEntity>();
+		
+		if(id != null) {
+			List<String> categoryIds = getCategoryIds(id);
+			for(String cid : categoryIds) {
+				WikipediaEntity we = searchPageId(cid);
+				if(we != null) {
+					categories.add(we);
+				}
+			}
+		}
+		
+		return categories;
+	}
+
+	private List<String> getCategoryIds(String id) {
 		List<String> categoryIds = new ArrayList<String>();
 		try {
 			Analyzer analyzer = new StandardAnalyzer(Version.LUCENE_30);
@@ -101,9 +136,9 @@ public class LuceneStore {
 			hits = catSearcher.search(query, 50);
 
 			if (hits.totalHits != 0) {
-				for (int i = 0; i < hits.totalHits-1; i++) {
+				for (int i = 0; i < hits.totalHits - 1; i++) {
 					Document doc = catSearcher.doc(hits.scoreDocs[i].doc);
-					categoryIds.add(doc.get("parent")); 
+					categoryIds.add(doc.get("parent"));
 				}
 			}
 		} catch (Exception e) {
@@ -118,7 +153,8 @@ public class LuceneStore {
 		int refresh = 0;
 		try {
 			new File(PAGE_INDEX_PATH).mkdir();
-			Directory directory = new SimpleFSDirectory(new File(PAGE_INDEX_PATH));
+			Directory directory = new SimpleFSDirectory(new File(
+					PAGE_INDEX_PATH));
 			Analyzer analyzer = new StandardAnalyzer(Version.LUCENE_30);
 			IndexWriter iwriter = new IndexWriter(directory, analyzer, true,
 					MaxFieldLength.UNLIMITED);
@@ -181,7 +217,8 @@ public class LuceneStore {
 		int refresh = 0;
 		try {
 			new File(CATEGORY_INDEX_PATH).mkdir();
-			Directory directory = new SimpleFSDirectory(new File(CATEGORY_INDEX_PATH));
+			Directory directory = new SimpleFSDirectory(new File(
+					CATEGORY_INDEX_PATH));
 			Analyzer analyzer = new StandardAnalyzer(Version.LUCENE_30);
 			IndexWriter iwriter = new IndexWriter(directory, analyzer, true,
 					MaxFieldLength.UNLIMITED);
@@ -196,8 +233,8 @@ public class LuceneStore {
 						String child = rs.getString("cl_child");
 						try {
 							Document doc = new Document();
-							doc.add(new Field("parent", parent, Field.Store.YES,
-									Field.Index.ANALYZED));
+							doc.add(new Field("parent", parent,
+									Field.Store.YES, Field.Index.ANALYZED));
 							doc.add(new Field("child", child, Field.Store.YES,
 									Field.Index.ANALYZED));
 							iwriter.addDocument(doc);
@@ -221,9 +258,9 @@ public class LuceneStore {
 				System.out.println(index);
 				index += 5000;
 				refresh++;
-//				if (refresh % 500000 == 0) {
-//					iwriter.optimize();
-//				}
+				// if (refresh % 500000 == 0) {
+				// iwriter.optimize();
+				// }
 			} while (index < 9526832);
 			iwriter.optimize();
 			iwriter.close();
@@ -231,33 +268,33 @@ public class LuceneStore {
 			e.printStackTrace();
 		}
 	}
-	
+
 	public static void main(String[] args) {
 		LuceneStore s = new LuceneStore();
-		
-//		s.indexPages(0);
-		s.indexCategories(0);
-		
-		
-//		 Date d1 = new Date();
-//		 s.search("yahoo");
-//		 Date d2 = new Date();
-//		 System.out.println((d2.getTime() - d1.getTime()));
-//		
-//		 d1 = new Date();
-//		 s.search("apple");
-//		 d2 = new Date();
-//		 System.out.println((d2.getTime() - d1.getTime()));
-//		
-//		 d1 = new Date();
-//		 s.search("france");
-//		 d2 = new Date();
-//		 System.out.println((d2.getTime() - d1.getTime()));
-//		
-//		 d1 = new Date();
-//		 s.search("pakistan");
-//		 d2 = new Date();
-//		 System.out.println((d2.getTime() - d1.getTime()));
+
+		// s.indexPages(0);
+		// s.indexCategories(0);
+
+		s.loadIndices();
+		Date d1 = new Date();
+		s.search("yahoo");
+		Date d2 = new Date();
+		System.out.println((d2.getTime() - d1.getTime()));
+
+		d1 = new Date();
+		s.search("apple");
+		d2 = new Date();
+		System.out.println((d2.getTime() - d1.getTime()));
+
+		d1 = new Date();
+		s.search("france");
+		d2 = new Date();
+		System.out.println((d2.getTime() - d1.getTime()));
+
+		d1 = new Date();
+		s.search("pakistan");
+		d2 = new Date();
+		System.out.println((d2.getTime() - d1.getTime()));
 	}
 
 }
