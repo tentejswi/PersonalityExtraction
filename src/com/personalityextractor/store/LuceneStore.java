@@ -29,6 +29,8 @@ import org.apache.lucene.util.Version;
 import com.personalityextractor.entity.WikipediaEntity;
 
 public class LuceneStore {
+	
+	private static LuceneStore instance = null;
 
 	private static final String PAGE_INDEX_PATH = "/Users/semanticvoid/projects/PE/indicies/pages";
 	private static final String CATEGORY_INDEX_PATH = "/Users/semanticvoid/projects/PE/indicies/categories";
@@ -44,21 +46,37 @@ public class LuceneStore {
 
 	static IndexSearcher pgSearcher = null;
 	static IndexSearcher catSearcher = null;
+	
+	private LuceneStore() {
+		
+	}
+	
+	public static LuceneStore getInstance() {
+		if (instance == null) {
+			instance = new LuceneStore();
+		}
+
+		return instance;
+	}
 
 	public void loadIndices() {
 		try {
-			System.err.print("Loading page index...\t");
-			if (new File(PAGE_INDEX_PATH).exists()) {
-				pgSearcher = new IndexSearcher(new RAMDirectory(
-						FSDirectory.open(new File(PAGE_INDEX_PATH))));
+			if(pgSearcher == null) {
+				System.err.print("Loading page index...\t");
+				if (new File(PAGE_INDEX_PATH).exists()) {
+					pgSearcher = new IndexSearcher(new RAMDirectory(
+							FSDirectory.open(new File(PAGE_INDEX_PATH))));
+				}
+				System.err.print("[ DONE ]\n");
 			}
-			System.err.print("[ DONE ]\n");
-			System.err.print("Loading category index...\t");
-			if (new File(CATEGORY_INDEX_PATH).exists()) {
-				catSearcher = new IndexSearcher(new RAMDirectory(
-						FSDirectory.open(new File(CATEGORY_INDEX_PATH))));
+			if(catSearcher == null) {
+				System.err.print("Loading category index...\t");
+				if (new File(CATEGORY_INDEX_PATH).exists()) {
+					catSearcher = new IndexSearcher(new RAMDirectory(
+							FSDirectory.open(new File(CATEGORY_INDEX_PATH))));
+				}
+				System.err.print("[ DONE ]\n");
 			}
-			System.err.print("[ DONE ]\n");
 		} catch (CorruptIndexException e) {
 			e.printStackTrace();
 		} catch (IOException e) {
@@ -77,9 +95,13 @@ public class LuceneStore {
 					analyzer);
 			query = qp.parse(terms);
 			hits = pgSearcher.search(query, 20);
+			int numResults = 20;
+			if(hits.totalHits < 20) {
+				numResults = hits.totalHits;
+			}
 
 			if (hits.totalHits != 0) {
-				for (int i = 0; i < hits.totalHits - 1; i++) {
+				for (int i = 0; i < numResults; i++) {
 					Document doc = pgSearcher.doc(hits.scoreDocs[i].doc);
 					entities.add(new WikipediaEntity(doc.get("text"), doc
 							.get("id"), Integer.valueOf(doc.get("type")), doc
@@ -136,9 +158,13 @@ public class LuceneStore {
 					analyzer);
 			query = qp.parse(id);
 			hits = catSearcher.search(query, 50);
+			int numResults = 50;
+			if(hits.totalHits < 50) {
+				numResults = hits.totalHits;
+			}
 
 			if (hits.totalHits != 0) {
-				for (int i = 0; i < hits.totalHits - 1; i++) {
+				for (int i = 0; i < numResults; i++) {
 					Document doc = catSearcher.doc(hits.scoreDocs[i].doc);
 					categoryIds.add(doc.get("parent"));
 				}

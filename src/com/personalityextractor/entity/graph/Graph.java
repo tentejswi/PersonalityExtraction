@@ -16,6 +16,7 @@ import net.sf.json.JSONObject;
 import com.personalityextractor.data.source.Wikiminer;
 import com.personalityextractor.entity.WikipediaEntity;
 import com.personalityextractor.entity.graph.ranking.WeightGraphRanker;
+import com.personalityextractor.store.LuceneStore;
 import com.personalityextractor.store.WikiminerDB;
 
 /**
@@ -52,8 +53,7 @@ public class Graph {
 			for (String cid : prevCategories) {
 				Node cNode = nodes.get(cid);
 
-				List<WikipediaEntity> categories = WikiminerDB.getInstance()
-						.getCategories(cid);
+				List<WikipediaEntity> categories = LuceneStore.getInstance().getCategories(cid);
 
 				for (WikipediaEntity category : categories) {
 					Node n2 = null;

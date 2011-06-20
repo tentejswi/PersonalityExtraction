@@ -13,18 +13,19 @@ import com.personalityextractor.entity.WikipediaEntity;
 import com.personalityextractor.entity.extractor.EntityExtractFactory;
 import com.personalityextractor.entity.extractor.IEntityExtractor;
 import com.personalityextractor.entity.extractor.EntityExtractFactory.Extracter;
+import com.personalityextractor.store.LuceneStore;
 import com.personalityextractor.store.WikiminerDB;
 
 import cs224n.util.CounterMap;
 
 public class ViterbiResolver extends BaseEntityResolver {
 
-	private static WikiminerDB db;
+	private static LuceneStore db;
 	static {
 		try {
-			db = WikiminerDB.getInstance("localhost", "root", "", "wikiminer");
+			db = LuceneStore.getInstance();
+			db.loadIndices();
 		} catch (Exception e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
 	}
