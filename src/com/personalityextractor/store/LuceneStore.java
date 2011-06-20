@@ -5,7 +5,9 @@ import java.io.IOException;
 import java.sql.ResultSet;
 import java.util.ArrayList;
 import java.util.Date;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 import org.apache.lucene.analysis.Analyzer;
 import org.apache.lucene.analysis.standard.StandardAnalyzer;
@@ -146,6 +148,29 @@ public class LuceneStore {
 		}
 
 		return categoryIds;
+	}
+	
+	public double compare(String id1, String id2) {
+		double sim = 0;
+		if (id1 == null || id2 == null || id1.equals("") || id2.equals("")) {
+			return sim;
+		}
+		
+		List<String> categories1 = getCategoryIds(id1);
+		List<String> categories2 = getCategoryIds(id2);
+
+		double intersection = 0;
+		for (String id11 : categories1) {
+			if (categories2.contains(id11)) {
+				intersection++;
+			}
+		}
+
+		if (intersection > 0 && (categories1.size() + categories2.size()) > 0) {
+			sim = intersection * 2 / (categories1.size() + categories2.size());
+		}
+		
+		return sim;
 	}
 
 	public void indexPages(int index) {
