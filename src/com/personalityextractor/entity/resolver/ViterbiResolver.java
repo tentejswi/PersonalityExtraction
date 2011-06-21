@@ -4,6 +4,7 @@ import java.io.BufferedReader;
 import java.io.FileReader;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 
@@ -13,6 +14,8 @@ import com.personalityextractor.entity.WikipediaEntity;
 import com.personalityextractor.entity.extractor.EntityExtractFactory;
 import com.personalityextractor.entity.extractor.IEntityExtractor;
 import com.personalityextractor.entity.extractor.EntityExtractFactory.Extracter;
+import com.personalityextractor.evaluation.PerfMetrics;
+import com.personalityextractor.evaluation.PerfMetrics.Metric;
 import com.personalityextractor.store.LuceneStore;
 import com.personalityextractor.store.WikiminerDB;
 
@@ -177,6 +180,7 @@ public class ViterbiResolver extends BaseEntityResolver {
 	}
 
 	public List<WikipediaEntity> resolve(List<String> entities) {
+		Date d1 = new Date();
 		List<WikipediaEntity> entityList = new ArrayList<WikipediaEntity>();
 		double bestProbability = (-1) * Integer.MAX_VALUE;
 		String bestPath = "";
@@ -338,7 +342,9 @@ public class ViterbiResolver extends BaseEntityResolver {
 			entityList.add(new WikipediaEntity(idToWikiEntityText.get(ids[l]),
 					ids[l], 1));
 		}
-		// System.out.println("entitylist length"+entityList.size());
+		
+		Date d2 = new Date();
+		PerfMetrics.getInstance().addToMetrics(Metric.RESOLUTION, (d2.getTime()-d1.getTime()));
 		return entityList;
 	}
 

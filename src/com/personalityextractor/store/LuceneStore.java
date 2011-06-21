@@ -27,6 +27,8 @@ import org.apache.lucene.store.SimpleFSDirectory;
 import org.apache.lucene.util.Version;
 
 import com.personalityextractor.entity.WikipediaEntity;
+import com.personalityextractor.evaluation.PerfMetrics;
+import com.personalityextractor.evaluation.PerfMetrics.Metric;
 
 public class LuceneStore {
 	
@@ -88,6 +90,7 @@ public class LuceneStore {
 	TopDocs hits = null; // the search results
 
 	public List<WikipediaEntity> search(String terms) {
+		Date d1 = new Date();
 		List<WikipediaEntity> entities = new ArrayList<WikipediaEntity>();
 		try {
 			Analyzer analyzer = new StandardAnalyzer(Version.LUCENE_30);
@@ -112,6 +115,8 @@ public class LuceneStore {
 			e.printStackTrace();
 		}
 
+		Date d2 = new Date();
+		PerfMetrics.getInstance().addToMetrics(Metric.SEARCHPAGE, (d2.getTime()-d1.getTime()));
 		return entities;
 	}
 
@@ -135,6 +140,7 @@ public class LuceneStore {
 	}
 
 	public List<WikipediaEntity> getCategories(String id) {
+		Date d1 = new Date();
 		List<WikipediaEntity> categories = new ArrayList<WikipediaEntity>();
 		
 		if(id != null) {
@@ -147,6 +153,8 @@ public class LuceneStore {
 			}
 		}
 		
+		Date d2 = new Date();
+		PerfMetrics.getInstance().addToMetrics(Metric.GETCATEGORIES, (d2.getTime()-d1.getTime()));
 		return categories;
 	}
 

@@ -3,10 +3,8 @@
  */
 package com.personalityextractor;
 
-import java.io.BufferedInputStream;
 import java.io.BufferedReader;
 import java.io.File;
-import java.io.FileInputStream;
 import java.io.FileReader;
 import java.sql.ResultSet;
 import java.util.ArrayList;
@@ -16,6 +14,7 @@ import java.util.List;
 
 import net.sf.json.JSONObject;
 
+import com.personalityextractor.commons.data.Tweet;
 import com.personalityextractor.data.source.Twitter;
 import com.personalityextractor.entity.WikipediaEntity;
 import com.personalityextractor.entity.extractor.EntityExtractFactory;
@@ -26,12 +25,13 @@ import com.personalityextractor.entity.graph.Node;
 import com.personalityextractor.entity.graph.ranking.IRanker;
 import com.personalityextractor.entity.graph.ranking.WeightGraphRanker;
 import com.personalityextractor.entity.resolver.ViterbiResolver;
+import com.personalityextractor.evaluation.PerfMetrics;
+import com.personalityextractor.evaluation.PerfMetrics.Metric;
 import com.personalityextractor.store.MysqlStore;
 
 /**
  * Main Class
  * 
- * @author semanticvoid
  * 
  */
 public class Runner {
@@ -99,10 +99,11 @@ public class Runner {
 			// List<String> tweets = t.fetchTweets(handle, 20);
 
 			List<String> tweets = new ArrayList<String>();
-			tweets.clear();
+			// tweets.clear();
+			// tweets.add("iPhone");
 			try {
 				BufferedReader rdr = new BufferedReader(new FileReader(
-						new File("/Users/semanticvoid/Downloads/mohit.txt")));
+						new File("/Users/semanticvoid/Downloads/less.txt_100")));
 				String line = null;
 				while ((line = rdr.readLine()) != null) {
 					tweets.add(line);
@@ -112,18 +113,26 @@ public class Runner {
 			}
 
 			int count = 0;
-			for (String tweet : tweets) {
-				System.out.println(++count);
-				List<String> entities = extractor.extract(tweet);
-				List<WikipediaEntity> resolvedEntities = resolver
-						.resolve(entities);
+			for (String text : tweets) {
+				// System.out.println(++count);
+				Tweet tweet = new Tweet(text);
 
-				for (WikipediaEntity e : resolvedEntities) {
-					if (!allEntities.containsKey(e.getText())) {
-						allEntities.put(e.getText(), e);
+				for (String s : tweet.getSentences()) {
+					List<String> entities = extractor.extract(s);
+
+					 for(String e : entities) {
+						 System.out.println(e);
+					 }
+					List<WikipediaEntity> resolvedEntities = resolver
+							.resolve(entities);
+
+					for (WikipediaEntity e : resolvedEntities) {
+						if (!allEntities.containsKey(e.getText())) {
+							allEntities.put(e.getText(), e);
+						}
+
+						(allEntities.get(e.getText())).incrCount();
 					}
-					
-					(allEntities.get(e.getText())).incrCount();
 				}
 				// break;
 			}
@@ -131,18 +140,30 @@ public class Runner {
 			List<WikipediaEntity> entities = new ArrayList<WikipediaEntity>();
 			entities.addAll(allEntities.values());
 			Graph g = new Graph(entities);
-			g.build(1);
-			System.out.println(g.toJSON());
+			g.build(2);
+			g.printWeights();
+			Date end = new Date();
+			PerfMetrics.getInstance().addToMetrics(Metric.TOTAL, (end.getTime() - start.getTime()));
+			
+			printMetrics();
+			
 			IRanker ranker = new WeightGraphRanker(g);
 			List<Node> topNodes = ranker.getTopRankedNodes(2);
 			setUserInterests(handle, nodesToJson(topNodes));
 			// update status
-			updateUser(handle);
-			// System.exit(0);
-			Date end = new Date();
-			System.out.print("[ DONE ] { time taken: "
-					+ (end.getTime() - start.getTime()) / 1000 + "s }\n");
+			// updateUser(handle);
 		}
+	}
+	
+	public static void printMetrics() {
+		PerfMetrics metrics = PerfMetrics.getInstance();
+		System.err.println("**********************************************");
+		System.err.println("             Performance Metrics              ");
+		System.err.println("**********************************************");
+		for(Metric m : metrics.getMetrics()) {
+			System.err.println(m.toString() + "\t" + metrics.getMetric(m));
+		}
+		System.err.println("**********************************************");
 	}
 
 	/**
