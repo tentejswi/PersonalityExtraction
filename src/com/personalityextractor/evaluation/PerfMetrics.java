@@ -6,7 +6,7 @@ import java.util.Set;
 public class PerfMetrics {
 	
 	public enum Metric {
-		TOTAL, RESOLUTION, EXTRACTION, SEARCHPAGE, GETCATEGORIES;
+		TOTAL, LOAD, RESOLUTION, EXTRACTION, SEARCHPAGE, GETCATEGORIES;
 	}
 	
 	private static PerfMetrics instance = null;

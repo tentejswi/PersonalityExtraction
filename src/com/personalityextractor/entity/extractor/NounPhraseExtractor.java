@@ -2,7 +2,11 @@ package com.personalityextractor.entity.extractor;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Date;
 import java.util.List;
+
+import com.personalityextractor.evaluation.PerfMetrics;
+import com.personalityextractor.evaluation.PerfMetrics.Metric;
 
 import edu.stanford.nlp.parser.lexparser.LexicalizedParser;
 import edu.stanford.nlp.trees.Tree;
@@ -13,9 +17,12 @@ public class NounPhraseExtractor implements IEntityExtractor {
 
 	static {
 		try {
+			Date d1 = new Date();
 			lp = new LexicalizedParser("/Users/semanticvoid/projects/PE/lair/englishPCFG.ser.gz");
 			lp.setOptionFlags(new String[] { "-maxLength", "80",
 					"-retainTmpSubcategories" });
+			Date d2 = new Date();
+			PerfMetrics.getInstance().addToMetrics(Metric.LOAD, (d2.getTime()-d1.getTime()));
 		} catch (Exception e) {
 			e.printStackTrace();
 		}

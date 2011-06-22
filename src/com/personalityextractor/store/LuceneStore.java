@@ -62,6 +62,7 @@ public class LuceneStore {
 	}
 
 	public void loadIndices() {
+		Date d1 = new Date();
 		try {
 			if(pgSearcher == null) {
 				System.err.print("Loading page index...\t");
@@ -84,6 +85,9 @@ public class LuceneStore {
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
+		
+		Date d2 = new Date();
+		PerfMetrics.getInstance().addToMetrics(Metric.LOAD, (d2.getTime()-d1.getTime()));
 	}
 
 	Query query = null; // the Query created by the QueryParser

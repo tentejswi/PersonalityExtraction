@@ -120,9 +120,9 @@ public class Runner {
 				for (String s : tweet.getSentences()) {
 					List<String> entities = extractor.extract(s);
 
-					 for(String e : entities) {
-						 System.out.println(e);
-					 }
+//					 for(String e : entities) {
+//						 System.out.println(e);
+//					 }
 					List<WikipediaEntity> resolvedEntities = resolver
 							.resolve(entities);
 
