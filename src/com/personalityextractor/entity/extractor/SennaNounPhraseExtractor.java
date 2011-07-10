@@ -141,7 +141,8 @@ public class SennaNounPhraseExtractor implements IEntityExtractor{
 		List<String> entities = new ArrayList<String>();
 		String sennaOutput = getSennaOutput(line);
 		//System.out.println(sennaOutput);
-		List<NounPhrase> nps = new ArrayList<NounPhrase>();
+		
+		List<NounPhrase> nps = getNounPhrasesWithType(sennaOutput);
 		for(NounPhrase np : nps){
 			if(np.getType().equalsIgnoreCase("pn")){
 				entities.add(np.getText());
@@ -156,7 +157,7 @@ public class SennaNounPhraseExtractor implements IEntityExtractor{
 	
 	public static void main(String[] args){
 		SennaNounPhraseExtractor sn = new SennaNounPhraseExtractor();
-		String line = "Tejaswi went to see London";
+		String line = "google goggle went to see London Parade";
 		System.out.println(sn.extract(line));
 	}
 
