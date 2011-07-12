@@ -4,10 +4,10 @@ import java.io.File;
 import java.io.IOException;
 import java.sql.ResultSet;
 import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Collections;
 import java.util.Date;
-import java.util.HashSet;
 import java.util.List;
-import java.util.Set;
 
 import org.apache.lucene.analysis.Analyzer;
 import org.apache.lucene.analysis.standard.StandardAnalyzer;
@@ -19,6 +19,8 @@ import org.apache.lucene.index.IndexWriter.MaxFieldLength;
 import org.apache.lucene.queryParser.QueryParser;
 import org.apache.lucene.search.IndexSearcher;
 import org.apache.lucene.search.Query;
+import org.apache.lucene.search.Sort;
+import org.apache.lucene.search.SortField;
 import org.apache.lucene.search.TopDocs;
 import org.apache.lucene.store.Directory;
 import org.apache.lucene.store.FSDirectory;
@@ -31,7 +33,7 @@ import com.personalityextractor.evaluation.PerfMetrics;
 import com.personalityextractor.evaluation.PerfMetrics.Metric;
 
 public class LuceneStore {
-	
+
 	private static LuceneStore instance = null;
 
 	private static final String PAGE_INDEX_PATH = "/Users/semanticvoid/projects/PE/indicies/pages";
@@ -48,11 +50,11 @@ public class LuceneStore {
 
 	static IndexSearcher pgSearcher = null;
 	static IndexSearcher catSearcher = null;
-	
+
 	private LuceneStore() {
-		
+
 	}
-	
+
 	public static LuceneStore getInstance() {
 		if (instance == null) {
 			instance = new LuceneStore();
@@ -64,7 +66,7 @@ public class LuceneStore {
 	public void loadIndices() {
 		Date d1 = new Date();
 		try {
-			if(pgSearcher == null) {
+			if (pgSearcher == null) {
 				System.err.print("Loading page index...\t");
 				if (new File(PAGE_INDEX_PATH).exists()) {
 					pgSearcher = new IndexSearcher(new RAMDirectory(
@@ -72,7 +74,7 @@ public class LuceneStore {
 				}
 				System.err.print("[ DONE ]\n");
 			}
-			if(catSearcher == null) {
+			if (catSearcher == null) {
 				System.err.print("Loading category index...\t");
 				if (new File(CATEGORY_INDEX_PATH).exists()) {
 					catSearcher = new IndexSearcher(new RAMDirectory(
@@ -85,9 +87,10 @@ public class LuceneStore {
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
-		
+
 		Date d2 = new Date();
-		PerfMetrics.getInstance().addToMetrics(Metric.LOAD, (d2.getTime()-d1.getTime()));
+		PerfMetrics.getInstance().addToMetrics(Metric.LOAD,
+				(d2.getTime() - d1.getTime()));
 	}
 
 	Query query = null; // the Query created by the QueryParser
@@ -101,26 +104,36 @@ public class LuceneStore {
 			QueryParser qp = new QueryParser(Version.LUCENE_30, "text",
 					analyzer);
 			query = qp.parse(terms);
-			hits = pgSearcher.search(query, 20);
-			int numResults = 20;
-			if(hits.totalHits < 20) {
+			hits = pgSearcher.search(query, null, 100);
+			int numResults = 100;
+			if (hits.totalHits < 100) {
 				numResults = hits.totalHits;
 			}
 
 			if (hits.totalHits != 0) {
 				for (int i = 0; i < numResults; i++) {
 					Document doc = pgSearcher.doc(hits.scoreDocs[i].doc);
+//					System.out.println(doc.get("id") + "\t" + doc.get("inlinks"));
 					entities.add(new WikipediaEntity(doc.get("text"), doc
 							.get("id"), Integer.valueOf(doc.get("type")), doc
 							.get("inlinks")));
 				}
 			}
+			
+			Collections.sort(entities);
+			if(numResults > 20) {
+				numResults = 20;
+			}
+			
+			List<WikipediaEntity> tmpEntities = entities.subList(0, numResults);
+			entities = tmpEntities;
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
 
 		Date d2 = new Date();
-		PerfMetrics.getInstance().addToMetrics(Metric.SEARCHPAGE, (d2.getTime()-d1.getTime()));
+		PerfMetrics.getInstance().addToMetrics(Metric.SEARCHPAGE,
+				(d2.getTime() - d1.getTime()));
 		return entities;
 	}
 
@@ -146,19 +159,20 @@ public class LuceneStore {
 	public List<WikipediaEntity> getCategories(String id) {
 		Date d1 = new Date();
 		List<WikipediaEntity> categories = new ArrayList<WikipediaEntity>();
-		
-		if(id != null) {
+
+		if (id != null) {
 			List<String> categoryIds = getCategoryIds(id);
-			for(String cid : categoryIds) {
+			for (String cid : categoryIds) {
 				WikipediaEntity we = searchPageId(cid);
-				if(we != null) {
+				if (we != null) {
 					categories.add(we);
 				}
 			}
 		}
-		
+
 		Date d2 = new Date();
-		PerfMetrics.getInstance().addToMetrics(Metric.GETCATEGORIES, (d2.getTime()-d1.getTime()));
+		PerfMetrics.getInstance().addToMetrics(Metric.GETCATEGORIES,
+				(d2.getTime() - d1.getTime()));
 		return categories;
 	}
 
@@ -171,7 +185,7 @@ public class LuceneStore {
 			query = qp.parse(id);
 			hits = catSearcher.search(query, 50);
 			int numResults = 50;
-			if(hits.totalHits < 50) {
+			if (hits.totalHits < 50) {
 				numResults = hits.totalHits;
 			}
 
@@ -187,13 +201,13 @@ public class LuceneStore {
 
 		return categoryIds;
 	}
-	
+
 	public double compare(String id1, String id2) {
 		double sim = 0;
 		if (id1 == null || id2 == null || id1.equals("") || id2.equals("")) {
 			return sim;
 		}
-		
+
 		List<String> categories1 = getCategoryIds(id1);
 		List<String> categories2 = getCategoryIds(id2);
 
@@ -207,7 +221,7 @@ public class LuceneStore {
 		if (intersection > 0 && (categories1.size() + categories2.size()) > 0) {
 			sim = intersection * 2 / (categories1.size() + categories2.size());
 		}
-		
+
 		return sim;
 	}
 
@@ -238,7 +252,7 @@ public class LuceneStore {
 									Field.Index.ANALYZED));
 							doc.add(new Field("id", id, Field.Store.YES,
 									Field.Index.ANALYZED));
-							doc.add(new Field("inlinks", id, Field.Store.YES,
+							doc.add(new Field("inlinks", inlinks, Field.Store.YES,
 									Field.Index.NO));
 							doc.add(new Field("type", type, Field.Store.YES,
 									Field.Index.NO));
@@ -335,29 +349,33 @@ public class LuceneStore {
 	public static void main(String[] args) {
 		LuceneStore s = new LuceneStore();
 
-		// s.indexPages(0);
+//		 s.indexPages(0);
 		// s.indexCategories(0);
 
 		s.loadIndices();
 		Date d1 = new Date();
-		s.search("yahoo");
+		List<WikipediaEntity> results = s.search("google");
+		for (WikipediaEntity e : results) {
+			System.out.println("\t" + e.getWikiminerID() + "\t"
+					+ e.getCommonness());
+		}
 		Date d2 = new Date();
 		System.out.println((d2.getTime() - d1.getTime()));
 
-		d1 = new Date();
-		s.search("apple");
-		d2 = new Date();
-		System.out.println((d2.getTime() - d1.getTime()));
-
-		d1 = new Date();
-		s.search("france");
-		d2 = new Date();
-		System.out.println((d2.getTime() - d1.getTime()));
-
-		d1 = new Date();
-		s.search("pakistan");
-		d2 = new Date();
-		System.out.println((d2.getTime() - d1.getTime()));
+//		d1 = new Date();
+//		s.search("apple");
+//		d2 = new Date();
+//		System.out.println((d2.getTime() - d1.getTime()));
+//
+//		d1 = new Date();
+//		s.search("france");
+//		d2 = new Date();
+//		System.out.println((d2.getTime() - d1.getTime()));
+//
+//		d1 = new Date();
+//		s.search("pakistan");
+//		d2 = new Date();
+//		System.out.println((d2.getTime() - d1.getTime()));
 	}
 
 }
