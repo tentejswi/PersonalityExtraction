@@ -37,10 +37,11 @@ public class Tweet {
 		List<String> words = new ArrayList<String>(); 
 		StringBuffer sb = new StringBuffer();
 		for(int i=0; i < arr.length; i++){
-			if(!Character.isLowerCase(arr[i])){
-				if(sb.length()>0)
+			if(Character.isUpperCase(arr[i])){
+				if(sb.length()>1){
 					words.add(sb.toString());
-				sb = new StringBuffer();
+					sb = new StringBuffer();
+				}
 			}
 			sb.append(arr[i]);
 		}
@@ -78,13 +79,16 @@ public class Tweet {
 			if(token.startsWith("#")){
 				if(this.hashTags==null)
 					this.hashTags= new ArrayList<String>();
-				this.hashTags.add(analyzeHashTags(token.replace("#","")));
+				String analyzedHashTag = analyzeHashTags(token.replace("#",""));
+				this.hashTags.add(analyzedHashTag);
+				token=analyzedHashTag;
 			}
 			
 			plainText.append(token+" ");
 		}
 		
-		String[] sentences = plainText.toString().trim().split("[:;\"?/><,\\.!@%^()\\-+=~`{}|]+");
+		String pText = plainText.toString().replaceAll("'s", "");
+		String[] sentences = pText.trim().split("[:;\"?/><,\\.!@%^()\\-+=~`{}|]+");
 		this.sentences = new ArrayList<String>();
 		for(String sentence : sentences){
 			if((sentence=sentence.trim()).length()!=0){
