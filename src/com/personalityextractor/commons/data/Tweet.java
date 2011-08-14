@@ -31,26 +31,39 @@ public class Tweet {
 		
 		return false;
 	}
-	
-	private static String analyzeHashTags(String tag){
+
+	private static String determineCase(char c){
+		String ccase = "";
+		if (Character.isUpperCase(c)) {
+			ccase="u";
+		} else{
+			ccase="l";
+		}
+		return ccase;
+	}
+	private static String analyzeHashTags(String tag) {
 		char[] arr = tag.toCharArray();
-		List<String> words = new ArrayList<String>(); 
+		List<String> words = new ArrayList<String>();
 		StringBuffer sb = new StringBuffer();
-		for(int i=0; i < arr.length; i++){
-			if(!Character.isLowerCase(arr[i])){
-				if(sb.length()>0)
-					words.add(sb.toString());
-				sb = new StringBuffer();
-			}
+		for (int i = 0; i < arr.length; i++) {
 			sb.append(arr[i]);
+			String ccase = determineCase(arr[i]);
+			String ncase = "";
+			if(i<arr.length-1){
+				ncase= determineCase(arr[i+1]);
+			}
+			if(!ccase.equalsIgnoreCase(ncase) && sb.length()>1){
+				words.add(sb.toString());
+				sb = new StringBuffer();				
+			}
 		}
 		words.add(sb.toString());
-		
+
 		sb = new StringBuffer();
-		for(String s : words){
-			sb.append(s+" ");
+		for (String s : words) {
+			sb.append(s + " ");
 		}
-		return sb.toString();
+		return sb.toString().trim();
 	}
 	
 	private void tokenize(){
@@ -78,13 +91,16 @@ public class Tweet {
 			if(token.startsWith("#")){
 				if(this.hashTags==null)
 					this.hashTags= new ArrayList<String>();
-				this.hashTags.add(analyzeHashTags(token.replace("#","")));
+				String analyzedHashTag = analyzeHashTags(token.replace("#",""));
+				this.hashTags.add(analyzedHashTag);
+				token=analyzedHashTag;
 			}
 			
 			plainText.append(token+" ");
 		}
 		
-		String[] sentences = plainText.toString().trim().split("[:;\"?/><,\\.!@%^()\\-+=~`{}|]+");
+		String pText = plainText.toString().replaceAll("'s", "");
+		String[] sentences = pText.trim().split("[:;\"?/><,\\.!@%^()\\-+=~`{}|]+");
 		this.sentences = new ArrayList<String>();
 		for(String sentence : sentences){
 			if((sentence=sentence.trim()).length()!=0){
@@ -112,7 +128,7 @@ public class Tweet {
 	}
 	
 	public static void main(String[] args){
-		String s = "alaskaNan";
+		String s = "WhatEverthatIS";
 		System.out.println(analyzeHashTags(s));
 //		String text = "Are you a do-good geek? @EFF is hiring a \"Technology Generalist\": http://bit.ly/jeb8x7";
 //		Tweet t = new Tweet(text);

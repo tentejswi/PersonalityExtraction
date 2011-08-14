@@ -1,11 +1,14 @@
 package com.personalityextractor.entity.extractor;
 
+import java.io.BufferedReader;
 import java.io.File;
+import java.io.FileReader;
 import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.List;
 
 import com.personalityextractor.commons.data.NounPhrase;
+import com.personalityextractor.commons.data.Tweet;
 
 public class SennaNounPhraseExtractor implements IEntityExtractor{
 	private static File sennaInstallDir;
@@ -144,21 +147,51 @@ public class SennaNounPhraseExtractor implements IEntityExtractor{
 		
 		List<NounPhrase> nps = getNounPhrasesWithType(sennaOutput);
 		for(NounPhrase np : nps){
-			if(np.getType().equalsIgnoreCase("pn")){
-				entities.add(np.getText());
-			} else if (np.getType().equalsIgnoreCase("cn")){
-				for(String token : np.getText().split("\\s+")){
-					entities.add(token);
-				}
-			}
+			entities.add(np.getText());
+//			if(np.getType().equalsIgnoreCase("pn")){
+//				entities.add(np.getText());
+//			} else if (np.getType().equalsIgnoreCase("cn")){
+//				for(String token : np.getText().split("\\s+")){
+//					entities.add(token);
+//				}
+//			}
 		}
 		return entities;
 	}
 	
+	
+	public List<String> readLinesinFile(String file){
+		List<String> lines = new ArrayList<String>();
+		try{
+			BufferedReader br = new BufferedReader(new FileReader(file));
+			String line ="";
+			while((line=br.readLine())!=null){
+				lines.add(line);
+			}
+			
+		}catch(Exception e){
+			e.printStackTrace();
+		}
+		return lines;
+	}
+	
+	
 	public static void main(String[] args){
 		SennaNounPhraseExtractor sn = new SennaNounPhraseExtractor();
-		String line = "google goggle went to see London Parade";
-		System.out.println(sn.extract(line));
+		String line1 = "New Video: “The Sims Social” Producers Show Off Upcoming Facebook Game - http://on.mash.to/orMXcI";
+		List<String> lines = new ArrayList<String>();
+		//List<String> lines = sn.readLinesinFile(args[0]);
+		lines.add(line1);
+		for(String line : lines){
+			System.out.println(sn.extract(line));
+			
+			System.out.println("Tweet: "+ line);
+			Tweet t = new Tweet(line);
+			for(String sent: t.getSentences()) {
+				System.out.println("Sentence: "+sent);
+				System.out.println(sn.extract(sent));
+			}
+		}
 	}
 
 }

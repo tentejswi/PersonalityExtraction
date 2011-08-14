@@ -28,6 +28,7 @@ import com.personalityextractor.entity.resolver.ViterbiResolver;
 import com.personalityextractor.evaluation.PerfMetrics;
 import com.personalityextractor.evaluation.PerfMetrics.Metric;
 import com.personalityextractor.store.MysqlStore;
+import com.personalityextractor.url.data.URLContent;
 
 /**
  * Main Class
@@ -89,7 +90,7 @@ public class Runner {
 
 		Twitter t = new Twitter();
 		IEntityExtractor extractor = EntityExtractFactory
-				.produceExtractor(Extracter.NOUNPHRASE);
+				.produceExtractor(Extracter.SENNANOUNPHRASE) ;
 		ViterbiResolver resolver = new ViterbiResolver();
 		HashMap<String, WikipediaEntity> allEntities = new HashMap<String, WikipediaEntity>();
 
@@ -103,13 +104,14 @@ public class Runner {
 			// tweets.add("iPhone");
 			try {
 				BufferedReader rdr = new BufferedReader(new FileReader(
-						new File("/Users/semanticvoid/Downloads/less.txt_100")));
+						new File("/Users/tejaswi/Documents/workspace/PersonalityExtraction/data/sample1.txt")));
 				String line = null;
 				while ((line = rdr.readLine()) != null) {
 					tweets.add(line);
 				}
 			} catch (Exception e) {
 				// TODO: handle exception
+				e.printStackTrace();
 			}
 
 			int count = 0;
@@ -120,9 +122,9 @@ public class Runner {
 				for (String s : tweet.getSentences()) {
 					List<String> entities = extractor.extract(s);
 
-//					 for(String e : entities) {
-//						 System.out.println(e);
-//					 }
+					// for(String e : entities) {
+					// System.out.println(e);
+					// }
 					List<WikipediaEntity> resolvedEntities = resolver
 							.resolve(entities);
 
@@ -134,6 +136,26 @@ public class Runner {
 						(allEntities.get(e.getText())).incrCount();
 					}
 				}
+
+				for (String urlStr : tweet.getLinks()) {
+					String urlContent = URLContent.fetchURLContent(urlStr);
+					String title = URLContent.fetchTitleString(urlContent);
+					Tweet titleFormatted = new Tweet(title);
+					for (String s : titleFormatted.getSentences()) {
+					
+						List<String> entities = extractor.extract(s);
+						List<WikipediaEntity> resolvedEntities = resolver
+								.resolve(entities);
+						for (WikipediaEntity e : resolvedEntities) {
+							if (!allEntities.containsKey(e.getText())) {
+								allEntities.put(e.getText(), e);
+							}
+
+							(allEntities.get(e.getText())).incrCount();
+						}
+
+					}
+				}
 				// break;
 			}
 
@@ -143,10 +165,11 @@ public class Runner {
 			g.build(2);
 			g.printWeights();
 			Date end = new Date();
-			PerfMetrics.getInstance().addToMetrics(Metric.TOTAL, (end.getTime() - start.getTime()));
-			
+			PerfMetrics.getInstance().addToMetrics(Metric.TOTAL,
+					(end.getTime() - start.getTime()));
+
 			printMetrics();
-			
+
 			IRanker ranker = new WeightGraphRanker(g);
 			List<Node> topNodes = ranker.getTopRankedNodes(2);
 			setUserInterests(handle, nodesToJson(topNodes));
@@ -154,13 +177,13 @@ public class Runner {
 			// updateUser(handle);
 		}
 	}
-	
+
 	public static void printMetrics() {
 		PerfMetrics metrics = PerfMetrics.getInstance();
 		System.err.println("**********************************************");
 		System.err.println("             Performance Metrics              ");
 		System.err.println("**********************************************");
-		for(Metric m : metrics.getMetrics()) {
+		for (Metric m : metrics.getMetrics()) {
 			System.err.println(m.toString() + "\t" + metrics.getMetric(m));
 		}
 		System.err.println("**********************************************");
@@ -178,6 +201,7 @@ public class Runner {
 		}
 
 		while (true) {
+			System.out.println("running");
 			run();
 			break;
 		}

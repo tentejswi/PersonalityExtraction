@@ -7,7 +7,7 @@ import java.net.URLConnection;
 
 public class URLContent {
 	
-	public String fetchURLContent(String urlStr){
+	public static String fetchURLContent(String urlStr){
 		StringBuffer buf = new StringBuffer();
 		try {
 			URL url = new URL(urlStr);
@@ -27,11 +27,12 @@ public class URLContent {
 		return buf.toString();
 	}
 	
-	public void fetchTitleString(String urlStr){
-		String urlContent = fetchURLContent(urlStr);
+	public static String fetchTitleString(String urlContent){
+		if(!urlContent.contains("<title>"))
+			return null;
 		int startIndex= urlContent.indexOf("<title>");
 		int endIndex= urlContent.indexOf("</title>");
-		System.out.println(urlContent.substring(startIndex+7, endIndex));
+		return urlContent.substring(startIndex+7, endIndex);
 		
 	}
 	
