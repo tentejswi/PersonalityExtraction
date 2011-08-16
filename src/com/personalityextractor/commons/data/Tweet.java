@@ -88,12 +88,20 @@ public class Tweet {
 				continue;
 			}
 			
+			if(token.contains("http://") || token.contains(".com")){
+//				if(this.links==null)
+//					this.links= new ArrayList<String>();
+//				links.add(token);
+				continue;
+			}
+			
 			if(token.startsWith("#")){
 				if(this.hashTags==null)
 					this.hashTags= new ArrayList<String>();
 				String analyzedHashTag = analyzeHashTags(token.replace("#",""));
 				this.hashTags.add(analyzedHashTag);
 				token=analyzedHashTag;
+				continue;
 			}
 			
 			plainText.append(token+" ");
@@ -104,8 +112,8 @@ public class Tweet {
 		this.sentences = new ArrayList<String>();
 		for(String sentence : sentences){
 			if((sentence=sentence.trim()).length()!=0){
-				if(isNewsArticle(sentence))
-					sentence= sentence.toLowerCase();
+//				if(isNewsArticle(sentence))
+//					sentence= sentence.toLowerCase();
 				this.sentences.add(sentence);
 			}
 		}
