@@ -10,11 +10,18 @@ public class Tweet {
 	private List<String> sentences =null;
 	private List<String> links =null;
 	private List<String> hashTags =null;
+	private List<String> analyzedhashTags =null;
+
 	private boolean isReply=false;
 	
 	public Tweet(String text){
 		this.text = text;
+		this.hashTags = new ArrayList<String>();
+		this.links = new ArrayList<String>();
+		this.sentences = new ArrayList<String>();
+		this.analyzedhashTags = new ArrayList<String>();
 		tokenize();
+		
 	}
 	
 	private boolean isNewsArticle(String text){
@@ -82,8 +89,6 @@ public class Tweet {
 			}
 			
 			if(token.startsWith("http://") || token.endsWith(".com")){
-				if(this.links==null)
-					this.links= new ArrayList<String>();
 				links.add(token);
 				continue;
 			}
@@ -96,10 +101,9 @@ public class Tweet {
 			}
 			
 			if(token.startsWith("#")){
-				if(this.hashTags==null)
-					this.hashTags= new ArrayList<String>();
+				this.hashTags.add(token);
 				String analyzedHashTag = analyzeHashTags(token.replace("#",""));
-				this.hashTags.add(analyzedHashTag);
+				this.analyzedhashTags.add(analyzedHashTag);
 				token=analyzedHashTag;
 				continue;
 			}
@@ -128,9 +132,11 @@ public class Tweet {
 	}
 	
 	public List<String> getHashTagsEntities(){
+		return this.analyzedhashTags;
+	}
+	public List<String> getHashTags(){
 		return this.hashTags;
 	}
-	
 	public boolean isReply(){
 		return this.isReply;
 	}
