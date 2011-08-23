@@ -73,8 +73,7 @@ public class Tweet {
 		return sb.toString().trim();
 	}
 	
-	private void tokenize(){
-		
+	private void tokenize(){	
 		if(this.text.startsWith("@")){
 			this.isReply= true;
 		}
@@ -101,6 +100,7 @@ public class Tweet {
 			}
 			
 			if(token.startsWith("#")){
+				token=token.toLowerCase();
 				this.hashTags.add(token);
 				String analyzedHashTag = analyzeHashTags(token.replace("#",""));
 				this.analyzedhashTags.add(analyzedHashTag);
@@ -113,6 +113,7 @@ public class Tweet {
 		
 		String pText = plainText.toString().replaceAll("'s", "");
 		String[] sentences = pText.trim().split("[:;\"?/><,\\.!@%^()\\-+=~`{}|]+");
+		
 		this.sentences = new ArrayList<String>();
 		for(String sentence : sentences){
 			if((sentence=sentence.trim()).length()!=0){
@@ -134,6 +135,7 @@ public class Tweet {
 	public List<String> getHashTagsEntities(){
 		return this.analyzedhashTags;
 	}
+	
 	public List<String> getHashTags(){
 		return this.hashTags;
 	}
