@@ -19,6 +19,8 @@ import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 import org.xml.sax.InputSource;
 
+import com.personalityextractor.entity.WikipediaEntity;
+
 import tathya.db.YahooBOSS;
 import cs224n.util.PriorityQueue;
 
@@ -266,6 +268,63 @@ public class Wikiminer {
 		}
 		return rankedCategories;
 	}
+	
+    public static ArrayList<WikipediaEntity> getWikipediaEntities(String xml, boolean getId){
+        ArrayList<WikipediaEntity> senses = new ArrayList<WikipediaEntity>();
+        DocumentBuilder db = null;
+        DocumentBuilderFactory dbf = DocumentBuilderFactory.newInstance();
+        try {
+            db = dbf.newDocumentBuilder();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+
+        InputSource is = new InputSource();
+        is.setCharacterStream(new StringReader(xml));
+        // System.out.println(xml);
+        try{
+        Document dom = db.parse(is);
+        NodeList senseNodes = dom.getElementsByTagName("Sense");
+        if (senseNodes != null && senseNodes.getLength() != 0) {
+            for (int i = 0; i < senseNodes.getLength(); i++) {
+                Node topSense = senseNodes.item(i);
+                if (topSense != null) {
+                    NamedNodeMap attrs = topSense.getAttributes();
+                    Node commonness = attrs.getNamedItem("commonness");
+
+                    if(commonness==null && xml.contains("Disambiguation") && xml.contains("This is a disambiguation page")){
+                    	double commonnessScore = (1.0/senseNodes.getLength()); 
+                        String[] senseArray = {attrs.getNamedItem("title").getTextContent(), attrs.getNamedItem("id").getTextContent(), String.valueOf(commonnessScore)};
+                        WikipediaEntity we = new WikipediaEntity(senseArray[0],senseArray[1],0, senseArray[2]);
+                        senses.add(we);
+                        continue;
+                    }
+                    double relevance = Double.parseDouble(commonness.getTextContent());
+                    if (relevance >= 0.01) {
+                        String[] senseArray = {attrs.getNamedItem("title").getTextContent(), attrs.getNamedItem("id").getTextContent(), String.valueOf(relevance)};
+                        WikipediaEntity we = new WikipediaEntity(senseArray[0],senseArray[1],0, senseArray[2]);
+                        senses.add(we);
+                    }
+                }
+            }
+        } else {
+            NodeList articleNodes = dom.getElementsByTagName("Article");
+            if (articleNodes != null && articleNodes.item(0) != null) {
+                Node article = articleNodes.item(0);
+                NamedNodeMap attrs = article.getAttributes();
+                String[] senseArray = {attrs.getNamedItem("title").getTextContent(), attrs.getNamedItem("id").getTextContent(), "1.0"};
+                WikipediaEntity we = new WikipediaEntity(senseArray[0],senseArray[1],0, senseArray[2]);
+                senses.add(we);
+            }
+        }
+        }catch(Exception e){
+            e.printStackTrace();
+        }
+        
+        return senses;
+
+    }
+
 
     public static ArrayList<String[]> getWikipediaSenses(String xml, boolean getId){
         ArrayList<String[]> senses = new ArrayList<String[]>();
@@ -331,6 +390,142 @@ public class Wikiminer {
 		}
 		return query;
 	}
+	
+	/*
+	 * Takes two words and gets the best Wikipedia Entities based on Compare score.
+	 */
+	
+	public static HashMap<String, WikipediaEntity> getRelativeBestSenses(String word1, String word2){
+		if(word1.startsWith("#"))
+			word1=word1.replace("#", "");
+		
+		if(word2.startsWith("#"))
+			word2=word2.replace("#", "");
+		
+		HashMap<String, WikipediaEntity> wes = new HashMap<String, WikipediaEntity>();
+		word1=correctEncoding(word1);
+		word2= correctEncoding(word2);
+		
+		String urlStr = "http://wdm.cs.waikato.ac.nz:8080/service?task=compare&details=true&xml&term1="+word1+"&term2="+word2;
+		try{
+			URL url = new URL(urlStr);
+			URLConnection yc = url.openConnection();
+			BufferedReader in = new BufferedReader(new InputStreamReader(
+					yc.getInputStream()));
+			String inputLine;
+
+			StringBuffer buf = new StringBuffer();
+			while ((inputLine = in.readLine()) != null){
+				buf.append(inputLine);
+			}
+			in.close();
+			if (buf.toString().contains("unknownTerm")) {
+				return null;
+			}
+
+			DocumentBuilder db = null;
+			DocumentBuilderFactory dbf = DocumentBuilderFactory.newInstance();
+			try {
+				db = dbf.newDocumentBuilder();
+			} catch (Exception e) {
+				e.printStackTrace();
+			}
+			
+			InputSource is = new InputSource();
+			is.setCharacterStream(new StringReader(buf.toString()));
+			Document dom = db.parse(is);
+			NodeList sense1 = dom.getElementsByTagName("Sense1");
+			Node relation1 = sense1.item(0);
+			if (relation1 != null) {
+                NamedNodeMap attrs = relation1.getAttributes();
+				String text = attrs.getNamedItem("title").getTextContent();
+				String id = attrs.getNamedItem("id").getTextContent();
+				wes.put(word1, new WikipediaEntity(text, id, 0, ""));
+			}
+			
+			NodeList sense2 = dom.getElementsByTagName("Sense2");
+			Node relation2 = sense2.item(0);
+			if (relation2 != null) {
+                NamedNodeMap attrs = relation2.getAttributes();
+				String text = attrs.getNamedItem("title").getTextContent();
+				String id = attrs.getNamedItem("id").getTextContent();
+				wes.put(word2, new WikipediaEntity(text, id, 0, ""));
+			}
+			
+		}catch(Exception e){
+			e.printStackTrace();
+		}
+		
+		return wes;
+	}
+	
+	
+	
+	public static double compareEntities(String word1, String word2){
+
+		word1=correctEncoding(word1);
+		word2= correctEncoding(word2);
+		
+		String urlStr = "http://wdm.cs.waikato.ac.nz:8080/service?task=compare&xml&term1="+word1+"&term2="+word2;
+		try {
+			// String urlStr =
+			// "http://wdm.cs.waikato.ac.nz:8080/service?task=compare&xml&term1="
+			// +correctEncoding(term1)+"&term2="+correctEncoding(term2);
+
+			// http://wdm.cs.waikato.ac.nz:8080/service?task=compare&term1=president&term2=obama&xml=true
+
+			// return from cache
+			if (cache.containsKey(urlStr)) {
+				return Double.parseDouble(cache.get(urlStr));
+			}
+
+			URL url = new URL(urlStr);
+			URLConnection yc = url.openConnection();
+			BufferedReader in = new BufferedReader(new InputStreamReader(yc.getInputStream()));
+			String inputLine;
+
+			StringBuffer buf = new StringBuffer();
+			while ((inputLine = in.readLine()) != null)
+				buf.append(inputLine);
+			in.close();
+			System.out.println(buf.toString());
+			if (buf.toString().contains("unknownTerm")) {
+				cache.put(urlStr, "0");
+				return 0.0;
+			}
+			// System.out.println(buf.toString());
+			DocumentBuilder db = null;
+			DocumentBuilderFactory dbf = DocumentBuilderFactory.newInstance();
+			try {
+				db = dbf.newDocumentBuilder();
+			} catch (Exception e) {
+				e.printStackTrace();
+			}
+			// System.out.println();
+
+			InputSource is = new InputSource();
+			is.setCharacterStream(new StringReader(buf.toString()));
+			Document dom = db.parse(is);
+			NodeList relatednessNodes = dom
+					.getElementsByTagName("RelatednessResponse");
+			Node relation = relatednessNodes.item(0);
+			if (relation != null) {
+                NamedNodeMap attrs = relation.getAttributes();
+				String str = attrs.getNamedItem("relatedness").getTextContent();
+				cache.put(urlStr, str);
+				return Double.parseDouble(str);
+			}
+
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+		
+		cache.put(urlStr, "0");
+		return 0.0;
+
+		
+		
+	}
 
 	public static double compare(String id1, String id2) {
 		String urlStr = "http://wdm.cs.waikato.ac.nz:8080/service?task=compare&xml&ids1="
@@ -394,6 +589,8 @@ public class Wikiminer {
 	}
 
 	public static String getXML(String query, boolean isId) {
+		if(query.startsWith("#"))
+			query = query.replace("#", "");
 		if (query.equalsIgnoreCase("wikipedia entry"))
 			return null;
 		StringBuffer correctEncoding = new StringBuffer();
@@ -447,10 +644,23 @@ public class Wikiminer {
 
 	public static void main(String args[]) {
 		Wikiminer wm = new Wikiminer();
+		
+		System.out.println(wm.getXML("hp touchpad", false));
+		HashMap<String, WikipediaEntity> rb = getRelativeBestSenses("icc", "bcci");
+		for(String r : rb.keySet()){
+			System.out.println(r);
+			System.out.println(rb.get(r).getText());
+		}
+		
 		// System.out.println(getXML("Model%20(person)", false));
-		// System.out.println(compare("president", "Abdul Kalam"));
-		System.out.println(compare("24113", "534366"));
-		System.out.println(compare("24113", "328670"));
+		 System.out.println(compareEntities("president", "Abdul Kalam"));
+		String xml = wm.getXML("memory", false);
+		ArrayList<String[]> senses = getWikipediaSenses(xml, false);
+		for(String[] sense : senses){
+			System.out.println(sense[0]+" "+sense[1]);
+		}
+		//System.out.println(compare("24113", "534366"));
+		//System.out.println(compare("24113", "328670"));
 	}
 
 }
