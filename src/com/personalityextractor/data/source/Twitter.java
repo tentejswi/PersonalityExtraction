@@ -74,4 +74,12 @@ public class Twitter {
 		
 		return null;
 	}
+	
+	public static void main(String args[]){
+		Twitter t = new Twitter();
+		List<String> tweets = t.fetchTweets("semanticvoid", 1000);
+		for(String tw : tweets){
+			System.out.println(tw);
+		}
+	}
 }
