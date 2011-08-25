@@ -39,7 +39,7 @@ public class SennaNounPhraseExtractor implements IEntityExtractor{
 	}
 
 
-	public ArrayList<String> getNounPhrases(String sennaOutput) {
+	public ArrayList<String> getProperNounPhrases(String sennaOutput) {
 		ArrayList<String> nounPhrases = new ArrayList<String>();
 		String[] lineArr = sennaOutput.split("\n");
 
@@ -59,7 +59,7 @@ public class SennaNounPhraseExtractor implements IEntityExtractor{
 			boolean flag = false;
 			StringBuffer npBuf= new StringBuffer();			
 			for(int i=0; i < posTags.size(); i++){
-				if(posTags.get(i).startsWith("NN")){
+				if(posTags.get(i).startsWith("NNP")){
 					flag = true;
 					npBuf.append(words.get(i)+" ");
 				} else if(flag == true){
@@ -77,6 +77,44 @@ public class SennaNounPhraseExtractor implements IEntityExtractor{
 		return nounPhrases;
 	}
 	
+	public ArrayList<String> getCommonNounPhrases(String sennaOutput) {
+		ArrayList<String> nounPhrases = new ArrayList<String>();
+		String[] lineArr = sennaOutput.split("\n");
+
+		ArrayList<String> words = new ArrayList<String>();
+		ArrayList<String> posTags = new ArrayList<String>();
+		ArrayList<String> chunkerTokens = new ArrayList<String>();
+		try {
+			for (String line : lineArr) {
+				String[] tokens = line.trim().split("[ \t]+");
+				if (tokens.length < 3)
+					continue;
+				words.add(tokens[0].trim());
+				posTags.add(tokens[1].trim());
+				chunkerTokens.add(tokens[2].trim());
+			}
+			
+			boolean flag = false;
+			StringBuffer npBuf= new StringBuffer();			
+			for(int i=0; i < posTags.size(); i++){
+				if(posTags.get(i).startsWith("NN") && !posTags.get(i).startsWith("NNP")) {
+					flag = true;
+					npBuf.append(words.get(i)+" ");
+				} else if(flag == true){
+					flag = false;
+					nounPhrases.add(npBuf.toString().trim().toLowerCase());
+					npBuf = new StringBuffer();
+				}
+			}
+			if(flag==true)
+				nounPhrases.add(npBuf.toString().trim().toLowerCase());
+			
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+		return nounPhrases;
+		
+	}
 	public ArrayList<NounPhrase> getNounPhrasesWithType(String sennaOutput){
 		ArrayList<NounPhrase> nounPhrases = new ArrayList<NounPhrase>();
 		String[] lineArr = sennaOutput.split("\n");
@@ -145,9 +183,9 @@ public class SennaNounPhraseExtractor implements IEntityExtractor{
 		String sennaOutput = getSennaOutput(line);
 		//System.out.println(sennaOutput);
 		
-		List<NounPhrase> nps = getNounPhrasesWithType(sennaOutput);
-		for(NounPhrase np : nps){
-			entities.add(np.getText());
+		List<String> nps = getProperNounPhrases(sennaOutput);
+		for(String np : nps){
+			entities.add(np);
 //			if(np.getType().equalsIgnoreCase("pn")){
 //				entities.add(np.getText());
 //			} else if (np.getType().equalsIgnoreCase("cn")){
@@ -178,18 +216,17 @@ public class SennaNounPhraseExtractor implements IEntityExtractor{
 	
 	public static void main(String[] args){
 		SennaNounPhraseExtractor sn = new SennaNounPhraseExtractor();
-		String line1 = "New Video: “The Sims Social” Producers Show Off Upcoming Facebook Game - http://on.mash.to/orMXcI";
+		String line1 = "I am near the Berghoff at Restaurant";
 		List<String> lines = new ArrayList<String>();
 		//List<String> lines = sn.readLinesinFile(args[0]);
 		lines.add(line1);
 		for(String line : lines){
-			System.out.println(sn.extract(line));
-			
 			System.out.println("Tweet: "+ line);
 			Tweet t = new Tweet(line);
 			for(String sent: t.getSentences()) {
 				System.out.println("Sentence: "+sent);
-				System.out.println(sn.extract(sent));
+				String sennaout = getSennaOutput(sent);
+				System.out.println(sn.getCommonNounPhrases(sennaout));
 			}
 		}
 	}
