@@ -27,6 +27,7 @@ import cs224n.util.PriorityQueue;
 public class Wikiminer {
 
 	static HashMap<String, String> cache = new HashMap<String, String>();
+	static HashMap<String, HashMap<String, WikipediaEntity>> cacheRelativeBestSenses = new HashMap<String, HashMap<String, WikipediaEntity>>();
 
 	// caution ahead: mix up the order of the args at your own peril
 	public static double calculateJaccard(List<String> links,
@@ -407,18 +408,27 @@ public class Wikiminer {
 		word2= correctEncoding(word2);
 		
 		String urlStr = "http://wdm.cs.waikato.ac.nz:8080/service?task=compare&details=true&xml&term1="+word1+"&term2="+word2;
-		try{
-			URL url = new URL(urlStr);
-			URLConnection yc = url.openConnection();
-			BufferedReader in = new BufferedReader(new InputStreamReader(
-					yc.getInputStream()));
-			String inputLine;
 
+		try{
 			StringBuffer buf = new StringBuffer();
-			while ((inputLine = in.readLine()) != null){
-				buf.append(inputLine);
+			if(cacheRelativeBestSenses.containsKey(urlStr)){
+				System.out.println("cached");
+				return cacheRelativeBestSenses.get(urlStr);
 			}
-			in.close();
+			
+			else {
+				System.out.println("not cached");
+				URL url = new URL(urlStr);
+				URLConnection yc = url.openConnection();
+				BufferedReader in = new BufferedReader(new InputStreamReader(yc
+						.getInputStream()));
+				String inputLine;
+
+				while ((inputLine = in.readLine()) != null) {
+					buf.append(inputLine);
+				}
+				in.close();
+			}
 			if (buf.toString().contains("unknownTerm")) {
 				return null;
 			}
@@ -455,7 +465,7 @@ public class Wikiminer {
 		}catch(Exception e){
 			e.printStackTrace();
 		}
-		
+		cacheRelativeBestSenses.put(urlStr, wes);
 		return wes;
 	}
 	
@@ -643,24 +653,14 @@ public class Wikiminer {
 	}
 
 	public static void main(String args[]) {
-		Wikiminer wm = new Wikiminer();
-		
-		System.out.println(wm.getXML("hp touchpad", false));
-		HashMap<String, WikipediaEntity> rb = getRelativeBestSenses("icc", "bcci");
-		for(String r : rb.keySet()){
-			System.out.println(r);
-			System.out.println(rb.get(r).getText());
+		HashMap<String, WikipediaEntity> rs = getRelativeBestSenses("child", "mother");
+		for(String s : rs.keySet()){
+			System.out.println(s+" : "+rs.get(s).getText());
 		}
-		
-		// System.out.println(getXML("Model%20(person)", false));
-		 System.out.println(compareEntities("president", "Abdul Kalam"));
-		String xml = wm.getXML("memory", false);
-		ArrayList<String[]> senses = getWikipediaSenses(xml, false);
-		for(String[] sense : senses){
-			System.out.println(sense[0]+" "+sense[1]);
+		rs = getRelativeBestSenses("child", "mother");
+		for(String s : rs.keySet()){
+			System.out.println(s+" : "+rs.get(s).getText());
 		}
-		//System.out.println(compare("24113", "534366"));
-		//System.out.println(compare("24113", "328670"));
 	}
 
 }
