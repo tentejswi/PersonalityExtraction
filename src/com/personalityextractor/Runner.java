@@ -41,7 +41,7 @@ public class Runner {
 
 	public static String popUserFromQueue() {
 		ResultSet rs = store
-				.execute("SELECT handle FROM user_queue WHERE done = 0 LIMIT 1");
+				.execute("SELECT handle FROM user_queue WHERE done = 0 AND type = 't' LIMIT 1");
 
 		try {
 			if (rs.first()) {
