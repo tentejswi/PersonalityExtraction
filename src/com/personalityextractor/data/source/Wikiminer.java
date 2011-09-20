@@ -270,6 +270,7 @@ public class Wikiminer {
 		return rankedCategories;
 	}
 	
+	
     public static ArrayList<WikipediaEntity> getWikipediaEntities(String xml, boolean getId){
         ArrayList<WikipediaEntity> senses = new ArrayList<WikipediaEntity>();
         DocumentBuilder db = null;
@@ -291,7 +292,7 @@ public class Wikiminer {
                 Node topSense = senseNodes.item(i);
                 if (topSense != null) {
                     NamedNodeMap attrs = topSense.getAttributes();
-                    Node commonness = attrs.getNamedItem("commonness");
+                    Node commonness = attrs.getNamedItem("priorProbability");
 
                     if(commonness==null && xml.contains("Disambiguation") && xml.contains("This is a disambiguation page")){
                     	double commonnessScore = (1.0/senseNodes.getLength()); 
@@ -636,7 +637,7 @@ public class Wikiminer {
 
 		try {
 			//String urlStr = "http://wdm.cs.waikato.ac.nz:8080/service?task=search&xml";
-			String urlStr = "http://50.19.209.97:8080/wikipediaminer/services/search?";
+			String urlStr = "http://50.19.209.97:8080/wikipediaminer/services/search?complex";
 
 			if (isId) {
 				//urlStr += "&id=" + query;
@@ -678,15 +679,14 @@ public class Wikiminer {
 
 	public static void main(String args[]) {
 		
-		System.out.println(getXML("camera", false));
-		HashMap<String, WikipediaEntity> rs = getRelativeBestSenses("child", "mother");
-		for(String s : rs.keySet()){
-			System.out.println(s+" : "+rs.get(s).getText());
+		String xml = (getXML("Camera", false));
+		System.out.println(xml);
+		ArrayList<WikipediaEntity> ents = getWikipediaEntities(xml, false);
+		for(WikipediaEntity we : ents){
+			System.out.println(we.getText());
+			System.out.println(we.getCommonness());
 		}
-		rs = getRelativeBestSenses("child", "mother");
-		for(String s : rs.keySet()){
-			System.out.println(s+" : "+rs.get(s).getText());
-		}
+
 	}
 
 }
