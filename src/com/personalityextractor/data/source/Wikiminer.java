@@ -394,8 +394,7 @@ public class Wikiminer {
 	
 	/*
 	 * Takes two words and gets the best Wikipedia Entities based on Compare score.
-	 */
-	
+	 */	
 	public static HashMap<String, WikipediaEntity> getRelativeBestSenses(String word1, String word2){
 		if(word1.startsWith("#"))
 			word1=word1.replace("#", "");
@@ -412,12 +411,12 @@ public class Wikiminer {
 		try{
 			StringBuffer buf = new StringBuffer();
 			if(cacheRelativeBestSenses.containsKey(urlStr)){
-				System.out.println("cached");
+				//System.out.println("cached");
 				return cacheRelativeBestSenses.get(urlStr);
 			}
 			
 			else {
-				System.out.println("not cached");
+				//System.out.println("not cached");
 				URL url = new URL(urlStr);
 				URLConnection yc = url.openConnection();
 				BufferedReader in = new BufferedReader(new InputStreamReader(yc
@@ -469,6 +468,27 @@ public class Wikiminer {
 		return wes;
 	}
 	
+	public static HashMap<String, WikipediaEntity> getRelativeBestSensesByID(String word1, String word2){
+		if(word1.startsWith("#"))
+			word1=word1.replace("#", "");
+		
+		if(word2.startsWith("#"))
+			word2=word2.replace("#", "");
+		
+		HashMap<String, WikipediaEntity> wes = new HashMap<String, WikipediaEntity>();
+		word1=correctEncoding(word1);
+		word2= correctEncoding(word2);
+		
+		String urlStr = "http://wdm.cs.waikato.ac.nz:8080/service?task=compare&details=true&xml&term1="+word1+"&term2="+word2;
+
+		try{
+			
+			
+		}catch(Exception e){
+			e.printStackTrace();
+		}
+		return wes;
+	}
 	
 	
 	public static double compareEntities(String word1, String word2){
@@ -615,11 +635,14 @@ public class Wikiminer {
 		}
 
 		try {
-			String urlStr = "http://wdm.cs.waikato.ac.nz:8080/service?task=search&xml";
+			//String urlStr = "http://wdm.cs.waikato.ac.nz:8080/service?task=search&xml";
+			String urlStr = "http://50.19.209.97:8080/wikipediaminer/services/search?";
+
 			if (isId) {
-				urlStr += "&id=" + query;
+				//urlStr += "&id=" + query;
+				return null;
 			} else {
-				urlStr += "&term=" + query;
+				urlStr += "&query=" + query;
 			}
 
 			// return from cache
@@ -637,10 +660,6 @@ public class Wikiminer {
 			while ((inputLine = in.readLine()) != null)
 				buf.append(inputLine);
 			in.close();
-
-			if (buf.toString().contains("unknownTerm")) {
-				return null;
-			}
 
 			String xml = buf.toString();
 			cache.put(urlStr, xml);
