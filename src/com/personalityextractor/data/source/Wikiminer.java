@@ -662,6 +662,11 @@ public class Wikiminer {
 			in.close();
 
 			String xml = buf.toString();
+			
+			if(!xml.contains("Sense")){
+				return null;
+			}
+			
 			cache.put(urlStr, xml);
 			return xml;
 		} catch (Exception e) {
@@ -672,6 +677,8 @@ public class Wikiminer {
 	}
 
 	public static void main(String args[]) {
+		
+		System.out.println(getXML("camera", false));
 		HashMap<String, WikipediaEntity> rs = getRelativeBestSenses("child", "mother");
 		for(String s : rs.keySet()){
 			System.out.println(s+" : "+rs.get(s).getText());
