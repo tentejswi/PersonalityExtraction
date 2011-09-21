@@ -22,6 +22,7 @@ import org.xml.sax.InputSource;
 import com.personalityextractor.entity.WikipediaEntity;
 
 import tathya.db.YahooBOSS;
+import cs224n.util.CounterMap;
 import cs224n.util.PriorityQueue;
 
 public class Wikiminer {
@@ -407,6 +408,8 @@ public class Wikiminer {
 		word1=correctEncoding(word1);
 		word2= correctEncoding(word2);
 		
+		CounterMap<String, String> idCompareScores = new CounterMap<String, String>();
+		
 		String urlStr = "http://wdm.cs.waikato.ac.nz:8080/service?task=compare&details=true&xml&term1="+word1+"&term2="+word2;
 
 		try{
@@ -468,111 +471,13 @@ public class Wikiminer {
 		cacheRelativeBestSenses.put(urlStr, wes);
 		return wes;
 	}
-	
-	public static HashMap<String, WikipediaEntity> getRelativeBestSensesByID(String word1, String word2){
-		if(word1.startsWith("#"))
-			word1=word1.replace("#", "");
 		
-		if(word2.startsWith("#"))
-			word2=word2.replace("#", "");
-		
-		
-		
-		
-		HashMap<String, WikipediaEntity> wes = new HashMap<String, WikipediaEntity>();
-		word1=correctEncoding(word1);
-		word2= correctEncoding(word2);
-		
-		String urlStr = "http://wdm.cs.waikato.ac.nz:8080/service?task=compare&details=true&xml&term1="+word1+"&term2="+word2;
 
-		try{
-			
-			
-		}catch(Exception e){
-			e.printStackTrace();
-		}
-		return wes;
-	}
-	
-	
-	public static double compareEntities(String word1, String word2){
-
-		word1=correctEncoding(word1);
-		word2= correctEncoding(word2);
-		
-		String urlStr = "http://wdm.cs.waikato.ac.nz:8080/service?task=compare&xml&term1="+word1+"&term2="+word2;
-		try {
-			// String urlStr =
-			// "http://wdm.cs.waikato.ac.nz:8080/service?task=compare&xml&term1="
-			// +correctEncoding(term1)+"&term2="+correctEncoding(term2);
-
-			// http://wdm.cs.waikato.ac.nz:8080/service?task=compare&term1=president&term2=obama&xml=true
-
-			// return from cache
-			if (cache.containsKey(urlStr)) {
-				return Double.parseDouble(cache.get(urlStr));
-			}
-
-			URL url = new URL(urlStr);
-			URLConnection yc = url.openConnection();
-			BufferedReader in = new BufferedReader(new InputStreamReader(yc.getInputStream()));
-			String inputLine;
-
-			StringBuffer buf = new StringBuffer();
-			while ((inputLine = in.readLine()) != null)
-				buf.append(inputLine);
-			in.close();
-			System.out.println(buf.toString());
-			if (buf.toString().contains("unknownTerm")) {
-				cache.put(urlStr, "0");
-				return 0.0;
-			}
-			// System.out.println(buf.toString());
-			DocumentBuilder db = null;
-			DocumentBuilderFactory dbf = DocumentBuilderFactory.newInstance();
-			try {
-				db = dbf.newDocumentBuilder();
-			} catch (Exception e) {
-				e.printStackTrace();
-			}
-			// System.out.println();
-
-			InputSource is = new InputSource();
-			is.setCharacterStream(new StringReader(buf.toString()));
-			Document dom = db.parse(is);
-			NodeList relatednessNodes = dom
-					.getElementsByTagName("RelatednessResponse");
-			Node relation = relatednessNodes.item(0);
-			if (relation != null) {
-                NamedNodeMap attrs = relation.getAttributes();
-				String str = attrs.getNamedItem("relatedness").getTextContent();
-				cache.put(urlStr, str);
-				return Double.parseDouble(str);
-			}
-
-		} catch (Exception e) {
-			e.printStackTrace();
-		}
-		
-		cache.put(urlStr, "0");
-		return 0.0;
-
-		
-		
-	}
-
-	public static double compare(String id1, String id2) {
-		String urlStr = "http://wdm.cs.waikato.ac.nz:8080/service?task=compare&xml&ids1="
-				+ id1 + ";" + id2;
+	public static double compareIds(String id1, String id2) {
+		String urlStr = "http://50.19.209.97:8080/wikipediaminer/services/compare?&ids1="
+				+ id1 + "&ids2=" + id2;
 
 		try {
-			// String urlStr =
-			// "http://wdm.cs.waikato.ac.nz:8080/service?task=compare&xml&term1="
-			// +correctEncoding(term1)+"&term2="+correctEncoding(term2);
-
-			// http://wdm.cs.waikato.ac.nz:8080/service?task=compare&term1=president&term2=obama&xml=true
-
-			// return from cache
 			if (cache.containsKey(urlStr)) {
 				return Double.parseDouble(cache.get(urlStr));
 			}
@@ -591,6 +496,7 @@ public class Wikiminer {
 				cache.put(urlStr, "0");
 				return 0.0;
 			}
+			
 			// System.out.println(buf.toString());
 			DocumentBuilder db = null;
 			DocumentBuilderFactory dbf = DocumentBuilderFactory.newInstance();
@@ -605,10 +511,11 @@ public class Wikiminer {
 			is.setCharacterStream(new StringReader(buf.toString()));
 			Document dom = db.parse(is);
 			NodeList relatednessNodes = dom
-					.getElementsByTagName("RelatednessResponse");
+					.getElementsByTagName("Measure");
 			Node relation = relatednessNodes.item(0);
 			if (relation != null) {
-				String str = relation.getTextContent().trim().split(",")[2];
+				String str = relation.getTextContent();
+				System.out.println(str);
 				cache.put(urlStr, str);
 				return Double.parseDouble(str);
 			}
@@ -619,7 +526,6 @@ public class Wikiminer {
 
 		cache.put(urlStr, "0");
 		return 0.0;
-
 	}
 
 	public static String getXML(String query, boolean isId) {
@@ -691,8 +597,10 @@ public class Wikiminer {
 	}
 
 	public static void main(String args[]) {
+		
+		System.out.println(compareIds("14533", "23235"));
+		
 		String query = "camera mama";
-		System.out.println(query);
 		String xml = (getXML(query, false));
 		System.out.println(xml);
 		ArrayList<WikipediaEntity> ents = getWikipediaEntities(xml, false);
