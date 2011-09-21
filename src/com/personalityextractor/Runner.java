@@ -19,6 +19,7 @@ import com.personalityextractor.data.source.Twitter;
 import com.personalityextractor.entity.WikipediaEntity;
 import com.personalityextractor.entity.extractor.EntityExtractFactory;
 import com.personalityextractor.entity.extractor.EntityExtractFactory.Extracter;
+import com.personalityextractor.entity.extractor.frequencybased.TopNNPHashTagsExtractor;
 import com.personalityextractor.entity.extractor.IEntityExtractor;
 import com.personalityextractor.entity.graph.Graph;
 import com.personalityextractor.entity.graph.Node;
@@ -29,6 +30,8 @@ import com.personalityextractor.evaluation.PerfMetrics;
 import com.personalityextractor.evaluation.PerfMetrics.Metric;
 import com.personalityextractor.store.MysqlStore;
 import com.personalityextractor.url.data.URLContent;
+
+import cs224n.util.Counter;
 
 /**
  * Main Class
@@ -89,76 +92,14 @@ public class Runner {
 		}
 
 		Twitter t = new Twitter();
-		IEntityExtractor extractor = EntityExtractFactory
-				.produceExtractor(Extracter.SENNANOUNPHRASE) ;
-		ViterbiResolver resolver = new ViterbiResolver();
 		HashMap<String, WikipediaEntity> allEntities = new HashMap<String, WikipediaEntity>();
-
 		if (handle != null) {
 			Date start = new Date();
 			System.out.print("processing " + handle + "...\t");
-			// List<String> tweets = t.fetchTweets(handle, 20);
-
-			List<String> tweets = new ArrayList<String>();
-			// tweets.clear();
-			// tweets.add("iPhone");
-			try {
-				BufferedReader rdr = new BufferedReader(new FileReader(
-						new File("/Users/tejaswi/Documents/workspace/PersonalityExtraction/data/sample1.txt")));
-				String line = null;
-				while ((line = rdr.readLine()) != null) {
-					tweets.add(line);
-				}
-			} catch (Exception e) {
-				// TODO: handle exception
-				e.printStackTrace();
-			}
-
-			int count = 0;
-			for (String text : tweets) {
-				// System.out.println(++count);
-				Tweet tweet = new Tweet(text);
-
-				for (String s : tweet.getSentences()) {
-					List<String> entities = extractor.extract(s);
-
-					// for(String e : entities) {
-					// System.out.println(e);
-					// }
-					List<WikipediaEntity> resolvedEntities = resolver
-							.resolve(entities);
-
-					for (WikipediaEntity e : resolvedEntities) {
-						if (!allEntities.containsKey(e.getText())) {
-							allEntities.put(e.getText(), e);
-						}
-
-						(allEntities.get(e.getText())).incrCount();
-					}
-				}
-
-				for (String urlStr : tweet.getLinks()) {
-					String urlContent = URLContent.fetchURLContent(urlStr);
-					String title = URLContent.fetchTitleString(urlContent);
-					Tweet titleFormatted = new Tweet(title);
-					for (String s : titleFormatted.getSentences()) {
-					
-						List<String> entities = extractor.extract(s);
-						List<WikipediaEntity> resolvedEntities = resolver
-								.resolve(entities);
-						for (WikipediaEntity e : resolvedEntities) {
-							if (!allEntities.containsKey(e.getText())) {
-								allEntities.put(e.getText(), e);
-							}
-
-							(allEntities.get(e.getText())).incrCount();
-						}
-
-					}
-				}
-				// break;
-			}
-
+			List<String> tweets = t.fetchTweets(handle, 200);
+			TopNNPHashTagsExtractor tne = new TopNNPHashTagsExtractor();
+			Counter<String> extracted_entities = tne.extract(tweets);
+			allEntities = tne.resolve(extracted_entities);
 			List<WikipediaEntity> entities = new ArrayList<WikipediaEntity>();
 			entities.addAll(allEntities.values());
 			Graph g = new Graph(entities);
