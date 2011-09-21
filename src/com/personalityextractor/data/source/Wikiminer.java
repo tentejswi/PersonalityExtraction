@@ -402,7 +402,7 @@ public class Wikiminer {
 		
 		if(word2.startsWith("#"))
 			word2=word2.replace("#", "");
-		
+
 		HashMap<String, WikipediaEntity> wes = new HashMap<String, WikipediaEntity>();
 		word1=correctEncoding(word1);
 		word2= correctEncoding(word2);
@@ -475,6 +475,9 @@ public class Wikiminer {
 		
 		if(word2.startsWith("#"))
 			word2=word2.replace("#", "");
+		
+		
+		
 		
 		HashMap<String, WikipediaEntity> wes = new HashMap<String, WikipediaEntity>();
 		word1=correctEncoding(word1);
@@ -624,8 +627,16 @@ public class Wikiminer {
 			query = query.replace("#", "");
 		if (query.equalsIgnoreCase("wikipedia entry"))
 			return null;
-		StringBuffer correctEncoding = new StringBuffer();
 		String[] sensesplit = query.split("\\s+");
+		
+		for (int i=0; i <sensesplit.length; i++) {
+			String s = sensesplit[i];
+			if(Character.isLowerCase(s.charAt(0))){
+				sensesplit[i] = (Character.toUpperCase(s.charAt(0))+s.substring(1));
+			}
+		}
+		
+		StringBuffer correctEncoding = new StringBuffer();
 		if (sensesplit.length > 1)
 			for (String s : sensesplit) {
 				correctEncoding.append(s + "%20");
@@ -645,6 +656,8 @@ public class Wikiminer {
 			} else {
 				urlStr += "&query=" + query;
 			}
+			
+			System.out.println(urlStr);
 
 			// return from cache
 			if (cache.containsKey(urlStr)) {
@@ -678,8 +691,9 @@ public class Wikiminer {
 	}
 
 	public static void main(String args[]) {
-		
-		String xml = (getXML("Camera", false));
+		String query = "camera mama";
+		System.out.println(query);
+		String xml = (getXML(query, false));
 		System.out.println(xml);
 		ArrayList<WikipediaEntity> ents = getWikipediaEntities(xml, false);
 		for(WikipediaEntity we : ents){
