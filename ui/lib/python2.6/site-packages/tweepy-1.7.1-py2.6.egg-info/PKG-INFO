@@ -1,0 +1,11 @@
+Metadata-Version: 1.0
+Name: tweepy
+Version: 1.7.1
+Summary: Twitter library for python
+Home-page: http://github.com/joshthecoder/tweepy
+Author: Joshua Roesslein
+Author-email: tweepy@googlegroups.com
+License: MIT
+Description: UNKNOWN
+Keywords: twitter library
+Platform: UNKNOWN

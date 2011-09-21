@@ -1,0 +1,24 @@
+{% extends "registration/registration_base.html" %}
+{% block title %}Activation email sent{% endblock %}
+{% block content %}
+<div id="inner_container">
+  <div class="" >
+    <p>
+      Thanks, for registering with us!  You may now <a href='{% url auth_login %}'>login</a> using the username and password you set at registration.
+    </p>
+    <br/>
+    <p>
+      In addition, an email has been sent to your email account for account notification purposes.
+    </p>
+    
+  </div>
+
+</div>
+{% endblock %}
+
+
+<!-- <div class="reg_outer_div"> -->
+<!--   <div class="reg_message_div"> -->
+<!--     An activation email has been sent.  Please check your email and click on the link to activate your account. -->
+<!--   </div> -->
+<!-- </div> -->

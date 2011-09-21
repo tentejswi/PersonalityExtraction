@@ -1,0 +1,85 @@
+      body {
+      background-color: #eee; 
+      padding: 10px 20px; font-family: sans-serif; color: #333;
+      text-align: center;
+
+      }
+      h1, h2, h3 {margin: 0; padding: 0;}
+      h1 {font-size: 1.8em; width: 95%;}
+      h2 {font-size: 1.3em; border-bottom: 1px solid #ddd; width: 85%;}
+      h3 {font-size: 1.2em;}
+      a, a:visited {color: #459FDA; text-decoration: none;}
+      a:hover {text-decoration: underline;}
+      a img {border: 0;}
+      input[type="text"][name="openid_identifier"] 
+      {
+      border: 1px solid #ccc; 
+      padding: 3px; 
+      width: 200px;
+      }
+      input[type="submit"] {padding: 2px 20px; margin-left: -5px;}
+      label {display: block;}
+      th {text-align: left; padding-right: 25px; font-weight: normal;}
+      th, td {padding: 5px 15px;}
+      tr.even {background-color: #ddd;}
+      #heading {margin-top: 2.3em;}
+      #content {padding: 0 20px;}
+      .helptext {font-size: 0.9em; color: #aaa; margin: 0; padding: 0;}
+      .description {font-size: 1.0em; color: #333;}
+      a.logout, span.disconnect a, .error {color: #c00;}
+      .error {padding-left: 30px;}
+      #forkme {position: absolute; top: 0; right: 0;}
+      #valid-badges {position: fixed; right: 10px; bottom: 10px;}
+      #valid-badges p {display: inline;}
+
+      #id_beta_ribbon {
+      float: left;
+      left: 0;
+      top: 0;
+      width: 10%;
+      }
+      #id_logo {
+      float: left;
+      width: 40%;
+      margin-left: 20px;
+      cursor: pointer;
+      }
+      #id_user_panel {
+      float: right;
+      margin-right: 30px;
+      font-size: 10pt;
+      }
+      #id_tagline {
+      float: left;
+      width: 100%;
+      }
+      #outer_container {
+      background-color: #ffffff;
+      border-radius: 10px;
+      -moz-border-radius: 10px;
+      -webkit-border-radius: 10px;
+      -moz-box-shadow: 0px 0px 20px #000000;
+      -webkit-box-shadow: 0px 0px 20px #000000;
+      box-shadow: 0px 0px 20px #000000;
+      width: 920px;
+      margin-left: 150px;
+      text-align: left;
+      float: left;
+      }
+      .left {
+      float: left;
+      }
+      #inner_container {
+      min-height: 400px;
+      margin-top: 100px;
+      margin-left: 50px;
+      }
+      .show-border {
+      border: solid blue 1px;
+      }
+      .form_field_errors
+      {
+      color: #ff0000;
+      font-size: 8pt;
+      font-family: arial;
+      }

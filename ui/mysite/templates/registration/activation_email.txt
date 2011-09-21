@@ -1,0 +1,8 @@
+You (or someone pretending to be you) have created an account at 
+{{ site.name }}.  If this was you, we have activated the account, go ahead an login.
+http://{{site.domain}}/accounts/login
+
+If this wasn't you, please report to us at contact@{{site.domain}} with this mail included and help us prevent spam, we hate it too!
+
+Sincerely,
+{{ site.name }} Management

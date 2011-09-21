@@ -1,0 +1,38 @@
+{% extends "base.html" %}
+
+{% block header %} 
+	<script type="text/javascript" src="http://mbostock.github.com/d3/d3.js"></script>
+	<script type="text/javascript" src="{{MEDIA_URL}}js/d3.layout.js"></script>
+	<link type="text/css" rel="stylesheet" href="{{MEDIA_URL}}css/treemap.css"/>
+	<link type="text/css" rel="stylesheet" href="{{MEDIA_URL}}css/button.css"/>
+	<link type="text/css" rel="stylesheet" href="{{MEDIA_URL}}css/extras.css"/>
+{% endblock %}
+
+{% block top_header %}
+<div id="title">
+	<label for="search"> search: </label>
+	<input type="text" id="search" onkeyup="update(this.value)">
+</div>
+{% endblock %}
+
+{% block content %}
+
+<div id="chart"></div>
+<script type="text/javascript">
+	var media_path = "{{MEDIA_URL}}";
+	var profilePic = 'http://michelleshaeffer.com/wp-content/uploads/2010/08/coffee_cup.jpg';
+	var username = "{{user.username}}";
+	var socialBackend;
+	{% for tweet in tweets %}
+		profilePic = "{{tweet.user.profile_image_url}}";
+		socialBackend = "t";
+	{% endfor %}
+	{% for feed in feeds %}
+		profilePic = "https://graph.facebook.com/{{feed.from.id}}/picture";
+		socialBackend = "f";
+	{% endfor %}
+</script>
+
+<script type="text/javascript" src="{{MEDIA_URL}}js/treemap_final.js">
+</script>
+{% endblock %}
