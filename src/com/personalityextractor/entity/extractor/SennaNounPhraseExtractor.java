@@ -14,12 +14,12 @@ public class SennaNounPhraseExtractor implements IEntityExtractor{
 	private static File sennaInstallDir;
 	
 	static {
-		sennaInstallDir = new File("/Users/tejaswi/Documents/StanfordCourses/SRL/senna-v2.0");	
+		sennaInstallDir = new File("/home/ubuntu/senna/senna/");	
 	}
 	
 	public static String getSennaOutput(String line) {
 		try {
-			String cmd = "echo " + line + " | " + sennaInstallDir + "/senna ";
+			String cmd = "echo " + line + " | " + sennaInstallDir + "/senna-linux64 ";
 			ProcessBuilder pb = new ProcessBuilder("bash", "-c", cmd);
 			pb.directory(sennaInstallDir);
 			Process shell = pb.start();
@@ -115,6 +115,7 @@ public class SennaNounPhraseExtractor implements IEntityExtractor{
 		return nounPhrases;
 		
 	}
+	
 	public ArrayList<NounPhrase> getNounPhrasesWithType(String sennaOutput){
 		ArrayList<NounPhrase> nounPhrases = new ArrayList<NounPhrase>();
 		String[] lineArr = sennaOutput.split("\n");
