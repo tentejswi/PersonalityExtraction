@@ -52,9 +52,7 @@ public class Graph {
 
 			for (String cid : prevCategories) {
 				Node cNode = nodes.get(cid);
-
-				List<WikipediaEntity> categories = LuceneStore.getInstance().getCategories(cid);
-
+				List<WikipediaEntity> categories = Wikiminer.getCategories(cid);
 				for (WikipediaEntity category : categories) {
 					Node n2 = null;
 

@@ -102,7 +102,9 @@ public class Wikiminer {
 						double relevance = Double.parseDouble(commonness
 								.getTextContent());
 						if (relevance >= 0.1) {
-							links.add(attrs.getNamedItem("id").getTextContent());
+							links
+									.add(attrs.getNamedItem("id")
+											.getTextContent());
 						}
 					}
 				}
@@ -118,7 +120,9 @@ public class Wikiminer {
 						double relevance = Double.parseDouble(commonness
 								.getTextContent());
 						if (relevance >= 0.1) {
-							links.add(attrs.getNamedItem("id").getTextContent());
+							links
+									.add(attrs.getNamedItem("id")
+											.getTextContent());
 						}
 					}
 				}
@@ -130,10 +134,48 @@ public class Wikiminer {
 		return links;
 	}
 
-	public static ArrayList<String[]> getCategories(String wikiminer_id) {
+	public static String getexploreArticleXML(String wikiminer_id) {
+		try {
+			// String urlStr =
+			// "http://wdm.cs.waikato.ac.nz:8080/service?task=search&xml";
+			String urlStr = "http://50.19.209.97:8080/wikipediaminer/services/exploreArticle?parentCategories=true";
+			urlStr += "&id=" + wikiminer_id;
 
-		String xml = getXML(wikiminer_id, true);
-		ArrayList<String[]> categories = new ArrayList<String[]>();
+			// return from cache
+			if (cache.containsKey(urlStr)) {
+				return cache.get(urlStr);
+			}
+
+			URL url = new URL(urlStr);
+			URLConnection yc = url.openConnection();
+			BufferedReader in = new BufferedReader(new InputStreamReader(yc
+					.getInputStream()));
+			String inputLine;
+
+			StringBuffer buf = new StringBuffer();
+			while ((inputLine = in.readLine()) != null)
+				buf.append(inputLine);
+			in.close();
+
+			String xml = buf.toString();
+
+			if (!xml.contains("ParentCategory")) {
+				return null;
+			}
+
+			cache.put(urlStr, xml);
+			return xml;
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+
+		return null;
+
+	}
+
+	public static ArrayList<WikipediaEntity> getCategories(String wikiminer_id) {
+		String xml = getexploreArticleXML(wikiminer_id);
+		ArrayList<WikipediaEntity> categories = new ArrayList<WikipediaEntity>();
 		DocumentBuilder db = null;
 		DocumentBuilderFactory dbf = DocumentBuilderFactory.newInstance();
 		try {
@@ -146,7 +188,7 @@ public class Wikiminer {
 		is.setCharacterStream(new StringReader(xml));
 		try {
 			Document dom = db.parse(is);
-			NodeList catNodes = dom.getElementsByTagName("Category");
+			NodeList catNodes = dom.getElementsByTagName("ParentCategory");
 			if (catNodes != null && catNodes.getLength() != 0) {
 				for (int i = 0; i < catNodes.getLength(); i++) {
 					Node cat = catNodes.item(i);
@@ -155,14 +197,13 @@ public class Wikiminer {
 						String[] values = new String[2];
 						values[0] = attrs.getNamedItem("id").getTextContent();
 						values[1] = attrs.getNamedItem("title").getTextContent();
-						categories.add(values);
+						categories.add(new WikipediaEntity(values[1],values[0], 1));
 					}
 				}
 			}
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
-
 		return categories;
 	}
 
@@ -257,7 +298,9 @@ public class Wikiminer {
 								.getTextContent();
 						int count = YahooBOSS.makeQuery("\"" + type + "\" \""
 								+ entity + "\" " + contextPhrases.toString());
-						queue.add(type, ((double) count / (double) entityCount));
+						queue
+								.add(type,
+										((double) count / (double) entityCount));
 					}
 				}
 			}
@@ -271,116 +314,152 @@ public class Wikiminer {
 		}
 		return rankedCategories;
 	}
-	
-	
-    public static ArrayList<WikipediaEntity> getWikipediaEntities(String xml, boolean getId){
-        ArrayList<WikipediaEntity> senses = new ArrayList<WikipediaEntity>();
-        DocumentBuilder db = null;
-        DocumentBuilderFactory dbf = DocumentBuilderFactory.newInstance();
-        try {
-            db = dbf.newDocumentBuilder();
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
 
-        InputSource is = new InputSource();
-        is.setCharacterStream(new StringReader(xml));
-        // System.out.println(xml);
-        try{
-        Document dom = db.parse(is);
-        NodeList senseNodes = dom.getElementsByTagName("Sense");
-        if (senseNodes != null && senseNodes.getLength() != 0) {
-            for (int i = 0; i < senseNodes.getLength(); i++) {
-                Node topSense = senseNodes.item(i);
-                if (topSense != null) {
-                    NamedNodeMap attrs = topSense.getAttributes();
-                    Node commonness = attrs.getNamedItem("priorProbability");
+	public static ArrayList<WikipediaEntity> getWikipediaEntities(String xml,
+			boolean getId) {
+		ArrayList<WikipediaEntity> senses = new ArrayList<WikipediaEntity>();
+		DocumentBuilder db = null;
+		DocumentBuilderFactory dbf = DocumentBuilderFactory.newInstance();
+		try {
+			db = dbf.newDocumentBuilder();
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
 
-                    if(commonness==null && xml.contains("Disambiguation") && xml.contains("This is a disambiguation page")){
-                    	double commonnessScore = (1.0/senseNodes.getLength()); 
-                        String[] senseArray = {attrs.getNamedItem("title").getTextContent(), attrs.getNamedItem("id").getTextContent(), String.valueOf(commonnessScore)};
-                        WikipediaEntity we = new WikipediaEntity(senseArray[0],senseArray[1],0, senseArray[2]);
-                        senses.add(we);
-                        continue;
-                    }
-                    double relevance = Double.parseDouble(commonness.getTextContent());
-                    if (relevance >= 0.01) {
-                        String[] senseArray = {attrs.getNamedItem("title").getTextContent(), attrs.getNamedItem("id").getTextContent(), String.valueOf(relevance)};
-                        WikipediaEntity we = new WikipediaEntity(senseArray[0],senseArray[1],0, senseArray[2]);
-                        senses.add(we);
-                    }
-                }
-            }
-        } else {
-            NodeList articleNodes = dom.getElementsByTagName("Article");
-            if (articleNodes != null && articleNodes.item(0) != null) {
-                Node article = articleNodes.item(0);
-                NamedNodeMap attrs = article.getAttributes();
-                String[] senseArray = {attrs.getNamedItem("title").getTextContent(), attrs.getNamedItem("id").getTextContent(), "1.0"};
-                WikipediaEntity we = new WikipediaEntity(senseArray[0],senseArray[1],0, senseArray[2]);
-                senses.add(we);
-            }
-        }
-        }catch(Exception e){
-            e.printStackTrace();
-        }
-        
-        return senses;
+		InputSource is = new InputSource();
+		is.setCharacterStream(new StringReader(xml));
+		// System.out.println(xml);
+		try {
+			Document dom = db.parse(is);
+			NodeList senseNodes = dom.getElementsByTagName("Sense");
+			if (senseNodes != null && senseNodes.getLength() != 0) {
+				for (int i = 0; i < senseNodes.getLength(); i++) {
+					Node topSense = senseNodes.item(i);
+					if (topSense != null) {
+						NamedNodeMap attrs = topSense.getAttributes();
+						Node commonness = attrs
+								.getNamedItem("priorProbability");
 
-    }
+						if (commonness == null
+								&& xml.contains("Disambiguation")
+								&& xml
+										.contains("This is a disambiguation page")) {
+							double commonnessScore = (1.0 / senseNodes
+									.getLength());
+							String[] senseArray = {
+									attrs.getNamedItem("title")
+											.getTextContent(),
+									attrs.getNamedItem("id").getTextContent(),
+									String.valueOf(commonnessScore) };
+							WikipediaEntity we = new WikipediaEntity(
+									senseArray[0], senseArray[1], 0,
+									senseArray[2]);
+							senses.add(we);
+							continue;
+						}
+						double relevance = Double.parseDouble(commonness
+								.getTextContent());
+						if (relevance >= 0.01) {
+							String[] senseArray = {
+									attrs.getNamedItem("title")
+											.getTextContent(),
+									attrs.getNamedItem("id").getTextContent(),
+									String.valueOf(relevance) };
+							WikipediaEntity we = new WikipediaEntity(
+									senseArray[0], senseArray[1], 0,
+									senseArray[2]);
+							senses.add(we);
+						}
+					}
+				}
+			} else {
+				NodeList articleNodes = dom.getElementsByTagName("Article");
+				if (articleNodes != null && articleNodes.item(0) != null) {
+					Node article = articleNodes.item(0);
+					NamedNodeMap attrs = article.getAttributes();
+					String[] senseArray = {
+							attrs.getNamedItem("title").getTextContent(),
+							attrs.getNamedItem("id").getTextContent(), "1.0" };
+					WikipediaEntity we = new WikipediaEntity(senseArray[0],
+							senseArray[1], 0, senseArray[2]);
+					senses.add(we);
+				}
+			}
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
 
+		return senses;
 
-    public static ArrayList<String[]> getWikipediaSenses(String xml, boolean getId){
-        ArrayList<String[]> senses = new ArrayList<String[]>();
-        DocumentBuilder db = null;
-        DocumentBuilderFactory dbf = DocumentBuilderFactory.newInstance();
-        try {
-            db = dbf.newDocumentBuilder();
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
+	}
 
-        InputSource is = new InputSource();
-        is.setCharacterStream(new StringReader(xml));
-        // System.out.println(xml);
-        try{
-        Document dom = db.parse(is);
-        NodeList senseNodes = dom.getElementsByTagName("Sense");
-        if (senseNodes != null && senseNodes.getLength() != 0) {
-            for (int i = 0; i < senseNodes.getLength(); i++) {
-                Node topSense = senseNodes.item(i);
-                if (topSense != null) {
-                    NamedNodeMap attrs = topSense.getAttributes();
-                    Node commonness = attrs.getNamedItem("commonness");
+	public static ArrayList<String[]> getWikipediaSenses(String xml,
+			boolean getId) {
+		ArrayList<String[]> senses = new ArrayList<String[]>();
+		DocumentBuilder db = null;
+		DocumentBuilderFactory dbf = DocumentBuilderFactory.newInstance();
+		try {
+			db = dbf.newDocumentBuilder();
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
 
-                    if(commonness==null && xml.contains("Disambiguation") && xml.contains("This is a disambiguation page")){
-                    	double commonnessScore = (1.0/senseNodes.getLength()); 
-                        String[] senseArray = {attrs.getNamedItem("title").getTextContent(), attrs.getNamedItem("id").getTextContent(), String.valueOf(commonnessScore)};
-                        senses.add(senseArray);
-                        continue;
-                    }
-                    double relevance = Double.parseDouble(commonness.getTextContent());
-                    if (relevance >= 0.01) {
-                        String[] senseArray = {attrs.getNamedItem("title").getTextContent(), attrs.getNamedItem("id").getTextContent(), String.valueOf(relevance)};
-                        senses.add(senseArray);
-                    }
-                }
-            }
-        } else {
-            NodeList articleNodes = dom.getElementsByTagName("Article");
-            if (articleNodes != null && articleNodes.item(0) != null) {
-                Node article = articleNodes.item(0);
-                NamedNodeMap attrs = article.getAttributes();
-                senses.add(new String[]{attrs.getNamedItem("title").getTextContent(), attrs.getNamedItem("id").getTextContent(), "1.0"});
-            }
-        }
-        }catch(Exception e){
-            e.printStackTrace();
-        }
-        return senses;
+		InputSource is = new InputSource();
+		is.setCharacterStream(new StringReader(xml));
+		// System.out.println(xml);
+		try {
+			Document dom = db.parse(is);
+			NodeList senseNodes = dom.getElementsByTagName("Sense");
+			if (senseNodes != null && senseNodes.getLength() != 0) {
+				for (int i = 0; i < senseNodes.getLength(); i++) {
+					Node topSense = senseNodes.item(i);
+					if (topSense != null) {
+						NamedNodeMap attrs = topSense.getAttributes();
+						Node commonness = attrs.getNamedItem("commonness");
 
-    }
-    
+						if (commonness == null
+								&& xml.contains("Disambiguation")
+								&& xml
+										.contains("This is a disambiguation page")) {
+							double commonnessScore = (1.0 / senseNodes
+									.getLength());
+							String[] senseArray = {
+									attrs.getNamedItem("title")
+											.getTextContent(),
+									attrs.getNamedItem("id").getTextContent(),
+									String.valueOf(commonnessScore) };
+							senses.add(senseArray);
+							continue;
+						}
+						double relevance = Double.parseDouble(commonness
+								.getTextContent());
+						if (relevance >= 0.01) {
+							String[] senseArray = {
+									attrs.getNamedItem("title")
+											.getTextContent(),
+									attrs.getNamedItem("id").getTextContent(),
+									String.valueOf(relevance) };
+							senses.add(senseArray);
+						}
+					}
+				}
+			} else {
+				NodeList articleNodes = dom.getElementsByTagName("Article");
+				if (articleNodes != null && articleNodes.item(0) != null) {
+					Node article = articleNodes.item(0);
+					NamedNodeMap attrs = article.getAttributes();
+					senses.add(new String[] {
+							attrs.getNamedItem("title").getTextContent(),
+							attrs.getNamedItem("id").getTextContent(), "1.0" });
+				}
+			}
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+		return senses;
+
+	}
+
 	public static String correctEncoding(String query) {
 		StringBuffer correctEncoding = new StringBuffer();
 		String[] sensesplit = query.split("\\s+");
@@ -394,42 +473,47 @@ public class Wikiminer {
 		}
 		return query;
 	}
-	
+
 	/*
-	 * Takes two words and gets the best Wikipedia Entities based on Compare score.
-	 */	
-	public static HashMap<String, WikipediaEntity> getRelativeBestSenses(String word1, String word2){
-		if(word1.startsWith("#"))
-			word1=word1.replace("#", "");
-		
-		if(word2.startsWith("#"))
-			word2=word2.replace("#", "");
+	 * Takes two words and gets the best Wikipedia Entities based on Compare
+	 * score.
+	 */
+	public static HashMap<String, WikipediaEntity> getRelativeBestSenses(
+			String word1, String word2) {
+		if (word1.startsWith("#"))
+			word1 = word1.replace("#", "");
+
+		if (word2.startsWith("#"))
+			word2 = word2.replace("#", "");
 
 		HashMap<String, WikipediaEntity> wes = new HashMap<String, WikipediaEntity>();
-		
-		String urlStr = "compare:"+word1+":"+word2;
-		try{
-			if(cacheRelativeBestSenses.containsKey(urlStr)){
+
+		String urlStr = "compare:" + word1 + ":" + word2;
+		try {
+			if (cacheRelativeBestSenses.containsKey(urlStr)) {
 				return cacheRelativeBestSenses.get(urlStr);
-			}
-			else {
-				String xml_word1= getXML(word1, false);
-				String xml_word2= getXML(word2, false);
-				if(xml_word1==null || xml_word2==null){
+			} else {
+				String xml_word1 = getXML(word1, false);
+				String xml_word2 = getXML(word2, false);
+				if (xml_word1 == null || xml_word2 == null) {
 					return null;
 				}
-				
-				List<WikipediaEntity> we_word1 = getWikipediaEntities(xml_word1, false);
-				List<WikipediaEntity> we_word2 = getWikipediaEntities(xml_word2, false);
-				
-				WikipediaEntity bestSense_word1 =null;
-				WikipediaEntity bestSense_word2 =null;
-				
+
+				List<WikipediaEntity> we_word1 = getWikipediaEntities(
+						xml_word1, false);
+				List<WikipediaEntity> we_word2 = getWikipediaEntities(
+						xml_word2, false);
+
+				WikipediaEntity bestSense_word1 = null;
+				WikipediaEntity bestSense_word2 = null;
+
 				double bestScore = 0.0;
-				for(int i=0; i<we_word1.size(); i++){
-					for(int j=0; j<we_word2.size(); j++){
-						double compareScore = compareIds(we_word1.get(i).getWikiminerID(), we_word2.get(j).getWikiminerID());
-						if(compareScore > bestScore){
+				for (int i = 0; i < we_word1.size(); i++) {
+					for (int j = 0; j < we_word2.size(); j++) {
+						double compareScore = compareIds(we_word1.get(i)
+								.getWikiminerID(), we_word2.get(j)
+								.getWikiminerID());
+						if (compareScore > bestScore) {
 							bestScore = compareScore;
 							bestSense_word1 = we_word1.get(i);
 							bestSense_word2 = we_word2.get(j);
@@ -439,14 +523,13 @@ public class Wikiminer {
 				wes.put(word1, bestSense_word1);
 				wes.put(word2, bestSense_word2);
 			}
-			
-		}catch(Exception e){
+
+		} catch (Exception e) {
 			e.printStackTrace();
 		}
 		cacheRelativeBestSenses.put(urlStr, wes);
 		return wes;
 	}
-		
 
 	public static double compareIds(String id1, String id2) {
 		String urlStr = "http://50.19.209.97:8080/wikipediaminer/services/compare?&ids1="
@@ -459,8 +542,8 @@ public class Wikiminer {
 
 			URL url = new URL(urlStr);
 			URLConnection yc = url.openConnection();
-			BufferedReader in = new BufferedReader(new InputStreamReader(
-					yc.getInputStream()));
+			BufferedReader in = new BufferedReader(new InputStreamReader(yc
+					.getInputStream()));
 			String inputLine;
 
 			StringBuffer buf = new StringBuffer();
@@ -471,7 +554,7 @@ public class Wikiminer {
 				cache.put(urlStr, "0");
 				return 0.0;
 			}
-			
+
 			// System.out.println(buf.toString());
 			DocumentBuilder db = null;
 			DocumentBuilderFactory dbf = DocumentBuilderFactory.newInstance();
@@ -485,12 +568,10 @@ public class Wikiminer {
 			InputSource is = new InputSource();
 			is.setCharacterStream(new StringReader(buf.toString()));
 			Document dom = db.parse(is);
-			NodeList relatednessNodes = dom
-					.getElementsByTagName("Measure");
+			NodeList relatednessNodes = dom.getElementsByTagName("Measure");
 			Node relation = relatednessNodes.item(0);
 			if (relation != null) {
 				String str = relation.getTextContent();
-				System.out.println(str);
 				cache.put(urlStr, str);
 				return Double.parseDouble(str);
 			}
@@ -504,19 +585,20 @@ public class Wikiminer {
 	}
 
 	public static String getXML(String query, boolean isId) {
-		if(query.startsWith("#"))
+		if (query.startsWith("#"))
 			query = query.replace("#", "");
 		if (query.equalsIgnoreCase("wikipedia entry"))
 			return null;
 		String[] sensesplit = query.split("\\s+");
-		
-		for (int i=0; i <sensesplit.length; i++) {
+
+		for (int i = 0; i < sensesplit.length; i++) {
 			String s = sensesplit[i];
-			if(Character.isLowerCase(s.charAt(0))){
-				sensesplit[i] = (Character.toUpperCase(s.charAt(0))+s.substring(1));
+			if (Character.isLowerCase(s.charAt(0))) {
+				sensesplit[i] = (Character.toUpperCase(s.charAt(0)) + s
+						.substring(1));
 			}
 		}
-		
+
 		StringBuffer correctEncoding = new StringBuffer();
 		if (sensesplit.length > 1)
 			for (String s : sensesplit) {
@@ -528,17 +610,16 @@ public class Wikiminer {
 		}
 
 		try {
-			//String urlStr = "http://wdm.cs.waikato.ac.nz:8080/service?task=search&xml";
+			// String urlStr =
+			// "http://wdm.cs.waikato.ac.nz:8080/service?task=search&xml";
 			String urlStr = "http://50.19.209.97:8080/wikipediaminer/services/search?complex";
 
 			if (isId) {
-				//urlStr += "&id=" + query;
+				// urlStr += "&id=" + query;
 				return null;
 			} else {
 				urlStr += "&query=" + query;
 			}
-			
-			System.out.println(urlStr);
 
 			// return from cache
 			if (cache.containsKey(urlStr)) {
@@ -547,8 +628,8 @@ public class Wikiminer {
 
 			URL url = new URL(urlStr);
 			URLConnection yc = url.openConnection();
-			BufferedReader in = new BufferedReader(new InputStreamReader(
-					yc.getInputStream()));
+			BufferedReader in = new BufferedReader(new InputStreamReader(yc
+					.getInputStream()));
 			String inputLine;
 
 			StringBuffer buf = new StringBuffer();
@@ -557,11 +638,11 @@ public class Wikiminer {
 			in.close();
 
 			String xml = buf.toString();
-			
-			if(!xml.contains("Sense")){
+
+			if (!xml.contains("Sense")) {
 				return null;
 			}
-			
+
 			cache.put(urlStr, xml);
 			return xml;
 		} catch (Exception e) {
@@ -572,9 +653,9 @@ public class Wikiminer {
 	}
 
 	public static void main(String args[]) {
-		HashMap<String, WikipediaEntity> rbs = getRelativeBestSenses("India", "Dhoni");
-		for(String key : rbs.keySet()){
-			System.out.println(key+" "+rbs.get(key).getText()+" "+rbs.get(key).getWikiminerID());
+		ArrayList<WikipediaEntity> ents = getCategories("52648");
+		for(WikipediaEntity we : ents){
+			System.out.println(we.getText()+" "+we.getWikiminerID());
 		}
 
 	}
