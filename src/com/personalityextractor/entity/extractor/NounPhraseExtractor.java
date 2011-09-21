@@ -51,7 +51,7 @@ public class NounPhraseExtractor implements IEntityExtractor {
 				Tree topNode = queue.remove(0);
 
 				if (topNode.isPreTerminal()) {
-					if (topNode.value().startsWith("NN")) {
+					if (topNode.value().startsWith("NNP")) {
 						str.append(topNode.children()[0].value() + " ");
 						flag = true;
 					} else if (flag == true) {
