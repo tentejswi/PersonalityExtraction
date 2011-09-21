@@ -22,6 +22,7 @@ import org.xml.sax.InputSource;
 import com.personalityextractor.entity.WikipediaEntity;
 
 import tathya.db.YahooBOSS;
+import cs224n.util.Counter;
 import cs224n.util.CounterMap;
 import cs224n.util.PriorityQueue;
 
@@ -405,64 +406,38 @@ public class Wikiminer {
 			word2=word2.replace("#", "");
 
 		HashMap<String, WikipediaEntity> wes = new HashMap<String, WikipediaEntity>();
-		word1=correctEncoding(word1);
-		word2= correctEncoding(word2);
 		
-		CounterMap<String, String> idCompareScores = new CounterMap<String, String>();
-		
-		String urlStr = "http://wdm.cs.waikato.ac.nz:8080/service?task=compare&details=true&xml&term1="+word1+"&term2="+word2;
-
+		String urlStr = "compare:"+word1+":"+word2;
 		try{
-			StringBuffer buf = new StringBuffer();
 			if(cacheRelativeBestSenses.containsKey(urlStr)){
-				//System.out.println("cached");
 				return cacheRelativeBestSenses.get(urlStr);
 			}
-			
 			else {
-				//System.out.println("not cached");
-				URL url = new URL(urlStr);
-				URLConnection yc = url.openConnection();
-				BufferedReader in = new BufferedReader(new InputStreamReader(yc
-						.getInputStream()));
-				String inputLine;
-
-				while ((inputLine = in.readLine()) != null) {
-					buf.append(inputLine);
+				String xml_word1= getXML(word1, false);
+				String xml_word2= getXML(word2, false);
+				if(xml_word1==null || xml_word2==null){
+					return null;
 				}
-				in.close();
-			}
-			if (buf.toString().contains("unknownTerm")) {
-				return null;
-			}
-
-			DocumentBuilder db = null;
-			DocumentBuilderFactory dbf = DocumentBuilderFactory.newInstance();
-			try {
-				db = dbf.newDocumentBuilder();
-			} catch (Exception e) {
-				e.printStackTrace();
-			}
-			
-			InputSource is = new InputSource();
-			is.setCharacterStream(new StringReader(buf.toString()));
-			Document dom = db.parse(is);
-			NodeList sense1 = dom.getElementsByTagName("Sense1");
-			Node relation1 = sense1.item(0);
-			if (relation1 != null) {
-                NamedNodeMap attrs = relation1.getAttributes();
-				String text = attrs.getNamedItem("title").getTextContent();
-				String id = attrs.getNamedItem("id").getTextContent();
-				wes.put(word1, new WikipediaEntity(text, id, 0, ""));
-			}
-			
-			NodeList sense2 = dom.getElementsByTagName("Sense2");
-			Node relation2 = sense2.item(0);
-			if (relation2 != null) {
-                NamedNodeMap attrs = relation2.getAttributes();
-				String text = attrs.getNamedItem("title").getTextContent();
-				String id = attrs.getNamedItem("id").getTextContent();
-				wes.put(word2, new WikipediaEntity(text, id, 0, ""));
+				
+				List<WikipediaEntity> we_word1 = getWikipediaEntities(xml_word1, false);
+				List<WikipediaEntity> we_word2 = getWikipediaEntities(xml_word2, false);
+				
+				WikipediaEntity bestSense_word1 =null;
+				WikipediaEntity bestSense_word2 =null;
+				
+				double bestScore = 0.0;
+				for(int i=0; i<we_word1.size(); i++){
+					for(int j=0; j<we_word2.size(); j++){
+						double compareScore = compareIds(we_word1.get(i).getWikiminerID(), we_word2.get(j).getWikiminerID());
+						if(compareScore > bestScore){
+							bestScore = compareScore;
+							bestSense_word1 = we_word1.get(i);
+							bestSense_word2 = we_word2.get(j);
+						}
+					}
+				}
+				wes.put(word1, bestSense_word1);
+				wes.put(word2, bestSense_word2);
 			}
 			
 		}catch(Exception e){
@@ -597,16 +572,9 @@ public class Wikiminer {
 	}
 
 	public static void main(String args[]) {
-		
-		System.out.println(compareIds("14533", "23235"));
-		
-		String query = "camera mama";
-		String xml = (getXML(query, false));
-		System.out.println(xml);
-		ArrayList<WikipediaEntity> ents = getWikipediaEntities(xml, false);
-		for(WikipediaEntity we : ents){
-			System.out.println(we.getText());
-			System.out.println(we.getCommonness());
+		HashMap<String, WikipediaEntity> rbs = getRelativeBestSenses("India", "Dhoni");
+		for(String key : rbs.keySet()){
+			System.out.println(key+" "+rbs.get(key).getText()+" "+rbs.get(key).getWikiminerID());
 		}
 
 	}
