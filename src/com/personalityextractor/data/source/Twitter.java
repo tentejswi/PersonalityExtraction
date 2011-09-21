@@ -46,39 +46,43 @@ public class Twitter {
 
 	public List<String> fetchTweets(String user, int count) {
 		ArrayList<String> tweets = new ArrayList<String>();
-		String urlStr = "http://api.twitter.com/statuses/user_timeline/" + user + ".json?count=" + count;
-		
-		try {
-			URL url = new URL(urlStr);
-	        URLConnection yc = url.openConnection();
-	        BufferedReader in = new BufferedReader(new InputStreamReader(yc.getInputStream()));
-	        String inputLine;
-	
-	        StringBuffer buf = new StringBuffer();
-	        while ((inputLine = in.readLine()) != null) { 
-	        	buf.append(inputLine);
-	        }
-	        
-	        JSONArray jsonArray = (JSONArray) JSONSerializer.toJSON(buf.toString());
-	        Iterator<JSONObject> itr = jsonArray.iterator();
-	        while (itr.hasNext()) {
-	        	String tweetText = extract(itr.next());
-	        	tweets.add(tweetText);
-	        }
-	        
-	        in.close();
-	        return tweets;
-		} catch (Exception e) {
-			e.printStackTrace();
+
+		for (int i = 1; i < 5; i++) {
+			String urlStr = "http://api.twitter.com/statuses/user_timeline/"
+					+ user + ".json?count=" + count+"&include_rts=true&page="+i;
+
+			try {
+				URL url = new URL(urlStr);
+				URLConnection yc = url.openConnection();
+				BufferedReader in = new BufferedReader(new InputStreamReader(yc
+						.getInputStream()));
+				String inputLine;
+
+				StringBuffer buf = new StringBuffer();
+				while ((inputLine = in.readLine()) != null) {
+					buf.append(inputLine);
+				}
+
+				JSONArray jsonArray = (JSONArray) JSONSerializer.toJSON(buf
+						.toString());
+				Iterator<JSONObject> itr = jsonArray.iterator();
+				while (itr.hasNext()) {
+					String tweetText = extract(itr.next());
+					tweets.add(tweetText);
+				}
+
+				in.close();
+			} catch (Exception e) {
+				e.printStackTrace();
+			}
 		}
-		
-		return null;
+		return tweets;
 	}
-	
-	public static void main(String args[]){
+
+	public static void main(String args[]) {
 		Twitter t = new Twitter();
-		List<String> tweets = t.fetchTweets("semanticvoid", 1000);
-		for(String tw : tweets){
+		List<String> tweets = t.fetchTweets("semanticvoid", 200);
+		for (String tw : tweets) {
 			System.out.println(tw);
 		}
 	}
