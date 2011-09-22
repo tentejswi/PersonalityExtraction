@@ -188,7 +188,7 @@ var svg = d3.select("body").append("svg:svg")
 	;
 
 var user_url = media_path+"user.json";
-user_url = "http://ec2-50-19-209-97.compute-1.amazonaws.com/api/interest.php?u="+username;
+//user_url = "http://ec2-50-19-209-97.compute-1.amazonaws.com/api/interest.php?u="+username;
 
 d3.json(user_url, function(json) {
   stringifyJson = JSON.stringify(json);
@@ -239,20 +239,21 @@ d3.json(user_url, function(json) {
 	  .each(fontSize)
 	  .each(wordWrap)
 	  ;
-
-  cell.append("svg:a")
-  	.attr("xlink:href", "#")
-	.append("svg:image")
-  	.attr("id", "edit")
-	.attr("class", "button")
-	.attr("x", function(d) {return d.dx - 25;})
-	.attr("y", function(d) {return 5;})
-  	.attr("width", "20px")
-    .attr("height", "20px")
-	.attr("xlink:href", "http://upload.wikimedia.org/wikipedia/commons/6/6c/UniversalEditButton2.svg")
-	.style("opacity",0)
-	.on("click", editCategory)
-	;
+  if (isAuthenticated) {
+  	cell.append("svg:a")
+  		.attr("xlink:href", "#")
+		.append("svg:image")
+  		.attr("id", "edit")
+		.attr("class", "button")
+		.attr("x", function(d) {return d.dx - 25;})
+		.attr("y", function(d) {return 5;})
+  		.attr("width", "20px")
+    		.attr("height", "20px")
+		.attr("xlink:href", "http://upload.wikimedia.org/wikipedia/commons/6/6c/UniversalEditButton2.svg")
+		.style("opacity",0)
+		.on("click", editCategory)
+		;
+  }
 });
 	  
 function onClick(d,i) {

@@ -23,6 +23,8 @@
 	var profilePic = 'http://michelleshaeffer.com/wp-content/uploads/2010/08/coffee_cup.jpg';
 	var username = "{{user.username}}";
 	var socialBackend;
+	var isAuthenticated = "{{user.is_authenticated}}" == "True" ? true : false;
+
 	{% for tweet in tweets %}
 		profilePic = "{{tweet.user.profile_image_url}}";
 		socialBackend = "t";
