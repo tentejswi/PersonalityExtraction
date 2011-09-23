@@ -12,7 +12,7 @@ urlpatterns = patterns('',
     url(r'^admin/', include(admin.site.urls)),
     #url(r'^accounts/', include('registration.urls')),
     url(r'^accounts/', include('accounts.urls')),
-    url(r'^tryfirst/', tryfirst, name='tryfirst'),
+    url(r'^tryfirst/(?P<username>[^/]+)', tryfirst, name='tryfirst'),
     url(r'', include('social_auth.urls')),
 )
 

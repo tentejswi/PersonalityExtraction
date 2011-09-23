@@ -33,7 +33,8 @@
 					method : 'get',
 					onSuccess : function(transport) {
 						//window.location = 'http://ec2-50-19-209-97.compute-1.amazonaws.com/interest.php?u=' + username + '&&s=t';
-						window.location = "{% url tryfirst %}";
+						// window.location = "{% url tryfirst "semanticvoid" %}";
+						window.location = "/tryfirst/"+username;
 					},
 					onFailure : function() {
 						alert('Something went wrong...')

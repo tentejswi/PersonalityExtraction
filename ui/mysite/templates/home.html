@@ -25,6 +25,8 @@
 	var socialBackend;
 	var isAuthenticated = "{{user.is_authenticated}}" == "True" ? true : false;
 
+	if(!isAuthenticated)
+		username = "{{username}}";
 	{% for tweet in tweets %}
 		profilePic = "{{tweet.user.profile_image_url}}";
 		socialBackend = "t";
