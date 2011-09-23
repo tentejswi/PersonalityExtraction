@@ -15,6 +15,7 @@ import net.sf.json.JSONObject;
 
 import com.personalityextractor.data.source.Wikiminer;
 import com.personalityextractor.entity.WikipediaEntity;
+import com.personalityextractor.entity.graph.ranking.IRanker;
 import com.personalityextractor.entity.graph.ranking.WeightGraphRanker;
 import com.personalityextractor.store.LuceneStore;
 import com.personalityextractor.store.WikiminerDB;
@@ -47,12 +48,19 @@ public class Graph {
 
 		Set<String> currCategories;
 
+		int iter = 0;
 		do {
 			currCategories = new HashSet<String>();
 
+			
 			for (String cid : prevCategories) {
 				Node cNode = nodes.get(cid);
-				List<WikipediaEntity> categories = Wikiminer.getCategories(cid);
+				List<WikipediaEntity> categories = null;
+				if(iter == 0) {
+					categories = Wikiminer.getCategories(cid);
+				} else {
+					categories = Wikiminer.getParentCategories(cid);
+				}
 				for (WikipediaEntity category : categories) {
 					Node n2 = null;
 
@@ -68,9 +76,10 @@ public class Graph {
 						n2 = nodes.get(category.getWikiminerID());
 					}
 
-					formEdge(cNode, n2, cNode.getWeight()/categories.size());
+					formEdge(cNode, n2, cNode.getWeight());
 				}
 			}
+			iter++;
 
 			prevCategories = currCategories;
 			currentDepth++;
@@ -139,6 +148,21 @@ public class Graph {
 		}
 
 		return json;
+	}
+	
+	public static void main(String[] args) {
+		ArrayList<WikipediaEntity> entities = new ArrayList<WikipediaEntity>();
+		entities.add(new WikipediaEntity("Rajiv Gandhi", "26129", 1));
+		WikipediaEntity e = new WikipediaEntity("Sonia Gandhi", "169798", 1);
+		e.incrCount();
+		e.incrCount();e.incrCount();
+		entities.add(e);
+		Graph g = new Graph(entities);
+		g.build(3);
+		g.printWeights();
+		IRanker ranker = new WeightGraphRanker(g);
+		List<Node> topNodes = ranker.getTopRankedNodes(100);
+		System.out.println();
 	}
 	
 }

@@ -96,14 +96,14 @@ public class Runner {
 		if (handle != null) {
 			Date start = new Date();
 			System.out.print("processing " + handle + "...\t");
-			List<String> tweets = t.fetchTweets(handle, 200);
+			List<String> tweets = t.fetchTweets(handle, 20);
 			TopNNPHashTagsExtractor tne = new TopNNPHashTagsExtractor();
 			Counter<String> extracted_entities = tne.extract(tweets);
 			allEntities = tne.resolve(extracted_entities);
 			List<WikipediaEntity> entities = new ArrayList<WikipediaEntity>();
 			entities.addAll(allEntities.values());
 			Graph g = new Graph(entities);
-			g.build(2);
+			g.build(10);
 			g.printWeights();
 			Date end = new Date();
 			PerfMetrics.getInstance().addToMetrics(Metric.TOTAL,
@@ -112,7 +112,7 @@ public class Runner {
 			printMetrics();
 
 			IRanker ranker = new WeightGraphRanker(g);
-			List<Node> topNodes = ranker.getTopRankedNodes(2);
+			List<Node> topNodes = ranker.getTopRankedNodes(100);
 			setUserInterests(handle, nodesToJson(topNodes));
 			// update status
 			// updateUser(handle);

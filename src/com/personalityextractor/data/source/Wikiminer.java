@@ -215,6 +215,9 @@ public class Wikiminer {
 	public static ArrayList<WikipediaEntity> getCategories(String wikiminer_id) {
 		String xml = getexploreArticleXML(wikiminer_id);
 		ArrayList<WikipediaEntity> categories = new ArrayList<WikipediaEntity>();
+		if(xml == null) {
+			return categories;
+		}
 		DocumentBuilder db = null;
 		DocumentBuilderFactory dbf = DocumentBuilderFactory.newInstance();
 		try {
@@ -249,6 +252,9 @@ public class Wikiminer {
 	public static ArrayList<WikipediaEntity> getParentCategories(String wikiminer_id) {
 		String xml = getexploreCategoryXML(wikiminer_id);
 		ArrayList<WikipediaEntity> categories = new ArrayList<WikipediaEntity>();
+		if(xml == null) {
+			return categories;
+		}
 		DocumentBuilder db = null;
 		DocumentBuilderFactory dbf = DocumentBuilderFactory.newInstance();
 		try {
