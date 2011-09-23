@@ -115,7 +115,7 @@ public class Runner {
 			List<Node> topNodes = ranker.getTopRankedNodes(100);
 			setUserInterests(handle, nodesToJson(topNodes));
 			// update status
-			// updateUser(handle);
+			updateUser(handle);
 		}
 	}
 
