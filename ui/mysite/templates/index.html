@@ -1,0 +1,58 @@
+{% extends "base.html" %}
+
+{% block header %}
+	<script src="{{MEDIA_URL}}js/prototype.js"></script>
+	<link rel="stylesheet" href="{{MEDIA_URL}}css/scriptina-pro-fontfacekit/stylesheet.css" type="text/css"/>
+{% endblock %}
+
+{% block top_header %}{% endblock %}
+
+{% block content %}
+<div id = "inner_container">
+	<div id = "inner_container_left">
+		<div id = "seekinme_desc_title">
+			<span class="script_font"> You </span> are the center </br> <span class="pad_40">of the universe.</span>
+		</div>
+		<div id = "seekinme_desc_body">
+			<span>seekinme</span> helps you make a lot more sense of your social data.
+		</div>
+	</div>
+	<div id = "inner_container_right">
+		<div id="login_sources" class="">
+			<h3 style="color:gray">Sign up with</h3>
+			<a rel="nofollow" href="{% url begin "twitter" %}" title="Connect with Twitter" class="auth_source_twitter"> </a>
+			<a rel="nofollow" href="{% url begin "facebook" %}" title="Connect with Facebook" class="auth_source_facebook"> </a>
+		</div> 
+		<div id = "try_out">
+	<script type="text/javascript">
+		function handleKeyPress(event, username) {
+			if(!event)
+				event = window.event;
+			if(event.keyCode == 13) {
+				new Ajax.Request('http://ec2-50-19-209-97.compute-1.amazonaws.com/api/queue.php?u=' + username + '&s=t', {
+					method : 'get',
+					onSuccess : function(transport) {
+						//window.location = 'http://ec2-50-19-209-97.compute-1.amazonaws.com/interest.php?u=' + username + '&&s=t';
+						// window.location = "{% url tryfirst "semanticvoid" %}";
+						window.location = "/tryfirst/"+username;
+					},
+					onFailure : function() {
+						alert('Something went wrong...')
+					}
+				});
+			}
+		}
+			</script>
+			<h3 style="color:gray">or try it out on a friend</h3>
+			<div id = "trial_form">
+				<input type="text" class= "inputtext" id="trial_handle" value = "enter a twitter username" name="loginname" onKeyPress="return handleKeyPress(event, this.value)"
+				size="25pt" onfocus="if (this.value=='enter a twitter username') this.value=''; this.style.color = '#000'"
+				onblur="if (this.value=='') this.value='enter a twitter username'; if (this.value=='enter a twitter username') this.style.color = '#ccc'">
+				<div id="trial_submit">
+					press ENTER to submit
+				</div>
+			</div>
+
+	</div>
+</div>
+{% endblock %} 

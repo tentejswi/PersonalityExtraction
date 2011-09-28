@@ -3,9 +3,6 @@
  */
 package com.personalityextractor;
 
-import java.io.BufferedReader;
-import java.io.File;
-import java.io.FileReader;
 import java.sql.ResultSet;
 import java.util.ArrayList;
 import java.util.Date;
@@ -14,22 +11,17 @@ import java.util.List;
 
 import net.sf.json.JSONObject;
 
-import com.personalityextractor.commons.data.Tweet;
 import com.personalityextractor.data.source.Twitter;
 import com.personalityextractor.entity.WikipediaEntity;
-import com.personalityextractor.entity.extractor.EntityExtractFactory;
-import com.personalityextractor.entity.extractor.EntityExtractFactory.Extracter;
 import com.personalityextractor.entity.extractor.frequencybased.TopNNPHashTagsExtractor;
-import com.personalityextractor.entity.extractor.IEntityExtractor;
+import com.personalityextractor.entity.graph.Edge;
 import com.personalityextractor.entity.graph.Graph;
 import com.personalityextractor.entity.graph.Node;
 import com.personalityextractor.entity.graph.ranking.IRanker;
 import com.personalityextractor.entity.graph.ranking.WeightGraphRanker;
-import com.personalityextractor.entity.resolver.ViterbiResolver;
 import com.personalityextractor.evaluation.PerfMetrics;
 import com.personalityextractor.evaluation.PerfMetrics.Metric;
 import com.personalityextractor.store.MysqlStore;
-import com.personalityextractor.url.data.URLContent;
 
 import cs224n.util.Counter;
 
@@ -74,14 +66,15 @@ public class Runner {
 						+ "ON DUPLICATE KEY UPDATE json = '" + json + "'");
 	}
 
-	public static String nodesToJson(List<Node> nodes) {
-		JSONObject json = new JSONObject();
-
-		for (Node n : nodes) {
-			json.put(n.getEntity().getText(), 1);
-		}
-
-		return json.toString();
+	public static String nodesToJson(String handle, Graph g, List<Node> nodes) {
+		JSONObject j = g.toJSON(handle, nodes);
+//			System.out.println(j.toString());
+//			json.put(n.getEntity().getText(), j);
+//		}
+//		
+//		JSONObject jroot =  new JSONObject();
+//		jroot.put(handle, json);
+		return j.toString();
 	}
 
 	public static void run() {
@@ -96,14 +89,14 @@ public class Runner {
 		if (handle != null) {
 			Date start = new Date();
 			System.out.print("processing " + handle + "...\t");
-			List<String> tweets = t.fetchTweets(handle, 200);
+			List<String> tweets = t.fetchTweets(handle, 20);
 			TopNNPHashTagsExtractor tne = new TopNNPHashTagsExtractor();
 			Counter<String> extracted_entities = tne.extract(tweets);
 			allEntities = tne.resolve(extracted_entities);
 			List<WikipediaEntity> entities = new ArrayList<WikipediaEntity>();
 			entities.addAll(allEntities.values());
 			Graph g = new Graph(entities);
-			g.build(2);
+			g.build(1);
 			g.printWeights();
 			Date end = new Date();
 			PerfMetrics.getInstance().addToMetrics(Metric.TOTAL,
@@ -112,10 +105,11 @@ public class Runner {
 			printMetrics();
 
 			IRanker ranker = new WeightGraphRanker(g);
-			List<Node> topNodes = ranker.getTopRankedNodes(2);
-			setUserInterests(handle, nodesToJson(topNodes));
+			List<Node> topNodes = ranker.getTopRankedNodes(25);
+			setUserInterests(handle, nodesToJson(handle, g, topNodes));
 			// update status
-			// updateUser(handle);
+			updateUser(handle);
+			System.out.println("ALL --- DONE");
 		}
 	}
 

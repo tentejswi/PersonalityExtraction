@@ -1,0 +1,12 @@
+.cell {
+  border: solid 1px white;
+  font-family: Georgia;
+  font-size: 15px;
+  font-weight: bolder;
+  color: Black;
+  line-height: 15px;
+  overflow: hidden;
+  position: absolute;
+  text-indent: 2px;
+  text-align: center;
+}

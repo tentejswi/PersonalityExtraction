@@ -1,0 +1,20 @@
+{% extends "registration/registration_base.html" %}
+{% block title %}Register for an account{% endblock %}
+{% block content %}
+<style>
+</style>
+<div id="inner_container" class="">
+  <div id="reg_inner_div" >
+    <h2>Register</h2>
+    <br/>
+    <form method='post' action=''>{% csrf_token %}
+      {% for field in form %}
+      <label class="left" >{{field.label}}</label>
+      <div class="left"> {{field}}</div><div class="form_field_errors left">{{field.errors}}</div>
+      {% endfor %}
+      <label class="left">&nbsp;</label>
+      <div class="left"><input type="submit" value=" Register " /></div>
+    </form>
+  </div>
+</div>
+{% endblock %}

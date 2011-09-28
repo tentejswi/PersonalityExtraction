@@ -1,0 +1,32 @@
+#title {
+    font: 24pt helvetica neue;
+    color: #666;
+}
+
+input[type = text] {
+    font: 24pt helvetica neue;
+    background: none;
+    border: none;
+    outline: 0;
+}
+
+#footer {
+    float: none;
+    text-align: center;
+    font-family: cursive, serif;
+    font-size: 36pt;
+    color: Black;
+}
+
+#category-edit {
+    font: 24pt helvetica neue;
+    background: none;
+    border-bottom-style: solid;
+    border-bottom-color: #000;
+    border-right: hidden;
+    border-left: hidden;
+    border-top: hidden;
+    outline: 0;
+    color: #ccc;
+    text-align: left;
+}

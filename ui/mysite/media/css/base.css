@@ -1,0 +1,117 @@
+/*base.html*/
+h3 {
+	font-family: 'Helvetica Neue', 'Helvetica', 'Arial';
+	font-size: 20pt;
+	line-height: 0.8
+}
+#outer_container {
+	min-height: 45px;
+}
+#top_logo {
+	font: 40pt 'GartonMedium';
+	color: #2C7F54;
+	text-align: left;
+	float: left;
+	margin-right: 2%;
+	min-height: 45px;
+}
+#top_content {
+	float: left;
+	text-align: center;
+	font-size: 10pt;
+	margin-right: 5%;
+	min-height: 45px;
+}
+#top_user_panel {
+	float: right;
+	text-align: right;
+	font-family: 'Helvetica Neue', 'Helvetica', 'Arial';
+	font-size: 10pt;
+	min-height: 45px;
+}
+/*index.html*/
+
+#seekinme_desc_title {
+	font: 35pt Helvetica Neue;
+	line-height: 0.8
+}
+.script_font {
+	font-family: 'ScriptinaProRegular', "Brush Script MT", cursive;
+	font-size: 50pt;
+	font-weight: bolder;
+}
+.italics {
+	font-style: italic;
+}
+.pad_40 {
+	padding: 40pt;
+}
+#seekinme_desc_body {
+	font: 20pt Helvetica Neue;
+	color: #886744;
+	margin-top: 20px;
+	text-align: justify;
+}
+#inner_container {
+	min-height: 400px;
+	margin-top: 100px;
+	margin-left: 50px;
+}
+#inner_container_left {
+	width: 40%;
+	margin-left: 5%;
+	margin-right: 5%;
+	float: left;
+}
+#inner_container_right {
+	width: 45%;
+	float: left;
+	margin-left: 5%;
+}
+a.auth_source_facebook, a.auth_source_twitter {
+	color: #32A0EB;
+	background-repeat: no-repeat;
+	text-decoration: none;
+	background: transparent url('../images/facebooktwitter_sprite.png') no-repeat;
+}
+a.auth_source_facebook {
+	background-position: 0 0;
+	width: 118px;
+	height: 34px;
+	display: inline-block;
+	margin-right: 9px;
+	zoom: 1;
+}
+a.auth_source_facebook:hover {
+	background-position: 0 -34px;
+}
+a.auth_source_twitter {
+	background-position: -118px 0;
+	width: 118px;
+	height: 34px;
+	display: inline-block;
+	zoom: 1;
+}
+a.auth_source_twitter:hover {
+	background-position: -118px -34px;
+}
+#trial_handle {
+	font: 20pt Helvetica Neue;
+	background: none;
+	border-bottom-style: solid;
+	border-bottom-color: #000;
+	border-right: hidden;
+	border-left: hidden;
+	border-top: hidden;
+	outline: 0;
+	color: #ccc;
+	text-align: center;
+}
+#trial_form {
+	height: 5%;
+}
+#trial_submit {
+	padding-left: 35%;
+	font: 12pt garamond;
+	color: #2C7F54;
+}

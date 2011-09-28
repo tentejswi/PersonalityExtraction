@@ -1,0 +1,17 @@
+TWITTER_CONSUMER_KEY              = 'fBuGlYTgCSpqUY8hnpVyfg'
+TWITTER_CONSUMER_SECRET           = 'n0NaeE1il5Y7swoQzJc7EozQ1KCRAglQW8wUHMddptY'
+FACEBOOK_APP_ID                   = '179961268680626'
+FACEBOOK_API_SECRET               = 'ca0b24867ef8b6de1e43571f6da115af'
+LINKEDIN_CONSUMER_KEY             = ''
+LINKEDIN_CONSUMER_SECRET          = ''
+ORKUT_CONSUMER_KEY                = ''
+ORKUT_CONSUMER_SECRET             = ''
+GOOGLE_OAUTH2_CLIENT_KEY          = ''
+GOOGLE_OAUTH2_CLIENT_SECRET       = ''
+SOCIAL_AUTH_CREATE_USERS          = True
+SOCIAL_AUTH_FORCE_RANDOM_USERNAME = False
+SOCIAL_AUTH_DEFAULT_USERNAME      = 'socialauth_user'
+SOCIAL_AUTH_COMPLETE_URL_NAME     = 'complete'
+LOGIN_ERROR_URL                   = '/login/error/'
+#SOCIAL_AUTH_USER_MODEL            = 'app.CustomUser'
+SOCIAL_AUTH_ERROR_KEY             = 'socialauth_error'

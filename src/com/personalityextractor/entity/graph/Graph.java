@@ -10,14 +10,13 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
-import net.sf.json.JSONArray;
 import net.sf.json.JSONObject;
 
+import com.personalityextractor.Runner;
 import com.personalityextractor.data.source.Wikiminer;
 import com.personalityextractor.entity.WikipediaEntity;
+import com.personalityextractor.entity.graph.ranking.IRanker;
 import com.personalityextractor.entity.graph.ranking.WeightGraphRanker;
-import com.personalityextractor.store.LuceneStore;
-import com.personalityextractor.store.WikiminerDB;
 
 /**
  * @author semanticvoid
@@ -47,12 +46,19 @@ public class Graph {
 
 		Set<String> currCategories;
 
+		int iter = 0;
 		do {
 			currCategories = new HashSet<String>();
 
+			
 			for (String cid : prevCategories) {
 				Node cNode = nodes.get(cid);
-				List<WikipediaEntity> categories = Wikiminer.getCategories(cid);
+				List<WikipediaEntity> categories = null;
+				if(iter == 0) {
+					categories = Wikiminer.getCategories(cid);
+				} else {
+					categories = Wikiminer.getParentCategories(cid);
+				}
 				for (WikipediaEntity category : categories) {
 					Node n2 = null;
 
@@ -68,9 +74,10 @@ public class Graph {
 						n2 = nodes.get(category.getWikiminerID());
 					}
 
-					formEdge(cNode, n2, cNode.getWeight()/categories.size());
+					formEdge(cNode, n2, cNode.getWeight());
 				}
 			}
+			iter++;
 
 			prevCategories = currCategories;
 			currentDepth++;
@@ -94,9 +101,23 @@ public class Graph {
 	public Collection<Node> getNodes() {
 		return nodes.values();
 	}
-
-	public String toJSON() {
-		return generateJSON(root, null, new HashSet<String>()).toString();
+	
+	public JSONObject toJSON(String handle, List<Node> nodes) {
+		JSONObject json = new JSONObject();
+		
+		Set<String> seen = new HashSet<String>();
+		Node root = new Node(new WikipediaEntity(handle, -1));
+		for(Node n : nodes) {
+//			JSONObject j = generateJSON(n, null, seen);
+//			System.out.println(j.toString());
+//			json.put(n.getEntity().getText(), j);
+			formEdge(n, root, 0);
+		}
+		
+		json =  generateJSON(root, null, new HashSet<String>());
+		JSONObject jroot = new JSONObject();
+		jroot.put(handle, json);
+		return jroot;
 	}
 	
 	public void printWeights() {
@@ -110,6 +131,9 @@ public class Graph {
 	}
 
 	private JSONObject generateJSON(Node root, Node parent, Set<String> seen) {
+		if(root == null) {
+			return null;
+		}
 		JSONObject json = new JSONObject();
 		List<Edge> edges = root.getEdges();
 		
@@ -121,16 +145,19 @@ public class Graph {
 			for (Edge e : edges) {
 				if(e.getNode2() != null) {
 						JSONObject cJson = null;
-						if(!seen.contains(e.getNode2())) {
+						if(!seen.contains(e.getNode2()) && !seen.contains(e.getNode1())) {
 							seen.add(e.getNode2());
+							seen.add(e.getNode1());
 							cJson = generateJSON(nodes.get(e.getNode2()),
 								root, seen);
 						}
 						if (cJson != null) {
 							json.put(nodes.get(e.getNode2()).getEntity().getText(), cJson);
 						} else {
-							json.put(nodes.get(e.getNode2()).getEntity().getText(), nodes.get(e.getNode2())
+							if(nodes.get(e.getNode2()) != null && nodes.get(e.getNode2()) != null && !seen.contains(e.getNode2())) {
+								json.put(nodes.get(e.getNode2()).getEntity().getText(), nodes.get(e.getNode2())
 									.getWeight());
+							}
 						}
 					}
 				}
@@ -139,6 +166,22 @@ public class Graph {
 		}
 
 		return json;
+	}
+	
+	public static void main(String[] args) {
+		ArrayList<WikipediaEntity> entities = new ArrayList<WikipediaEntity>();
+		entities.add(new WikipediaEntity("Rajiv Gandhi", "26129", 1));
+		WikipediaEntity e = new WikipediaEntity("Sonia Gandhi", "169798", 1);
+		e.incrCount();
+		e.incrCount();e.incrCount();
+		entities.add(e);
+		Graph g = new Graph(entities);
+		g.build(3);
+		g.printWeights();
+		IRanker ranker = new WeightGraphRanker(g);
+		List<Node> topNodes = ranker.getTopRankedNodes(100);
+		System.out.println();
+		System.out.println(Runner.nodesToJson("testuser", g, topNodes));
 	}
 	
 }

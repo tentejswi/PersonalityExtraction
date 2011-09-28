@@ -172,10 +172,89 @@ public class Wikiminer {
 		return null;
 
 	}
+	
+	public static String getexploreCategoryXML(String wikiminer_id) {
+		try {
+			// String urlStr =
+			// "http://wdm.cs.waikato.ac.nz:8080/service?task=search&xml";
+			String urlStr = "http://50.19.209.97:8080/wikipediaminer/services/exploreCategory?parentCategories=true";
+			urlStr += "&id=" + wikiminer_id;
+
+			// return from cache
+			if (cache.containsKey(urlStr)) {
+				return cache.get(urlStr);
+			}
+
+			URL url = new URL(urlStr);
+			URLConnection yc = url.openConnection();
+			BufferedReader in = new BufferedReader(new InputStreamReader(yc
+					.getInputStream()));
+			String inputLine;
+
+			StringBuffer buf = new StringBuffer();
+			while ((inputLine = in.readLine()) != null)
+				buf.append(inputLine);
+			in.close();
+
+			String xml = buf.toString();
+
+			if (!xml.contains("ParentCategory")) {
+				return null;
+			}
+
+			cache.put(urlStr, xml);
+			return xml;
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+
+		return null;
+
+	}
 
 	public static ArrayList<WikipediaEntity> getCategories(String wikiminer_id) {
 		String xml = getexploreArticleXML(wikiminer_id);
 		ArrayList<WikipediaEntity> categories = new ArrayList<WikipediaEntity>();
+		if(xml == null) {
+			return categories;
+		}
+		DocumentBuilder db = null;
+		DocumentBuilderFactory dbf = DocumentBuilderFactory.newInstance();
+		try {
+			db = dbf.newDocumentBuilder();
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+
+		InputSource is = new InputSource();
+		is.setCharacterStream(new StringReader(xml));
+		try {
+			Document dom = db.parse(is);
+			NodeList catNodes = dom.getElementsByTagName("ParentCategory");
+			if (catNodes != null && catNodes.getLength() != 0) {
+				for (int i = 0; i < catNodes.getLength(); i++) {
+					Node cat = catNodes.item(i);
+					if (cat != null) {
+						NamedNodeMap attrs = cat.getAttributes();
+						String[] values = new String[2];
+						values[0] = attrs.getNamedItem("id").getTextContent();
+						values[1] = attrs.getNamedItem("title").getTextContent();
+						categories.add(new WikipediaEntity(values[1],values[0], 1));
+					}
+				}
+			}
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+		return categories;
+	}
+	
+	public static ArrayList<WikipediaEntity> getParentCategories(String wikiminer_id) {
+		String xml = getexploreCategoryXML(wikiminer_id);
+		ArrayList<WikipediaEntity> categories = new ArrayList<WikipediaEntity>();
+		if(xml == null) {
+			return categories;
+		}
 		DocumentBuilder db = null;
 		DocumentBuilderFactory dbf = DocumentBuilderFactory.newInstance();
 		try {
