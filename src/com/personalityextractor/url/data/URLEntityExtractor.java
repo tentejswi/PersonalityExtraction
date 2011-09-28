@@ -16,7 +16,7 @@ public class URLEntityExtractor {
 
 	ViterbiResolver vr = new ViterbiResolver();
 	
-	public List<String> extractEntitiesinTitle(String title) {
+	public static List<String> extractEntitiesinTitle(String title) {
 		IEntityExtractor extractor = EntityExtractFactory.produceExtractor(Extracter.SENNANOUNPHRASE);
 		return extractor.extract(title);
 	}
