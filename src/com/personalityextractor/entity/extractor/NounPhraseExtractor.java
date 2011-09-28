@@ -18,7 +18,7 @@ public class NounPhraseExtractor implements IEntityExtractor {
 	static {
 		try {
 			Date d1 = new Date();
-			lp = new LexicalizedParser("/Users/semanticvoid/projects/PE/lair/englishPCFG.ser.gz");
+			lp = new LexicalizedParser("/Users/tejaswi/Documents/workspace/PersonalityExtraction/lair/englishPCFG.ser.gz");
 			lp.setOptionFlags(new String[] { "-maxLength", "80",
 					"-retainTmpSubcategories" });
 			Date d2 = new Date();
@@ -51,7 +51,7 @@ public class NounPhraseExtractor implements IEntityExtractor {
 				Tree topNode = queue.remove(0);
 
 				if (topNode.isPreTerminal()) {
-					if (topNode.value().startsWith("NNP")) {
+					if (topNode.value().startsWith("NN")) {
 						str.append(topNode.children()[0].value() + " ");
 						flag = true;
 					} else if (flag == true) {
