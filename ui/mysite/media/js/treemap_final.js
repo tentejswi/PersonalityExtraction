@@ -188,7 +188,7 @@ var svg = d3.select("body").append("svg:svg")
 	;
 
 var user_url = media_path+"user.json";
-//user_url = "http://ec2-50-19-209-97.compute-1.amazonaws.com/api/interest.php?u="+username;
+user_url = "http://ec2-50-19-209-97.compute-1.amazonaws.com/api/interest.php?u="+username;
 
 d3.json(user_url, function(json) {
   stringifyJson = JSON.stringify(json);

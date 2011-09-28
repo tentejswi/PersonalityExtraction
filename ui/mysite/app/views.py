@@ -22,9 +22,13 @@ def index(request):
         return render_to_response('index.html', {'version': settings.APP_VERSION},
                                   RequestContext(request))
 
-def tryfirst(request):
+def tryfirst(request, username):
    """This is for when the user tries out by giving the twitter handle directly"""
-   return render_to_response('home.html', {'version': settings.APP_VERSION},
+   ctx = RequestContext(request, {
+		'version' : settings.APP_VERSION,
+		'username': username,
+	})
+   return render_to_response('home.html', ctx,
                              RequestContext(request))
 
 @login_required
