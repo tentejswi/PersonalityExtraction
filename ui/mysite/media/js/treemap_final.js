@@ -69,6 +69,11 @@ function activeTrue(d, i){
 		.transition()
 		.style("opacity",1)
 		;
+		
+	// Make tooltip visibile
+	if(d3.select(this).select(".category-text").classed("wordwrapped"))
+	tooltip.style("visibility", "visible");
+	tooltip.text(d.key);
 }
 
 function activeFalse(d, i){
@@ -83,6 +88,9 @@ function activeFalse(d, i){
 		.transition()
 		.style("opacity",1e-6)
 		;
+		
+	// Hide tooltip
+	tooltip.style("visibility", "hidden");
 }
 
 function fontSize(d,i) {
@@ -157,6 +165,7 @@ function wordWrap(d, i){
 				text = d3.select(this).select(function() {return this.lastChild;}).text();
 				text = text + "...";
 				d3.select(this).select(function() {return this.lastChild;}).text(text);
+				d3.select(this).classed("wordwrapped", true);
 				// break out of this loop since we can't proceed further
 				break;
 			}
@@ -169,9 +178,6 @@ function wordWrap(d, i){
 	
 	this.firstChild.data = '';
 }
-
-// var profilePic = 'http://michelleshaeffer.com/wp-content/uploads/2010/08/coffee_cup.jpg';
-// var profilePic = media_path+"images/"+"coffee_cup.jpg";
 	
 var treemap = d3.layout.treemap()
     .size([w, h])
@@ -187,20 +193,29 @@ var svg = d3.select("body").append("svg:svg")
     .attr("transform", "translate(-.5,-.5)")
 	;
 
-var user_url = media_path+"user.json";
+var tooltip = d3.select("body")
+	.append("div")
+	.attr("id", "tooltip")
+	.style("position", "absolute")
+	.style("z-index", "10")
+	.style("visibility", "hidden")
+	.text("")
+	;
+
+// var user_url = media_path+"user.json";
 user_url = "http://ec2-50-19-209-97.compute-1.amazonaws.com/api/interest.php?u="+username;
 
 d3.json(user_url, function(json) {
   stringifyJson = JSON.stringify(json);
   var cell = svg.data(d3.entries(json)).selectAll("g")
-//      .data(treemap.nodes, function(d) {return d.key+","+d.value;})
 		.data(treemap.nodes)
     .enter().append("svg:g")
       .attr("class", "cell")
       .attr("transform", function(d) { return "translate(" + d.x + "," + d.y + ")"; })
-	  .attr("visibility", function(d) {return d.depth == 0 ? "visible" : "hidden"})
+	  .attr("visibility", function(d) {return d.depth == 0 ? "visible" : "hidden";})
 	  .on("click",onClick)
 	  .on('mouseover',activeTrue)
+	  .on("mousemove", function(){return tooltip.style("top", (event.pageY-10)+"px").style("left",(event.pageX+10)+"px");})
 	  .on('mouseout', activeFalse)
 	  ;
 	
@@ -239,6 +254,7 @@ d3.json(user_url, function(json) {
 	  .each(fontSize)
 	  .each(wordWrap)
 	  ;
+
   if (isAuthenticated) {
   	cell.append("svg:a")
   		.attr("xlink:href", "#")
