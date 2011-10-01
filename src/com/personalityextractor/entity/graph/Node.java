@@ -20,7 +20,8 @@ public class Node {
 	private String id;
 	private List<Edge> edges;
 	private WikipediaEntity entity;
-	private double weight = 0;
+	private double weight = 0.0;
+	private boolean isLeaf = false;
 	
 	public Node(WikipediaEntity entity) {
 		this.id = entity.getWikiminerID();
@@ -45,6 +46,10 @@ public class Node {
 		return weight;
 	}
 	
+	public void setWeight(double w) {
+		weight = w;
+	}
+	
 	public List<Edge> getEdges() {
 		return edges;
 	}
@@ -63,5 +68,19 @@ public class Node {
 		json.put("text", entity.getText());
 		json.put("weight", weight);
 		return json;
+	}
+
+	/**
+	 * @return the isLeaf
+	 */
+	public boolean isLeaf() {
+		return isLeaf;
+	}
+
+	/**
+	 * @param isLeaf the isLeaf to set
+	 */
+	public void setLeaf(boolean isLeaf) {
+		this.isLeaf = isLeaf;
 	}
 }
