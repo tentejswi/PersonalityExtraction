@@ -13,10 +13,14 @@ import java.util.Set;
 import net.sf.json.JSONObject;
 
 import com.personalityextractor.Runner;
+import com.personalityextractor.commons.data.Tweet;
 import com.personalityextractor.data.source.Wikiminer;
 import com.personalityextractor.entity.WikipediaEntity;
+import com.personalityextractor.entity.extractor.frequencybased.TopNNPHashTagsExtractor;
 import com.personalityextractor.entity.graph.ranking.IRanker;
 import com.personalityextractor.entity.graph.ranking.WeightGraphRanker;
+
+import cs224n.util.Counter;
 
 /**
  * @author semanticvoid
@@ -51,52 +55,54 @@ public class Graph {
 		Set<String> currCategories;
 
 		int iter = 0;
-		do {
-			currCategories = new HashSet<String>();
-
-			
-			for (String cid : prevCategories) {
-				Node cNode = nodes.get(cid);
-				List<WikipediaEntity> categories = null;
-//				if(iter == 0) {
-					categories = Wikiminer.getCategories(cid);
-//				} else {
-//					categories = Wikiminer.getParentCategories(cid);
-//				}
+		if(depth > 0) {
+			do {
+				currCategories = new HashSet<String>();
+	
 				
-				List<WikipediaEntity> tmpCategories = new ArrayList<WikipediaEntity>();
-				for (WikipediaEntity c : categories) {
-					String txt = c.getText();
-					WikipediaEntity e = Wikiminer.getHighestSenseEntity(txt);
-					if(e != null) {
-						tmpCategories.add(e);
+				for (String cid : prevCategories) {
+					Node cNode = nodes.get(cid);
+					List<WikipediaEntity> categories = null;
+	//				if(iter == 0) {
+						categories = Wikiminer.getCategories(cid);
+	//				} else {
+	//					categories = Wikiminer.getParentCategories(cid);
+	//				}
+					
+					List<WikipediaEntity> tmpCategories = new ArrayList<WikipediaEntity>();
+					for (WikipediaEntity c : categories) {
+						String txt = c.getText();
+						WikipediaEntity e = Wikiminer.getHighestSenseEntity(txt);
+						if(e != null) {
+							tmpCategories.add(e);
+						}
+					}
+					categories = tmpCategories;
+					
+					for (WikipediaEntity category : categories) {
+						Node n2 = null;
+	
+						if (cid.equalsIgnoreCase(category.getWikiminerID())) {
+							continue;
+						}
+	
+						if (!nodes.containsKey(category.getWikiminerID())) {
+							currCategories.add(category.getWikiminerID());
+							n2 = new Node(category);
+							nodes.put(n2.getId(), n2);
+						} else {
+							n2 = nodes.get(category.getWikiminerID());
+						}
+	
+						formEdge(cNode, n2, cNode.getWeight());
 					}
 				}
-				categories = tmpCategories;
-				
-				for (WikipediaEntity category : categories) {
-					Node n2 = null;
-
-					if (cid.equalsIgnoreCase(category.getWikiminerID())) {
-						continue;
-					}
-
-					if (!nodes.containsKey(category.getWikiminerID())) {
-						currCategories.add(category.getWikiminerID());
-						n2 = new Node(category);
-						nodes.put(n2.getId(), n2);
-					} else {
-						n2 = nodes.get(category.getWikiminerID());
-					}
-
-					formEdge(cNode, n2, cNode.getWeight());
-				}
-			}
-			iter++;
-
-			prevCategories = currCategories;
-			currentDepth++;
-		} while (prevCategories.size() > 0 && currentDepth < depth);
+				iter++;
+	
+				prevCategories = currCategories;
+				currentDepth++;
+			} while (prevCategories.size() > 0 && currentDepth < depth);
+		}
 
 		// link to roo
 		for (String cid : prevCategories) {
@@ -150,7 +156,10 @@ public class Graph {
 	private JSONObject generateJSON(Node root, Node parent, Set<String> seen) {
 		if(root == null) {
 			return null;
+		} else {
+			seen.add(root.getId());
 		}
+		
 		JSONObject json = new JSONObject();
 		List<Edge> edges = root.getEdges();
 		
@@ -190,13 +199,24 @@ public class Graph {
 	
 	public static void main(String[] args) {
 		ArrayList<WikipediaEntity> entities = new ArrayList<WikipediaEntity>();
-		entities.add(new WikipediaEntity("Rajiv Gandhi", "26129", 1));
-		WikipediaEntity e = new WikipediaEntity("Sonia Gandhi", "169798", 1);
-		e.incrCount();
-		e.incrCount();e.incrCount();
-		entities.add(e);
+//		entities.add(new WikipediaEntity("Rajiv Gandhi", "26129", 1));
+//		WikipediaEntity e = new WikipediaEntity("Sonia Gandhi", "169798", 1);
+//		e.incrCount();
+//		e.incrCount();
+//		e.incrCount();
+//		entities.add(e);
+		
+		List<String> tweets = new ArrayList<String>();
+		tweets.add("Sonia Gandhi is a person.");
+		tweets.add("Rajiv Gandhi is a person.");
+		TopNNPHashTagsExtractor tne = new TopNNPHashTagsExtractor();
+		Counter<String> extracted_entities = tne.extract(tweets);
+		HashMap<String, WikipediaEntity> allEntities = tne.resolve(extracted_entities);
+		entities = new ArrayList<WikipediaEntity>();
+		entities.addAll(allEntities.values());
+		
 		Graph g = new Graph(entities);
-		g.build(3);
+		g.build(0);
 		g.printWeights();
 		IRanker ranker = new WeightGraphRanker(g);
 		List<Node> topNodes = ranker.getTopRankedNodes(100);
