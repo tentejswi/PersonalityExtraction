@@ -717,6 +717,8 @@ public class Wikiminer {
 
 		for (int i = 0; i < sensesplit.length; i++) {
 			String s = sensesplit[i];
+			if(s.length()<=0)
+				continue;
 			if (Character.isLowerCase(s.charAt(0))) {
 				sensesplit[i] = (Character.toUpperCase(s.charAt(0)) + s
 						.substring(1));
