@@ -45,18 +45,17 @@ public class TopNNPHashTagsExtractor implements IFrequencyBasedExtractor {
 		buildTweetIDMap(allTweets);
 		Counter<String> entityCounter = new Counter<String>();
 		IEntityExtractor extractor = EntityExtractFactory
-				.produceExtractor(Extracter.SENNANOUNPHRASE);
+				.produceExtractor(Extracter.NOUNPHRASE);
 		for (String id : tweetIDs.keySet()) {
 			HashSet<String> entitiesInTweet = new HashSet<String>();
 			Tweet tweet = tweetIDs.get(id);
-			System.out.println(tweet.getSentences());
 			if (!tweetToEntities.containsKey(id)) {
 				ArrayList<String> ents = new ArrayList<String>();
 				tweetToEntities.put(id, ents);
 			}
 			
 			for (String s : tweet.getSentences()) {
-				List<String> entities = extractor.extract(s);
+				List<String> entities = extractor.extract(s.replaceAll("&", "and"));
 				entitiesInTweet.addAll(entities);
 				for (String entity : entities) {
 					tweetToEntities.get(id).add(entity);
@@ -75,7 +74,6 @@ public class TopNNPHashTagsExtractor implements IFrequencyBasedExtractor {
 
 			if (tweet.getLinks() != null) {
 				for (String link : tweet.getLinks()) {
-					// System.out.println(link);
 					List<String> entities = URLEntityExtractor
 							.extractEntitiesinTitle(link);
 					if (entities != null) {
@@ -179,6 +177,7 @@ public class TopNNPHashTagsExtractor implements IFrequencyBasedExtractor {
 		return finalEntityCounter;
 	}
 
+	
 	public HashMap<String, WikipediaEntity> resolve(Counter<String> entityCounter) {
 		HashMap<String, WikipediaEntity> resolvedEntities = new HashMap<String, WikipediaEntity>();
 		for (String entity : entityCounter.keySet()) {
@@ -187,12 +186,11 @@ public class TopNNPHashTagsExtractor implements IFrequencyBasedExtractor {
 			if (entityXML == null)
 				continue;
 
-			System.out.println("Resolving : " + entity);
+			//System.out.println("Resolving : " + entity);
 
 			List<String> oentities = new ArrayList<String>();
 			if (cooccurence.keySet().contains(entity)) {
-				PriorityQueue<String> sorted = cooccurence.getCounter(entity)
-						.asPriorityQueue();
+				PriorityQueue<String> sorted = cooccurence.getCounter(entity).asPriorityQueue();
 				int count =0;
 //				while (sorted.hasNext() && count<5) {
 				while (sorted.hasNext()) {
@@ -215,7 +213,7 @@ public class TopNNPHashTagsExtractor implements IFrequencyBasedExtractor {
 					continue;
 				if (entity.equalsIgnoreCase(oentity))
 					continue;
-				System.out.println("comparing with " + oentity);
+				//System.out.println("comparing with " + oentity);
 				HashMap<String, WikipediaEntity> relativeBestSenses = Wikiminer
 						.getRelativeBestSenses(entity, oentity);
 				if (relativeBestSenses != null
@@ -240,12 +238,15 @@ public class TopNNPHashTagsExtractor implements IFrequencyBasedExtractor {
 		return resolvedEntities;
 	}
 
+	
 	public static void main(String[] args) {
 		TopNNPHashTagsExtractor tt = new TopNNPHashTagsExtractor();
 		ReadJSON rjs = new ReadJSON();
 		List<String> json = FileRW.getLinesinFile(args[0]);
 		List<String> tweets = new ArrayList<String>();
 		for (String son : json) {
+			if(son.length()==0)
+				continue;
 			tweets.addAll(rjs.parseJSONArray(son));
 		}
 
