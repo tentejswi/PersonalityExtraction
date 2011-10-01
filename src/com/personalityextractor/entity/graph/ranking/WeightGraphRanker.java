@@ -52,8 +52,11 @@ public class WeightGraphRanker extends AbstractRanker {
 		Iterator<Node> itr = nodes.iterator();
 		int i = 0;
 		while(itr.hasNext() && i<n) {
-			topNodes.add(itr.next());
-			i++;
+			Node node = itr.next();
+//			if(node.getWeight() >= 1) {
+				topNodes.add(node);
+				i++;
+//			}
 		}
 		
 		return topNodes;

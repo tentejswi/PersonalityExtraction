@@ -393,6 +393,51 @@ public class Wikiminer {
 		}
 		return rankedCategories;
 	}
+	
+	public static WikipediaEntity getHighestSenseEntity(String query){
+		String xml = getXML(query, false);
+		
+		DocumentBuilderFactory dbf = DocumentBuilderFactory.newInstance();
+		DocumentBuilder db = null;
+		try {
+			db = dbf.newDocumentBuilder();
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+		
+		try {
+			InputSource is = new InputSource();
+	        is.setCharacterStream(new StringReader(xml));
+//	        System.out.println(xml);
+			Document dom = db.parse(is);
+			NodeList senseNodes = dom.getElementsByTagName("Sense");
+			Node topSense = senseNodes.item(0);
+			if(topSense != null) {
+				NamedNodeMap attrs = topSense.getAttributes();
+				Node commonness = attrs.getNamedItem("priorProbability");
+				try {
+					double relevance = Double.parseDouble(commonness.getTextContent());
+					if(relevance >= 0.70) {
+						return new WikipediaEntity(attrs.getNamedItem("title").getTextContent(), attrs.getNamedItem("id").getTextContent(), 1);
+					}
+				} catch (Exception e) {
+					e.printStackTrace();
+				}
+			} else {
+				NodeList articleNodes = dom.getElementsByTagName("Article");
+				if(articleNodes != null && articleNodes.item(0) != null) {
+					NamedNodeMap attrs = articleNodes.item(0).getAttributes();
+					return new WikipediaEntity(attrs.getNamedItem("title").getTextContent(), attrs.getNamedItem("id").getTextContent(), 1);	
+				}
+			}
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+
+
+		return null;
+
+	}
 
 	public static ArrayList<WikipediaEntity> getWikipediaEntities(String xml,
 			boolean getId) {

@@ -24,6 +24,8 @@ import com.personalityextractor.entity.graph.ranking.WeightGraphRanker;
  */
 public class Graph {
 
+	private static double DECAY = 0.5;
+	
 	HashMap<String, Node> nodes;
 	Node root = null;
 	int edgeCount = 0;
@@ -33,6 +35,8 @@ public class Graph {
 		this.nodes = new HashMap<String, Node>();
 		for (WikipediaEntity we : leafEntities) {
 			Node n = new Node(we);
+			n.setLeaf(true);
+			n.setWeight(we.count);
 			nodes.put(n.getId(), n);
 		}
 	}
@@ -54,11 +58,22 @@ public class Graph {
 			for (String cid : prevCategories) {
 				Node cNode = nodes.get(cid);
 				List<WikipediaEntity> categories = null;
-				if(iter == 0) {
+//				if(iter == 0) {
 					categories = Wikiminer.getCategories(cid);
-				} else {
-					categories = Wikiminer.getParentCategories(cid);
+//				} else {
+//					categories = Wikiminer.getParentCategories(cid);
+//				}
+				
+				List<WikipediaEntity> tmpCategories = new ArrayList<WikipediaEntity>();
+				for (WikipediaEntity c : categories) {
+					String txt = c.getText();
+					WikipediaEntity e = Wikiminer.getHighestSenseEntity(txt);
+					if(e != null) {
+						tmpCategories.add(e);
+					}
 				}
+				categories = tmpCategories;
+				
 				for (WikipediaEntity category : categories) {
 					Node n2 = null;
 
@@ -96,6 +111,8 @@ public class Graph {
 		n1.addEdge(e1);
 		n2.addEdge(e2);
 		n2.addWeight(weight);
+		// add decay
+//		n2.addWeight(weight*1.0*DECAY);
 	}
 
 	public Collection<Node> getNodes() {
@@ -111,7 +128,7 @@ public class Graph {
 //			JSONObject j = generateJSON(n, null, seen);
 //			System.out.println(j.toString());
 //			json.put(n.getEntity().getText(), j);
-			formEdge(n, root, 0);
+			formEdge(n, root, 1);
 		}
 		
 		json =  generateJSON(root, null, new HashSet<String>());
@@ -155,8 +172,11 @@ public class Graph {
 							json.put(nodes.get(e.getNode2()).getEntity().getText(), cJson);
 						} else {
 							if(nodes.get(e.getNode2()) != null && nodes.get(e.getNode2()) != null && !seen.contains(e.getNode2())) {
-								json.put(nodes.get(e.getNode2()).getEntity().getText(), nodes.get(e.getNode2())
-									.getWeight());
+								double w = nodes.get(e.getNode2()).getWeight();
+								if(nodes.get(e.getNode2()).getWeight() < 1) {
+									w = 1;
+								}
+								json.put(nodes.get(e.getNode2()).getEntity().getText(), w);
 							}
 						}
 					}
