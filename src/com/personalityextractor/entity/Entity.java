@@ -13,6 +13,7 @@ public class Entity {
 	public ArrayList<String> tweets;
 	
 	public Entity(String text){
+		text = text.replaceAll("'", "");
 		this.text= text;
 		tweets = new ArrayList<String>();
 	}

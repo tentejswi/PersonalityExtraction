@@ -23,7 +23,7 @@ import cs224n.util.PriorityQueue;
 
 public class TopNNPHashTagsExtractor implements IFrequencyBasedExtractor {
 
-	double threshold = 1.0;
+	double threshold = 0.0;
 	HashMap<String, Tweet> tweetIDs = new HashMap<String, Tweet>();
 	HashMap<String, ArrayList<String>> entityToTweetIDs = new HashMap<String, ArrayList<String>>();
 	HashMap<String, ArrayList<String>> tweetToEntities = new HashMap<String, ArrayList<String>>();
@@ -194,7 +194,8 @@ public class TopNNPHashTagsExtractor implements IFrequencyBasedExtractor {
 				PriorityQueue<String> sorted = cooccurence.getCounter(entity)
 						.asPriorityQueue();
 				int count =0;
-				while (sorted.hasNext() && count<5) {
+//				while (sorted.hasNext() && count<5) {
+				while (sorted.hasNext()) {
 					oentities.add(sorted.next());
 					count++;
 				}
@@ -225,12 +226,15 @@ public class TopNNPHashTagsExtractor implements IFrequencyBasedExtractor {
 			}
 
 			if (senseCounter.argMax() != null) {
-				System.out.println("Resolved");
-				resolvedEntities.put(entity, senseCounter.argMax());
+				System.out.println("Resolved: " + senseCounter.argMax().getText());
+				WikipediaEntity e = senseCounter.argMax();
+				e.count += entityCounter.getCount(entity);
+				resolvedEntities.put(entity, e);
 			} else {
 				List<WikipediaEntity> wikiSenses = Wikiminer
 						.getWikipediaEntities(entityXML, false);
 				resolvedEntities.put(entity, wikiSenses.get(0));
+				System.out.println("Resolved: " + wikiSenses.get(0).getText());
 			}
 		}
 		return resolvedEntities;

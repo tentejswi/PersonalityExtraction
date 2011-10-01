@@ -9,6 +9,7 @@ public class WikipediaEntity extends Entity implements
 	String commonnness;
 	ArrayList<String> categories;
 	int type;
+	public double count = 0;
 	
 	private void debug() {
 		// System.out.println("init:\t" + type + "\t" + wikiminer_id + "\t" +
