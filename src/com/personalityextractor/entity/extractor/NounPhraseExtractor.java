@@ -18,7 +18,7 @@ public class NounPhraseExtractor implements IEntityExtractor {
 	static {
 		try {
 			Date d1 = new Date();
-			lp = new LexicalizedParser("/Users/tejaswi/Documents/workspace/PersonalityExtraction/lair/englishPCFG.ser.gz");
+			lp = new LexicalizedParser("/home/ubuntu/data/englishPCFG.ser.gz");
 			lp.setOptionFlags(new String[] { "-maxLength", "80",
 					"-retainTmpSubcategories" });
 			Date d2 = new Date();
