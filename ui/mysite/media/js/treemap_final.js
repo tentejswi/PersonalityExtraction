@@ -1,8 +1,5 @@
-// var w = window.innerWidth - 1,
-   // h = window.innerHeight - 1;
-// var w = document.body.clientWidth,
-	// h = document.body.clientHeight;
-var w = 1279, h = 746;
+var w = window.innerWidth - 1,
+   h = window.innerHeight - 1;
 var colorbrewer = ["rgb(158,1,66)","rgb(213,62,79)","rgb(244,109,67)","rgb(253,174,97)","rgb(254,224,139)","rgb(230,245,152)","rgb(171,221,164)","rgb(102,194,165)","rgb(50,136,189)","rgb(94,79,162)"];
 var color = d3.scale.ordinal().range(colorbrewer)
 var re = "";
@@ -204,8 +201,8 @@ var tooltip = d3.select("body")
 	.text("")
 	;
 
-var user_url = media_path+"user_single.json";
-// user_url = "http://ec2-50-19-209-97.compute-1.amazonaws.com/api/interest.php?u="+username + '&s='+socialBackend;
+var user_url = media_path+"user.json";
+user_url = "http://ec2-50-19-209-97.compute-1.amazonaws.com/api/interest.php?u="+username + '&s='+socialBackend;
 
 d3.json(user_url, function(json) {
   stringifyJson = JSON.stringify(json);
