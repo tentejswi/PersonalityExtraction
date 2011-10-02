@@ -14,6 +14,7 @@ import net.sf.json.JSONObject;
 import com.personalityextractor.data.source.Twitter;
 import com.personalityextractor.entity.WikipediaEntity;
 import com.personalityextractor.entity.extractor.frequencybased.TopNNPHashTagsExtractor;
+import com.personalityextractor.entity.extractor.frequencybased.TopNPExtractor;
 import com.personalityextractor.entity.graph.Edge;
 import com.personalityextractor.entity.graph.Graph;
 import com.personalityextractor.entity.graph.Node;
@@ -89,14 +90,23 @@ public class Runner {
 		if (handle != null) {
 			Date start = new Date();
 			System.out.print("processing " + handle + "...\t");
-			List<String> tweets = t.fetchTweets(handle, 20);
-			TopNNPHashTagsExtractor tne = new TopNNPHashTagsExtractor();
+			List<String> tweets = t.fetchTweets(handle, 200);
+			//TopNNPHashTagsExtractor tne = new TopNNPHashTagsExtractor();
+			TopNPExtractor tne = new TopNPExtractor(); 
 			Counter<String> extracted_entities = tne.extract(tweets);
+			System.out.println("Number of entities: "+extracted_entities.size());
 			allEntities = tne.resolve(extracted_entities);
+			
+			System.out.println("=========Wikipedia Entities==============");
+			for(String str : allEntities.keySet()){
+				System.out.println(str+" "+allEntities.get(str).getText()+" "+allEntities.get(str).getWikiminerID());
+			}
+			System.out.println("=========================================");
+			
 			List<WikipediaEntity> entities = new ArrayList<WikipediaEntity>();
 			entities.addAll(allEntities.values());
 			Graph g = new Graph(entities);
-			g.build(1);
+			g.build(0);
 			g.printWeights();
 			Date end = new Date();
 			PerfMetrics.getInstance().addToMetrics(Metric.TOTAL,
@@ -138,7 +148,7 @@ public class Runner {
 		while (true) {
 			System.out.println("running");
 			run();
-			break;
+			//Thread.sleep(10000);
 		}
 	}
 
