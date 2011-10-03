@@ -59,7 +59,7 @@ public class Runner {
 
 	public static boolean setUserInterests(String handle, String json) {
 		return store
-				.executeUpdate("INSERT INTO user_interests(handle, json) values ('"
+				.executeUpdate("INSERT INTO user_interests_alpha(handle, json) values ('"
 						+ handle
 						+ "','"
 						+ json
