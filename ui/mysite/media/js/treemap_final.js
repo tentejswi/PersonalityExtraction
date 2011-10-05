@@ -186,8 +186,8 @@ var treemap = d3.layout.treemap()
 	;
 	
 var svg = d3.select("body").append("svg:svg")
-    .style("width", w)
-    .style("height", h)
+    .attr("width", w)
+    .attr("height", h)
   .append("svg:g")
     .attr("transform", "translate(-.5,-.5)")
 	;
