@@ -1,4 +1,6 @@
 /*base.html*/
+* {padding: 0; margin: 0;} 
+
 h3 {
 	font-family: 'Helvetica Neue', 'Helvetica', 'Arial';
 	font-size: 20pt;

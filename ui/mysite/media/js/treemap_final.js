@@ -201,8 +201,8 @@ var tooltip = d3.select("body")
 	.text("")
 	;
 
-var user_url = media_path+"user.json";
-user_url = "http://ec2-50-19-209-97.compute-1.amazonaws.com/api/interest.php?u="+username + '&s='+socialBackend;
+// var user_url = media_path+"user.json";
+var user_url = "http://ec2-50-19-209-97.compute-1.amazonaws.com/api/interest.php?u="+username + '&s='+socialBackend;
 
 d3.json(user_url, function(json) {
   stringifyJson = JSON.stringify(json);
@@ -214,7 +214,7 @@ d3.json(user_url, function(json) {
 	  .attr("visibility", function(d) {return d.depth == 0 ? "visible" : "hidden";})
 	  .on("click",onClick)
 	  .on('mouseover',activeTrue)
-	  .on("mousemove", function(){return tooltip.style("top", (event.pageY-10)+"px").style("left",(event.pageX+10)+"px");})
+	  .on("mousemove", function(){return tooltip.style("top", (d3.event.pageY-10)+"px").style("left",(d3.event.pageX+10)+"px");})
 	  .on('mouseout', activeFalse)
 	  ;
 	
