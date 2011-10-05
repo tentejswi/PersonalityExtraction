@@ -13,7 +13,6 @@ import java.util.Set;
 import net.sf.json.JSONObject;
 
 import com.personalityextractor.Runner;
-import com.personalityextractor.commons.data.Tweet;
 import com.personalityextractor.data.source.Wikiminer;
 import com.personalityextractor.entity.WikipediaEntity;
 import com.personalityextractor.entity.extractor.frequencybased.TopNNPHashTagsExtractor;
@@ -28,6 +27,34 @@ import cs224n.util.Counter;
  */
 public class Graph {
 
+	private static Set<String> superCategories = new HashSet<String>();
+	static {
+		superCategories.add("Agriculture");
+		superCategories.add("Arts");
+		superCategories.add("Applied sciences");
+		superCategories.add("Belief");
+		superCategories.add("Business");
+		superCategories.add("Computers");
+		superCategories.add("Culture");
+		superCategories.add("Education");
+		superCategories.add("Environment");
+		superCategories.add("Geography");
+		superCategories.add("Health");
+		superCategories.add("History");
+		superCategories.add("Humanities");
+		superCategories.add("Language");
+		superCategories.add("Law");
+		superCategories.add("Mathematics");
+		superCategories.add("Nature");
+		superCategories.add("People");
+		superCategories.add("Politics");
+		superCategories.add("Science");
+		superCategories.add("Society");
+		superCategories.add("Technology");
+		superCategories.add("Sports");
+		superCategories.add("Travel");
+	}
+	
 	private static double DECAY = 0.5;
 	
 	HashMap<String, Node> nodes;
@@ -44,72 +71,181 @@ public class Graph {
 			nodes.put(n.getId(), n);
 		}
 	}
-
-	public void build(int depth) {
+	
+	private WikipediaEntity getSuperCategory(String id, int depth) {
+		WikipediaEntity entity = null;
+		int shortestPath = Integer.MAX_VALUE;
 		int currentDepth = 0;
+		int maxCount = -1;
+		HashMap<String, WikipediaEntity> entities = new HashMap<String, WikipediaEntity>();
+		HashMap<String, Integer> entityCount = new HashMap<String, Integer>();
 		Set<String> prevCategories = new HashSet<String>();
-
-		// add leaf node categories
-		prevCategories.addAll(nodes.keySet());
-
-		Set<String> currCategories;
-
+		Set<String> currCategories = null;
+		prevCategories.add(id);
+		
 		int iter = 0;
-		if(depth > 0) {
-			do {
-				currCategories = new HashSet<String>();
-	
-				
-				for (String cid : prevCategories) {
-					Node cNode = nodes.get(cid);
-					List<WikipediaEntity> categories = null;
-	//				if(iter == 0) {
-						categories = Wikiminer.getCategories(cid);
-	//				} else {
-	//					categories = Wikiminer.getParentCategories(cid);
-	//				}
-					
-					List<WikipediaEntity> tmpCategories = new ArrayList<WikipediaEntity>();
-					for (WikipediaEntity c : categories) {
-						String txt = c.getText();
-						WikipediaEntity e = Wikiminer.getHighestSenseEntity(txt);
-						if(e != null) {
-							tmpCategories.add(e);
-						}
-					}
-					categories = tmpCategories;
-					
-					for (WikipediaEntity category : categories) {
-						Node n2 = null;
-	
-						if (cid.equalsIgnoreCase(category.getWikiminerID())) {
-							continue;
-						}
-	
-						if (!nodes.containsKey(category.getWikiminerID())) {
-							currCategories.add(category.getWikiminerID());
-							n2 = new Node(category);
-							nodes.put(n2.getId(), n2);
-						} else {
-							n2 = nodes.get(category.getWikiminerID());
-						}
-	
-						formEdge(cNode, n2, cNode.getWeight());
-					}
-				}
-				iter++;
-	
-				prevCategories = currCategories;
-				currentDepth++;
-			} while (prevCategories.size() > 0 && currentDepth < depth);
-		}
+		do {
+			currCategories = new HashSet<String>();
 
-		// link to roo
-		for (String cid : prevCategories) {
-			Node cNode = nodes.get(cid);
-			formEdge(cNode, root, 0);
+			
+			for (String cid : prevCategories) {
+				Node cNode = nodes.get(cid);
+				List<WikipediaEntity> categories = null;
+				if(iter == 0) {
+					categories = Wikiminer.getCategories(cid);
+				} else {
+					categories = Wikiminer.getParentCategories(cid);
+				}
+				
+				for (WikipediaEntity category : categories) {
+					Node n2 = null;
+
+					if (cid.equalsIgnoreCase(category.getWikiminerID())) {
+						continue;
+					}
+
+					if (!nodes.containsKey(category.getWikiminerID())) {
+						if(!superCategories.contains(category.getText())) {
+							currCategories.add(category.getWikiminerID());
+						} else {
+							System.out.println("hit " + category.getText() + " at depth " + currentDepth);
+							if(currentDepth < shortestPath) {
+								entity = category;
+							}
+							
+							if(!entities.containsKey(category.getText())) {
+								entities.put(category.getText(), category);
+							}
+							
+							if(!entityCount.containsKey(category.getText())) {
+								entityCount.put(category.getText(), 1);
+							} else {
+								entityCount.put(category.getText(), entityCount.get(category.getText()) + 1);
+							}
+						}
+//						n2 = new Node(category);
+//						nodes.put(n2.getId(), n2);
+					} else {
+//						n2 = nodes.get(category.getWikiminerID());
+					}
+
+//					formEdge(cNode, n2, cNode.getWeight());
+				}
+			}
+			iter++;
+
+			prevCategories = currCategories;
+			currentDepth++;
+			System.out.println("depth:\t" + currentDepth);
+		} while (prevCategories.size() > 0 && currentDepth < depth);
+		
+		for(String k : entityCount.keySet()) {
+			int count = entityCount.get(k);
+			if(count > maxCount) {
+				maxCount = count;
+				entity = entities.get(k);
+			}
 		}
+		
+		return entity;
 	}
+	
+	public void build(int depth) {
+		Set<Node> cNodes = new HashSet<Node>();
+		Object[] ids = nodes.keySet().toArray();
+		for(Object id : ids) {
+			String cid = (String) id;
+			WikipediaEntity e = getSuperCategory(cid, 5);
+			if(e != null) {
+				Node n2 = new Node(e);
+				if(!nodes.containsKey(n2.getId())) {
+					cNodes.add(n2);
+//					nodes.put(n2.getId(), n2);
+				}
+				Node n1 = nodes.get(cid);
+				formEdge(n1, n2, 1);	// fixed weight for now
+			}
+		}
+		
+		// link to root
+		for (Node n : cNodes) {
+			nodes.put(n.getId(), n);
+			formEdge(n, root, 1);
+		}
+		
+		System.out.println("done");
+	}
+
+//	public void build(int depth) {
+//		int currentDepth = 0;
+//		Set<String> prevCategories = new HashSet<String>();
+//
+//		// add leaf node categories
+//		prevCategories.addAll(nodes.keySet());
+//
+//		Set<String> currCategories;
+//
+//		int iter = 0;
+//		if(depth > 0) {
+//			do {
+//				currCategories = new HashSet<String>();
+//	
+//				
+//				for (String cid : prevCategories) {
+//					Node cNode = nodes.get(cid);
+//					List<WikipediaEntity> categories = null;
+//					if(iter == 0) {
+//						categories = Wikiminer.getCategories(cid);
+//					} else {
+//						categories = Wikiminer.getParentCategories(cid);
+//					}
+//					
+////					List<WikipediaEntity> tmpCategories = new ArrayList<WikipediaEntity>();
+////					for (WikipediaEntity c : categories) {
+////						String txt = c.getText();
+////						WikipediaEntity e = Wikiminer.getHighestSenseEntity(txt);
+////						if(e != null) {
+////							tmpCategories.add(e);
+////						}
+////					}
+////					categories = tmpCategories;
+//					
+//					for (WikipediaEntity category : categories) {
+//						Node n2 = null;
+//	
+//						if (cid.equalsIgnoreCase(category.getWikiminerID())) {
+//							continue;
+//						}
+//	
+//						if (!nodes.containsKey(category.getWikiminerID())) {
+//							if(!superCategories.contains(category.getText())) {
+//								currCategories.add(category.getWikiminerID());
+//							} else {
+//								System.out.println("hit " + category.getText());
+//							}
+//							n2 = new Node(category);
+//							nodes.put(n2.getId(), n2);
+//						} else {
+//							n2 = nodes.get(category.getWikiminerID());
+//						}
+//	
+//						formEdge(cNode, n2, cNode.getWeight());
+//					}
+//				}
+//				iter++;
+//	
+//				prevCategories = currCategories;
+//				currentDepth++;
+//				System.out.println("depth:\t" + currentDepth);
+//			} while (prevCategories.size() > 0 && currentDepth < depth);
+//		}
+//
+//		// link to roo
+//		for (String cid : prevCategories) {
+//			Node cNode = nodes.get(cid);
+//			formEdge(cNode, root, 0);
+//		}
+//	}
 
 	private void formEdge(Node n1, Node n2, double weight) {
 		Edge e1 = new Edge(edgeCount++, n1.getId(), n2.getId());
@@ -130,11 +266,13 @@ public class Graph {
 		
 		Set<String> seen = new HashSet<String>();
 		Node root = new Node(new WikipediaEntity(handle, -1));
-		for(Node n : nodes) {
-//			JSONObject j = generateJSON(n, null, seen);
-//			System.out.println(j.toString());
-//			json.put(n.getEntity().getText(), j);
-			formEdge(n, root, 1);
+		if(nodes != null) {
+			for(Node n : nodes) {
+	//			JSONObject j = generateJSON(n, null, seen);
+	//			System.out.println(j.toString());
+	//			json.put(n.getEntity().getText(), j);
+				formEdge(n, root, 1);
+			}
 		}
 		
 		json =  generateJSON(root, null, new HashSet<String>());
@@ -146,10 +284,10 @@ public class Graph {
 	public void printWeights() {
 		for(String id : nodes.keySet()) {
 			Node n = nodes.get(id);
-			if(n.getEntity().getType() == 1) {
+//			if(n.getEntity().getType() == 1) {
 				System.out.println(n.getId() + "\t" + n.getEntity().getText() + "\t"
 						+ n.getEntity().getType() + "\t" + n.getWeight());
-			}
+//			}
 		}
 	}
 
@@ -209,6 +347,8 @@ public class Graph {
 		List<String> tweets = new ArrayList<String>();
 		tweets.add("Sonia Gandhi is a person.");
 		tweets.add("Rajiv Gandhi is a person.");
+		tweets.add("Sonia Gandhi is a Congress leader.");
+//		tweets.add("Sonia Gandhi is a Congress leader.");
 		TopNNPHashTagsExtractor tne = new TopNNPHashTagsExtractor();
 		Counter<String> extracted_entities = tne.extract(tweets);
 		HashMap<String, WikipediaEntity> allEntities = tne.resolve(extracted_entities);
@@ -216,12 +356,12 @@ public class Graph {
 		entities.addAll(allEntities.values());
 		
 		Graph g = new Graph(entities);
-		g.build(0);
+		g.build(10);
 		g.printWeights();
 		IRanker ranker = new WeightGraphRanker(g);
-		List<Node> topNodes = ranker.getTopRankedNodes(100);
-		System.out.println();
-		System.out.println(Runner.nodesToJson("testuser", g, topNodes));
+//		List<Node> topNodes = ranker.getTopRankedNodes(100);
+		System.out.println(g.toJSON("testuser", null));
+//		System.out.println(Runner.nodesToJson("testuser", g, topNodes));
 	}
 	
 }
