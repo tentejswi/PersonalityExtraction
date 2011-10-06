@@ -54,9 +54,9 @@ public class Graph {
 		superCategories.add("Sports");
 		superCategories.add("Travel");
 	}
-	
+
 	private static double DECAY = 0.5;
-	
+
 	HashMap<String, Node> nodes;
 	Node root = null;
 	int edgeCount = 0;
@@ -71,7 +71,7 @@ public class Graph {
 			nodes.put(n.getId(), n);
 		}
 	}
-	
+
 	private WikipediaEntity getSuperCategory(String id, int depth) {
 		WikipediaEntity entity = null;
 		int shortestPath = Integer.MAX_VALUE;
@@ -82,21 +82,20 @@ public class Graph {
 		Set<String> prevCategories = new HashSet<String>();
 		Set<String> currCategories = null;
 		prevCategories.add(id);
-		
+
 		int iter = 0;
 		do {
 			currCategories = new HashSet<String>();
 
-			
 			for (String cid : prevCategories) {
 				Node cNode = nodes.get(cid);
 				List<WikipediaEntity> categories = null;
-				if(iter == 0) {
+				if (iter == 0) {
 					categories = Wikiminer.getCategories(cid);
 				} else {
 					categories = Wikiminer.getParentCategories(cid);
 				}
-				
+
 				for (WikipediaEntity category : categories) {
 					Node n2 = null;
 
@@ -105,31 +104,34 @@ public class Graph {
 					}
 
 					if (!nodes.containsKey(category.getWikiminerID())) {
-						if(!superCategories.contains(category.getText())) {
+						if (!superCategories.contains(category.getText())) {
 							currCategories.add(category.getWikiminerID());
 						} else {
-							System.out.println("hit " + category.getText() + " at depth " + currentDepth);
-							if(currentDepth < shortestPath) {
+							System.out.println("hit " + category.getText()
+									+ " at depth " + currentDepth);
+							if (currentDepth < shortestPath) {
 								entity = category;
 							}
-							
-							if(!entities.containsKey(category.getText())) {
+
+							if (!entities.containsKey(category.getText())) {
 								entities.put(category.getText(), category);
 							}
-							
-							if(!entityCount.containsKey(category.getText())) {
+
+							if (!entityCount.containsKey(category.getText())) {
 								entityCount.put(category.getText(), 1);
 							} else {
-								entityCount.put(category.getText(), entityCount.get(category.getText()) + 1);
+								entityCount
+										.put(category.getText(), entityCount
+												.get(category.getText()) + 1);
 							}
 						}
-//						n2 = new Node(category);
-//						nodes.put(n2.getId(), n2);
+						// n2 = new Node(category);
+						// nodes.put(n2.getId(), n2);
 					} else {
-//						n2 = nodes.get(category.getWikiminerID());
+						// n2 = nodes.get(category.getWikiminerID());
 					}
 
-//					formEdge(cNode, n2, cNode.getWeight());
+					// formEdge(cNode, n2, cNode.getWeight());
 				}
 			}
 			iter++;
@@ -138,114 +140,116 @@ public class Graph {
 			currentDepth++;
 			System.out.println("depth:\t" + currentDepth);
 		} while (prevCategories.size() > 0 && currentDepth < depth);
-		
-		for(String k : entityCount.keySet()) {
+
+		for (String k : entityCount.keySet()) {
 			int count = entityCount.get(k);
-			if(count > maxCount) {
+			if (count > maxCount) {
 				maxCount = count;
 				entity = entities.get(k);
 			}
 		}
-		
+
 		return entity;
 	}
-	
+
 	public void build(int depth) {
 		Set<Node> cNodes = new HashSet<Node>();
 		Object[] ids = nodes.keySet().toArray();
-		for(Object id : ids) {
+		for (Object id : ids) {
 			String cid = (String) id;
 			WikipediaEntity e = getSuperCategory(cid, 5);
-			if(e != null) {
+			if (e != null) {
 				Node n2 = new Node(e);
-				if(!nodes.containsKey(n2.getId())) {
+				if (!nodes.containsKey(n2.getId())) {
 					cNodes.add(n2);
-//					nodes.put(n2.getId(), n2);
+					nodes.put(n2.getId(), n2);
+					formEdge(n2, root, 1);
 				}
 				Node n1 = nodes.get(cid);
-				formEdge(n1, n2, 1);	// fixed weight for now
+				formEdge(n1, n2, 1); // fixed weight for now
 			}
 		}
-		
+
 		// link to root
-		for (Node n : cNodes) {
-			nodes.put(n.getId(), n);
-			formEdge(n, root, 1);
-		}
-		
+		// for (Node n : cNodes) {
+		// nodes.put(n.getId(), n);
+		// formEdge(n, root, 1);
+		// }
+
 		System.out.println("done");
 	}
 
-//	public void build(int depth) {
-//		int currentDepth = 0;
-//		Set<String> prevCategories = new HashSet<String>();
-//
-//		// add leaf node categories
-//		prevCategories.addAll(nodes.keySet());
-//
-//		Set<String> currCategories;
-//
-//		int iter = 0;
-//		if(depth > 0) {
-//			do {
-//				currCategories = new HashSet<String>();
-//	
-//				
-//				for (String cid : prevCategories) {
-//					Node cNode = nodes.get(cid);
-//					List<WikipediaEntity> categories = null;
-//					if(iter == 0) {
-//						categories = Wikiminer.getCategories(cid);
-//					} else {
-//						categories = Wikiminer.getParentCategories(cid);
-//					}
-//					
-////					List<WikipediaEntity> tmpCategories = new ArrayList<WikipediaEntity>();
-////					for (WikipediaEntity c : categories) {
-////						String txt = c.getText();
-////						WikipediaEntity e = Wikiminer.getHighestSenseEntity(txt);
-////						if(e != null) {
-////							tmpCategories.add(e);
-////						}
-////					}
-////					categories = tmpCategories;
-//					
-//					for (WikipediaEntity category : categories) {
-//						Node n2 = null;
-//	
-//						if (cid.equalsIgnoreCase(category.getWikiminerID())) {
-//							continue;
-//						}
-//	
-//						if (!nodes.containsKey(category.getWikiminerID())) {
-//							if(!superCategories.contains(category.getText())) {
-//								currCategories.add(category.getWikiminerID());
-//							} else {
-//								System.out.println("hit " + category.getText());
-//							}
-//							n2 = new Node(category);
-//							nodes.put(n2.getId(), n2);
-//						} else {
-//							n2 = nodes.get(category.getWikiminerID());
-//						}
-//	
-//						formEdge(cNode, n2, cNode.getWeight());
-//					}
-//				}
-//				iter++;
-//	
-//				prevCategories = currCategories;
-//				currentDepth++;
-//				System.out.println("depth:\t" + currentDepth);
-//			} while (prevCategories.size() > 0 && currentDepth < depth);
-//		}
-//
-//		// link to roo
-//		for (String cid : prevCategories) {
-//			Node cNode = nodes.get(cid);
-//			formEdge(cNode, root, 0);
-//		}
-//	}
+	// public void build(int depth) {
+	// int currentDepth = 0;
+	// Set<String> prevCategories = new HashSet<String>();
+	//
+	// // add leaf node categories
+	// prevCategories.addAll(nodes.keySet());
+	//
+	// Set<String> currCategories;
+	//
+	// int iter = 0;
+	// if(depth > 0) {
+	// do {
+	// currCategories = new HashSet<String>();
+	//
+	//
+	// for (String cid : prevCategories) {
+	// Node cNode = nodes.get(cid);
+	// List<WikipediaEntity> categories = null;
+	// if(iter == 0) {
+	// categories = Wikiminer.getCategories(cid);
+	// } else {
+	// categories = Wikiminer.getParentCategories(cid);
+	// }
+	//
+	// // List<WikipediaEntity> tmpCategories = new
+	// ArrayList<WikipediaEntity>();
+	// // for (WikipediaEntity c : categories) {
+	// // String txt = c.getText();
+	// // WikipediaEntity e = Wikiminer.getHighestSenseEntity(txt);
+	// // if(e != null) {
+	// // tmpCategories.add(e);
+	// // }
+	// // }
+	// // categories = tmpCategories;
+	//
+	// for (WikipediaEntity category : categories) {
+	// Node n2 = null;
+	//
+	// if (cid.equalsIgnoreCase(category.getWikiminerID())) {
+	// continue;
+	// }
+	//
+	// if (!nodes.containsKey(category.getWikiminerID())) {
+	// if(!superCategories.contains(category.getText())) {
+	// currCategories.add(category.getWikiminerID());
+	// } else {
+	// System.out.println("hit " + category.getText());
+	// }
+	// n2 = new Node(category);
+	// nodes.put(n2.getId(), n2);
+	// } else {
+	// n2 = nodes.get(category.getWikiminerID());
+	// }
+	//
+	// formEdge(cNode, n2, cNode.getWeight());
+	// }
+	// }
+	// iter++;
+	//
+	// prevCategories = currCategories;
+	// currentDepth++;
+	// System.out.println("depth:\t" + currentDepth);
+	// } while (prevCategories.size() > 0 && currentDepth < depth);
+	// }
+	//
+	// // link to roo
+	// for (String cid : prevCategories) {
+	// Node cNode = nodes.get(cid);
+	// formEdge(cNode, root, 0);
+	// }
+	// }
 
 	private void formEdge(Node n1, Node n2, double weight) {
 		Edge e1 = new Edge(edgeCount++, n1.getId(), n2.getId());
@@ -254,114 +258,132 @@ public class Graph {
 		n2.addEdge(e2);
 		n2.addWeight(weight);
 		// add decay
-//		n2.addWeight(weight*1.0*DECAY);
+		// n2.addWeight(weight*1.0*DECAY);
 	}
 
 	public Collection<Node> getNodes() {
 		return nodes.values();
 	}
-	
+
 	public JSONObject toJSON(String handle, List<Node> nodes) {
 		JSONObject json = new JSONObject();
-		
+
 		Set<String> seen = new HashSet<String>();
-		Node root = new Node(new WikipediaEntity(handle, -1));
-		if(nodes != null) {
-			for(Node n : nodes) {
-	//			JSONObject j = generateJSON(n, null, seen);
-	//			System.out.println(j.toString());
-	//			json.put(n.getEntity().getText(), j);
+		// Node root = new Node(new WikipediaEntity(handle, -1));
+		if (nodes != null) {
+			for (Node n : nodes) {
+				// JSONObject j = generateJSON(n, null, seen);
+				// System.out.println(j.toString());
+				// json.put(n.getEntity().getText(), j);
 				formEdge(n, root, 1);
 			}
 		}
-		
-		json =  generateJSON(root, null, new HashSet<String>());
+
+		json = generateJSON(root, null, new HashSet<String>());
 		JSONObject jroot = new JSONObject();
 		jroot.put(handle, json);
 		return jroot;
 	}
-	
+
 	public void printWeights() {
-		for(String id : nodes.keySet()) {
+		for (String id : nodes.keySet()) {
 			Node n = nodes.get(id);
-//			if(n.getEntity().getType() == 1) {
-				System.out.println(n.getId() + "\t" + n.getEntity().getText() + "\t"
-						+ n.getEntity().getType() + "\t" + n.getWeight());
-//			}
+			// if(n.getEntity().getType() == 1) {
+			System.out.println(n.getId() + "\t" + n.getEntity().getText()
+					+ "\t" + n.getEntity().getType() + "\t" + n.getWeight());
+			// }
 		}
 	}
 
 	private JSONObject generateJSON(Node root, Node parent, Set<String> seen) {
-		if(root == null) {
+		if (root == null) {
 			return null;
 		} else {
 			seen.add(root.getId());
 		}
-		
+
 		JSONObject json = new JSONObject();
 		List<Edge> edges = root.getEdges();
-		
-//		if(root != null && root.getId() != null && root.getId().equals("38809")) {
-//			System.out.print("");
-//		}
+
+		// if(root != null && root.getId() != null &&
+		// root.getId().equals("38809")) {
+		// System.out.print("");
+		// }
 
 		if (edges.size() > 0) {
 			for (Edge e : edges) {
-				if(e.getNode2() != null) {
-						JSONObject cJson = null;
-						if(!seen.contains(e.getNode2()) && !seen.contains(e.getNode1())) {
-							seen.add(e.getNode2());
-							seen.add(e.getNode1());
-							cJson = generateJSON(nodes.get(e.getNode2()),
-								root, seen);
-						}
-						if (cJson != null) {
-							json.put(nodes.get(e.getNode2()).getEntity().getText(), cJson);
+				if (e.getNode2() != null) {
+					JSONObject cJson = null;
+					if (!seen.contains(e.getNode2())) { // &&
+														// !seen.contains(e.getNode1()))
+														// {
+						// seen.add(e.getNode2());
+						seen.add(e.getNode1());
+						if (!nodes.get(e.getNode2()).isLeaf()) {
+							cJson = generateJSON(nodes.get(e.getNode2()), root,
+									seen);
 						} else {
-							if(nodes.get(e.getNode2()) != null && nodes.get(e.getNode2()) != null && !seen.contains(e.getNode2())) {
-								double w = nodes.get(e.getNode2()).getWeight();
-								if(nodes.get(e.getNode2()).getWeight() < 1) {
-									w = 1;
-								}
-								json.put(nodes.get(e.getNode2()).getEntity().getText(), w);
+							json.put(nodes.get(e.getNode2()).getEntity()
+									.getText(), nodes.get(e.getNode2())
+									.getWeight());
+						}
+					}
+					if (cJson != null) {
+						json.put(nodes.get(e.getNode2()).getEntity().getText(),
+								cJson);
+					} else {
+						if (nodes.get(e.getNode2()) != null
+								&& nodes.get(e.getNode2()) != null
+								&& !seen.contains(e.getNode2())) {
+							double w = nodes.get(e.getNode2()).getWeight();
+							if (nodes.get(e.getNode2()).getWeight() < 1) {
+								w = 1;
 							}
+							json.put(nodes.get(e.getNode2()).getEntity()
+									.getText(), w);
 						}
 					}
 				}
+			}
+
+			if (json.size() == 0) {
+				json.put(root.getEntity().getText(), root.getWeight());
+			}
 		} else {
 			return null;
 		}
 
 		return json;
 	}
-	
+
 	public static void main(String[] args) {
 		ArrayList<WikipediaEntity> entities = new ArrayList<WikipediaEntity>();
-//		entities.add(new WikipediaEntity("Rajiv Gandhi", "26129", 1));
-//		WikipediaEntity e = new WikipediaEntity("Sonia Gandhi", "169798", 1);
-//		e.incrCount();
-//		e.incrCount();
-//		e.incrCount();
-//		entities.add(e);
-		
+		// entities.add(new WikipediaEntity("Rajiv Gandhi", "26129", 1));
+		// WikipediaEntity e = new WikipediaEntity("Sonia Gandhi", "169798", 1);
+		// e.incrCount();
+		// e.incrCount();
+		// e.incrCount();
+		// entities.add(e);
+
 		List<String> tweets = new ArrayList<String>();
 		tweets.add("Sonia Gandhi is a person.");
 		tweets.add("Rajiv Gandhi is a person.");
 		tweets.add("Sonia Gandhi is a Congress leader.");
-//		tweets.add("Sonia Gandhi is a Congress leader.");
+		// tweets.add("Sonia Gandhi is a Congress leader.");
 		TopNNPHashTagsExtractor tne = new TopNNPHashTagsExtractor();
 		Counter<String> extracted_entities = tne.extract(tweets);
-		HashMap<String, WikipediaEntity> allEntities = tne.resolve(extracted_entities);
+		HashMap<String, WikipediaEntity> allEntities = tne
+				.resolve(extracted_entities);
 		entities = new ArrayList<WikipediaEntity>();
 		entities.addAll(allEntities.values());
-		
+
 		Graph g = new Graph(entities);
 		g.build(10);
 		g.printWeights();
 		IRanker ranker = new WeightGraphRanker(g);
-//		List<Node> topNodes = ranker.getTopRankedNodes(100);
+		// List<Node> topNodes = ranker.getTopRankedNodes(100);
 		System.out.println(g.toJSON("testuser", null));
-//		System.out.println(Runner.nodesToJson("testuser", g, topNodes));
+		// System.out.println(Runner.nodesToJson("testuser", g, topNodes));
 	}
-	
+
 }
