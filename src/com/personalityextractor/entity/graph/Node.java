@@ -20,7 +20,7 @@ public class Node {
 	private String id;
 	private List<Edge> edges;
 	private WikipediaEntity entity;
-	private double weight = 0.0;
+	private double weight = 0;
 	private boolean isLeaf = false;
 	
 	public Node(WikipediaEntity entity) {

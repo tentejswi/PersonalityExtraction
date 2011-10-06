@@ -1,6 +1,5 @@
 var w = window.innerWidth - 1,
    h = window.innerHeight - 1;
-// var w = 1279, h = 746;
 var colorbrewer = ["rgb(158,1,66)","rgb(213,62,79)","rgb(244,109,67)","rgb(253,174,97)","rgb(254,224,139)","rgb(230,245,152)","rgb(171,221,164)","rgb(102,194,165)","rgb(50,136,189)","rgb(94,79,162)"];
 var color = d3.scale.ordinal().range(colorbrewer)
 var re = "";
@@ -185,10 +184,10 @@ var treemap = d3.layout.treemap()
     .value(function(d) { return d.value; })
     .sticky(true)
 	;
-
+	
 var svg = d3.select("body").append("svg:svg")
-    .style("width", w)
-    .style("height", h)
+    .attr("width", w)
+    .attr("height", h)
   .append("svg:g")
     .attr("transform", "translate(-.5,-.5)")
 	;
@@ -203,7 +202,7 @@ var tooltip = d3.select("body")
 	;
 
 // var user_url = media_path+"user.json";
-user_url = "http://ec2-50-19-209-97.compute-1.amazonaws.com/api/interest.php?u="+username;
+var user_url = "http://ec2-50-19-209-97.compute-1.amazonaws.com/api/interest.php?u="+username + '&s='+socialBackend;
 
 d3.json(user_url, function(json) {
   stringifyJson = JSON.stringify(json);
@@ -215,7 +214,7 @@ d3.json(user_url, function(json) {
 	  .attr("visibility", function(d) {return d.depth == 0 ? "visible" : "hidden";})
 	  .on("click",onClick)
 	  .on('mouseover',activeTrue)
-	  .on("mousemove", function(){return tooltip.style("top", (event.pageY-10)+"px").style("left",(event.pageX+10)+"px");})
+	  .on("mousemove", function(){return tooltip.style("top", (d3.event.pageY-10)+"px").style("left",(d3.event.pageX+10)+"px");})
 	  .on('mouseout', activeFalse)
 	  ;
 	
