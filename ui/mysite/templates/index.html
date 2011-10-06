@@ -14,15 +14,17 @@
 			<span class="script_font"> You </span> are the center </br> <span class="pad_40">of the universe.</span>
 		</div>
 		<div id = "seekinme_desc_body">
-			<span>seekinme</span> helps you make a lot more sense of your social data.
+			seekinme helps you make a lot more sense of your social data.
 		</div>
 	</div>
 	<div id = "inner_container_right">
 		<div id="login_sources" class="">
 			<h3 style="color:gray">Sign up with</h3>
+			</br>
 			<a rel="nofollow" href="{% url begin "twitter" %}" title="Connect with Twitter" class="auth_source_twitter"> </a>
 			<a rel="nofollow" href="{% url begin "facebook" %}" title="Connect with Facebook" class="auth_source_facebook"> </a>
 		</div> 
+		</br></br>
 		<div id = "try_out">
 	<script type="text/javascript">
 		function handleKeyPress(event, username) {
@@ -42,6 +44,7 @@
 		}
 			</script>
 			<h3 style="color:gray">or try it out on a friend</h3>
+			</br>
 			<div id = "trial_form">
 				<input type="text" class= "inputtext" id="trial_handle" value = "enter a twitter username" name="loginname" onKeyPress="return handleKeyPress(event, this.value)"
 				size="25pt" onfocus="if (this.value=='enter a twitter username') this.value=''; this.style.color = '#000'"
