@@ -76,7 +76,15 @@ public class NounPhraseExtractor implements IEntityExtractor {
 				phrases.add(str.toString().trim().replaceAll("\\.", ""));
 			}
 		}
-		return phrases;
+		
+		ArrayList<String> finalPhrases = new ArrayList<String>();
+		for(String p : phrases){
+			if(p.length()>1){
+				finalPhrases.add(p);
+			}
+		}
+		
+		return finalPhrases;
 	}
 
 	public static void main(String[] args) {
@@ -85,7 +93,7 @@ public class NounPhraseExtractor implements IEntityExtractor {
 
 		IEntityExtractor e = new NounPhraseExtractor();
 		List<String> sentences = Arrays.asList(
-				"@Kv @Ushu My cousin told a Hyderabadi auto driver \"Station jaane ki aavashyakatha hai\" apparently yet to come out of the Madhyamika hangover"
+				"@Kv @Ushu My cousin told a S Hyderabadi auto driver \"Station jaane ki aavashyakatha hai\" apparently yet to come out of the Madhyamika hangover"
 				//"Ushu My cousin told a Hyderabadi auto driver ."
 //				"Rest in Peace!",
 //				 "New blog post: 50 days with Google Nexus S: http://www.venu.in/blog/?p=314",
