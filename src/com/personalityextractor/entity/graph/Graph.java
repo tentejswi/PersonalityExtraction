@@ -49,7 +49,7 @@ public class Graph {
 		superCategories.add("People");
 		superCategories.add("Politics");
 		superCategories.add("Science");
-		superCategories.add("Society");
+//		superCategories.add("Society");
 		superCategories.add("Technology");
 		superCategories.add("Sports");
 		superCategories.add("Travel");
@@ -118,10 +118,10 @@ public class Graph {
 						}
 
 						if (!entityCount.containsKey(category.getText())) {
-							entityCount.put(category.getText(), 1);
+							entityCount.put(category.getText(), (depth-currentDepth));
 						} else {
 							entityCount.put(category.getText(),
-									entityCount.get(category.getText()) + 1);
+									entityCount.get(category.getText()) + (depth-currentDepth));
 						}
 					}
 					// n2 = new Node(category);
@@ -142,6 +142,7 @@ public class Graph {
 
 		for (String k : entityCount.keySet()) {
 			int count = entityCount.get(k);
+			System.out.println(k + "\t" + count);
 			if (count > maxCount) {
 				maxCount = count;
 				entity = entities.get(k);
@@ -372,11 +373,11 @@ public class Graph {
 		// entities.add(e);
 
 		List<String> tweets = new ArrayList<String>();
-		tweets.add("Sonia Gandhi is a person.");
-		tweets.add("Rajiv Gandhi is a person.");
-		 tweets.add("Rahul Gandhi is a person.");
-		tweets.add("Sonia Gandhi is a Congress leader.");
-		// tweets.add("Sonia Gandhi is a Congress leader.");
+//		tweets.add("Sonia Gandhi is a person.");
+//		tweets.add("Rajiv Gandhi is a person.");
+//		tweets.add("Rahul Gandhi is a person.");
+//		tweets.add("Sonia Gandhi is a Congress leader.");
+		tweets.add("Amazon is an awesome company.");
 		TopNNPHashTagsExtractor tne = new TopNNPHashTagsExtractor();
 		Counter<String> extracted_entities = tne.extract(tweets);
 		HashMap<String, WikipediaEntity> allEntities = tne
