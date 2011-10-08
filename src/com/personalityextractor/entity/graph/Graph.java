@@ -103,33 +103,32 @@ public class Graph {
 						continue;
 					}
 
-					if (!nodes.containsKey(category.getWikiminerID())) {
-						if (!superCategories.contains(category.getText())) {
-							currCategories.add(category.getWikiminerID());
-						} else {
-							System.out.println("hit " + category.getText()
-									+ " at depth " + currentDepth);
-							if (currentDepth < shortestPath) {
-								entity = category;
-							}
-
-							if (!entities.containsKey(category.getText())) {
-								entities.put(category.getText(), category);
-							}
-
-							if (!entityCount.containsKey(category.getText())) {
-								entityCount.put(category.getText(), 1);
-							} else {
-								entityCount
-										.put(category.getText(), entityCount
-												.get(category.getText()) + 1);
-							}
-						}
-						// n2 = new Node(category);
-						// nodes.put(n2.getId(), n2);
+					// if (!nodes.containsKey(category.getWikiminerID())) {
+					if (!superCategories.contains(category.getText())) {
+						currCategories.add(category.getWikiminerID());
 					} else {
-						// n2 = nodes.get(category.getWikiminerID());
+//						System.out.println("hit " + category.getText()
+//								+ " at depth " + currentDepth);
+						// if (currentDepth < shortestPath) {
+						// entity = category;
+						// }
+
+						if (!entities.containsKey(category.getText())) {
+							entities.put(category.getText(), category);
+						}
+
+						if (!entityCount.containsKey(category.getText())) {
+							entityCount.put(category.getText(), 1);
+						} else {
+							entityCount.put(category.getText(),
+									entityCount.get(category.getText()) + 1);
+						}
 					}
+					// n2 = new Node(category);
+					// nodes.put(n2.getId(), n2);
+					// } else {
+					// // n2 = nodes.get(category.getWikiminerID());
+					// }
 
 					// formEdge(cNode, n2, cNode.getWeight());
 				}
@@ -138,7 +137,7 @@ public class Graph {
 
 			prevCategories = currCategories;
 			currentDepth++;
-			System.out.println("depth:\t" + currentDepth);
+//			System.out.println("depth:\t" + currentDepth);
 		} while (prevCategories.size() > 0 && currentDepth < depth);
 
 		for (String k : entityCount.keySet()) {
@@ -159,7 +158,14 @@ public class Graph {
 			String cid = (String) id;
 			WikipediaEntity e = getSuperCategory(cid, 5);
 			if (e != null) {
-				Node n2 = new Node(e);
+				System.out.println(nodes.get(id).getEntity().getText()
+						+ " has super category " + e.getText());
+				Node n2 = null;
+				if(nodes.containsKey(e.getWikiminerID())) {
+					n2 = nodes.get(e.getWikiminerID());
+				} else {
+					n2 = new Node(e);
+				}
 				if (!nodes.containsKey(n2.getId())) {
 					cNodes.add(n2);
 					nodes.put(n2.getId(), n2);
@@ -346,9 +352,9 @@ public class Graph {
 				}
 			}
 
-			if (json.size() == 0) {
-				json.put(root.getEntity().getText(), root.getWeight());
-			}
+			// if (json.size() == 0) {
+			// json.put(root.getEntity().getText(), root.getWeight());
+			// }
 		} else {
 			return null;
 		}
@@ -368,6 +374,7 @@ public class Graph {
 		List<String> tweets = new ArrayList<String>();
 		tweets.add("Sonia Gandhi is a person.");
 		tweets.add("Rajiv Gandhi is a person.");
+		 tweets.add("Rahul Gandhi is a person.");
 		tweets.add("Sonia Gandhi is a Congress leader.");
 		// tweets.add("Sonia Gandhi is a Congress leader.");
 		TopNNPHashTagsExtractor tne = new TopNNPHashTagsExtractor();
