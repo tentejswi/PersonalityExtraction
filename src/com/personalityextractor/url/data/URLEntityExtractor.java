@@ -11,6 +11,10 @@ import com.personalityextractor.entity.extractor.EntityExtractFactory;
 import com.personalityextractor.entity.extractor.IEntityExtractor;
 import com.personalityextractor.entity.extractor.EntityExtractFactory.Extracter;
 import com.personalityextractor.entity.resolver.ViterbiResolver;
+import com.personalityextractor.url.HTMLParser.Readability.Readability;
+
+import cs224n.util.Counter;
+import cs224n.util.PriorityQueue;
 
 public class URLEntityExtractor {
 
@@ -30,6 +34,24 @@ public class URLEntityExtractor {
 			entities.addAll(extractor.extract(sentence));
 		}
 		return entities;
+	}
+	
+	public static List<String> extractTopEntities(String url){
+		Readability read = new Readability();
+		String text = read.removeHTML(url);
+		String[] lines = text.split("\n");
+		Counter<String> entities = new Counter<String>();
+		IEntityExtractor extractor = EntityExtractFactory.produceExtractor(Extracter.NOUNPHRASE);
+		for(String line : lines){
+			entities.incrementAll(extractor.extract(line), 1.0);
+		}
+		PriorityQueue<String> pq = entities.asPriorityQueue();
+		int count=0;
+		ArrayList<String> topEntities = new ArrayList<String>();
+		while(pq.hasNext() && count <2){
+			topEntities.add(pq.next());
+		}
+		return topEntities;
 	}
 	
 	public List<WikipediaEntity> resolveEntitiesinTitle(List<String> entities){
