@@ -1,5 +1,5 @@
 /*base.html*/
-* {padding: 0; margin: 0;} 
+* {padding: 0; margin: 2px;} 
 
 h3 {
 	font-family: 'Helvetica Neue', 'Helvetica', 'Arial';
@@ -15,6 +15,7 @@ h3 {
 	text-align: left;
 	float: left;
 	margin-right: 2%;
+	margin-top: 4px;
 	min-height: 45px;
 }
 #top_content {
@@ -66,7 +67,7 @@ h3 {
 	float: left;
 }
 #inner_container_right {
-	width: 45%;
+/*	width: 45%;*/
 	float: left;
 	margin-left: 5%;
 }
@@ -113,7 +114,7 @@ a.auth_source_twitter:hover {
 	height: 5%;
 }
 #trial_submit {
-	padding-left: 35%;
+	padding-left: 50%;
 	font: 12pt garamond;
 	color: #2C7F54;
 }

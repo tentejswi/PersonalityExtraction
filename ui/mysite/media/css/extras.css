@@ -1,6 +1,8 @@
 #title {
     font: 24pt helvetica neue;
     color: #666;
+    margin-top: 4px;
+    text-align: left;
 }
 
 input[type = text] {
