@@ -1,5 +1,6 @@
 var w = window.innerWidth - 1,
    h = window.innerHeight - 1;
+   w = 1200, h = 900;
 var colorbrewer = ["rgb(158,1,66)","rgb(213,62,79)","rgb(244,109,67)","rgb(253,174,97)","rgb(254,224,139)","rgb(230,245,152)","rgb(171,221,164)","rgb(102,194,165)","rgb(50,136,189)","rgb(94,79,162)"];
 var color = d3.scale.ordinal().range(colorbrewer)
 var re = "";
@@ -137,11 +138,12 @@ function wordWrap(d, i){
 			text = line.join(' ');
 			this.firstChild.data = text;
 			
-			if (this.getBBox().width > width) { // using only the word we have in line (without the next word) will cause overflow too
-				// should add trailing dots to the last word
+			if (this.getBBox().width > width) { // using only the word we have in line (without the next word) will 
+				// cause overflow too should add trailing dots to the last word
 				text = d3.select(this).select(function() {return this.lastChild;}).text();
 				text = text + "...";
 				d3.select(this).select(function() {return this.lastChild;}).text(text);
+				d3.select(this).classed("wordwrapped", true);
 				// break out of this loop since we can't proceed further
 				break;
 			}
