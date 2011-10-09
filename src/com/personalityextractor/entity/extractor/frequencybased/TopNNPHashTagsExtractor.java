@@ -23,7 +23,7 @@ import cs224n.util.PriorityQueue;
 
 public class TopNNPHashTagsExtractor implements IFrequencyBasedExtractor {
 
-	double threshold = 0.0;
+	double threshold = 1.0;
 	HashMap<String, Tweet> tweetIDs = new HashMap<String, Tweet>();
 	HashMap<String, ArrayList<String>> entityToTweetIDs = new HashMap<String, ArrayList<String>>();
 	HashMap<String, ArrayList<String>> tweetToEntities = new HashMap<String, ArrayList<String>>();
@@ -76,6 +76,7 @@ public class TopNNPHashTagsExtractor implements IFrequencyBasedExtractor {
 				for (String link : tweet.getLinks()) {
 					List<String> entities = URLEntityExtractor
 							.extractEntitiesinTitle(link);
+					entities.addAll(URLEntityExtractor.extractTopEntities(link));
 					if (entities != null) {
 						entitiesInTweet.addAll(entities);
 						for (String entity : entities) {
@@ -180,7 +181,14 @@ public class TopNNPHashTagsExtractor implements IFrequencyBasedExtractor {
 	
 	public HashMap<String, WikipediaEntity> resolve(Counter<String> entityCounter) {
 		HashMap<String, WikipediaEntity> resolvedEntities = new HashMap<String, WikipediaEntity>();
-		for (String entity : entityCounter.keySet()) {
+		PriorityQueue<String> q = entityCounter.asPriorityQueue();
+		int entity_count =0;
+		while (q.hasNext()) {
+			entity_count++;
+			if(entity_count>100){
+				break;
+			}
+			String entity = q.next();
 			Counter<WikipediaEntity> senseCounter = new Counter<WikipediaEntity>();
 			String entityXML = Wikiminer.getXML(entity, false);
 			if (entityXML == null)

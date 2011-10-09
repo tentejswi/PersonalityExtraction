@@ -49,6 +49,7 @@ public class URLEntityExtractor {
 		int count=0;
 		ArrayList<String> topEntities = new ArrayList<String>();
 		while(pq.hasNext() && count <2){
+			count++;
 			topEntities.add(pq.next());
 		}
 		return topEntities;
