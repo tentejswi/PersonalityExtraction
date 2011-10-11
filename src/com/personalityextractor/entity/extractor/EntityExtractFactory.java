@@ -10,7 +10,7 @@ package com.personalityextractor.entity.extractor;
 public class EntityExtractFactory {
 
 	public enum Extracter {
-		BASELINE, CONSECUTIVE_WORDS, NOUNPHRASE, SENNANOUNPHRASE;
+		BASELINE, CONSECUTIVE_WORDS, NOUNPHRASE, SENNANOUNPHRASE, PROPERNOUNPHRASE, COMMONNOUNPHRASE;
 	}
 	
 	public static IEntityExtractor produceExtractor(Extracter e) {
@@ -21,6 +21,10 @@ public class EntityExtractFactory {
 		} else if(e == Extracter.NOUNPHRASE) {
 			return new NounPhraseExtractor();
 		} else if (e == Extracter.SENNANOUNPHRASE){
+			return new SennaNounPhraseExtractor();
+		} else if (e == Extracter.PROPERNOUNPHRASE){
+			return new SennaNounPhraseExtractor();
+		} else if (e == Extracter.COMMONNOUNPHRASE){
 			return new SennaNounPhraseExtractor();
 		}else {
 			// default
