@@ -23,9 +23,9 @@ public class EntityExtractFactory {
 		} else if (e == Extracter.SENNANOUNPHRASE){
 			return new SennaNounPhraseExtractor();
 		} else if (e == Extracter.PROPERNOUNPHRASE){
-			return new SennaNounPhraseExtractor();
+			return new ProperNounPhraseExtractor();
 		} else if (e == Extracter.COMMONNOUNPHRASE){
-			return new SennaNounPhraseExtractor();
+			return new CommonNounPhraseExtractor();
 		}else {
 			// default
 			return new BaselineExtractor();
