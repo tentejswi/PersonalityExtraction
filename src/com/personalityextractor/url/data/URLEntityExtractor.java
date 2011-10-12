@@ -50,6 +50,7 @@ public class URLEntityExtractor {
 			line = line.trim();
 			if(line.length()==0)
 				continue;
+			
 			if(line_count>2)
 				break;
 			line_count++;
