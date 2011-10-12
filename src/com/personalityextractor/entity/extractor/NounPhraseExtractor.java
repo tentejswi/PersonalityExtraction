@@ -8,6 +8,7 @@ import java.util.List;
 import com.personalityextractor.evaluation.PerfMetrics;
 import com.personalityextractor.evaluation.PerfMetrics.Metric;
 
+import edu.stanford.nlp.ling.CoreLabel;
 import edu.stanford.nlp.parser.lexparser.LexicalizedParser;
 import edu.stanford.nlp.trees.Tree;
 
@@ -18,7 +19,7 @@ public class NounPhraseExtractor implements IEntityExtractor {
 	static {
 		try {
 			Date d1 = new Date();
-			lp = new LexicalizedParser("/home/ubuntu/data/englishPCFG.ser.gz");
+			lp = new LexicalizedParser("/Users/tejaswi/Documents/workspace/PersonalityExtraction/lair/englishPCFG.ser.gz");
 			lp.setOptionFlags(new String[] { "-maxLength", "80",
 					"-retainTmpSubcategories" });
 			Date d2 = new Date();
@@ -39,7 +40,13 @@ public class NounPhraseExtractor implements IEntityExtractor {
 			if(line.trim().length()==0)
 				continue;
 			String[] sent = line.split(" ");
-			Tree parse = (Tree) lp.apply(Arrays.asList(sent));
+		    List<CoreLabel> rawWords = new ArrayList<CoreLabel>();
+		    for (String word : sent) {
+		        CoreLabel l = new CoreLabel();
+		        l.setWord(word);
+		        rawWords.add(l);
+		     }
+			Tree parse = (Tree) lp.apply(rawWords);
 			// TreePrint tp = new TreePrint("penn,typedDependenciesCollapsed");
 			// tp.printTree(parse);
 			ArrayList<Tree> queue = new ArrayList<Tree>();
@@ -93,7 +100,8 @@ public class NounPhraseExtractor implements IEntityExtractor {
 
 		IEntityExtractor e = new NounPhraseExtractor();
 		List<String> sentences = Arrays.asList(
-				"@Kv @Ushu My cousin told a S Hyderabadi auto driver \"Station jaane ki aavashyakatha hai\" apparently yet to come out of the Madhyamika hangover"
+				"The company didn't specify the cause of death. Mr. Jobs had battled pancreatic cancer and several years ago received a liver transplant. In August, Mr. Jobs stepped down as chief executive, handing the reins to longtime deputy Tim Cook."
+
 				//"Ushu My cousin told a Hyderabadi auto driver ."
 //				"Rest in Peace!",
 //				 "New blog post: 50 days with Google Nexus S: http://www.venu.in/blog/?p=314",
