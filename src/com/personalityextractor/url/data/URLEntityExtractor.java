@@ -37,21 +37,40 @@ public class URLEntityExtractor {
 	}
 	
 	public static List<String> extractTopEntities(String url){
+		ArrayList<String> topEntities = new ArrayList<String>();
 		Readability read = new Readability();
 		String text = read.removeHTML(url);
+		if(text==null)
+			return null;
 		String[] lines = text.split("\n");
 		Counter<String> entities = new Counter<String>();
-		IEntityExtractor extractor = EntityExtractFactory.produceExtractor(Extracter.NOUNPHRASE);
+		IEntityExtractor extractor = EntityExtractFactory.produceExtractor(Extracter.PROPERNOUNPHRASE);
+		int line_count =0;
 		for(String line : lines){
-			entities.incrementAll(extractor.extract(line), 1.0);
+			if(line_count>2)
+				break;
+			line_count++;
+			System.out.println(line);
+			List<String> ents = extractor.extract(line);
+			System.out.println(ents);
+			if(ents!=null){
+				entities.incrementAll(ents, 1.0);
+			}
 		}
 		PriorityQueue<String> pq = entities.asPriorityQueue();
 		int count=0;
-		ArrayList<String> topEntities = new ArrayList<String>();
+		double leastCount = 0;
+		
 		while(pq.hasNext() && count <2){
 			count++;
-			topEntities.add(pq.next());
+			leastCount = (entities.getCount(pq.next()));
 		}
+		for(String ent : entities.keySet()){
+			if(entities.getCount(ent)>=leastCount){
+				topEntities.add(ent);
+			}
+		}
+		
 		return topEntities;
 	}
 	
@@ -75,7 +94,7 @@ public class URLEntityExtractor {
 	
 	public static void main(String[] args) {
 		URLEntityExtractor uee = new URLEntityExtractor();
-		uee.extractEntitiesinTitle("http://berke");
+		System.out.println(uee.extractTopEntities("http://blogs.nuxeo.com/dev/2011/10/speeding-up-the-android-emulator.html"));
 	}
 		
 }
