@@ -47,6 +47,9 @@ public class URLEntityExtractor {
 		IEntityExtractor extractor = EntityExtractFactory.produceExtractor(Extracter.PROPERNOUNPHRASE);
 		int line_count =0;
 		for(String line : lines){
+			line = line.trim();
+			if(line.length()==0)
+				continue;
 			if(line_count>2)
 				break;
 			line_count++;
@@ -94,7 +97,7 @@ public class URLEntityExtractor {
 	
 	public static void main(String[] args) {
 		URLEntityExtractor uee = new URLEntityExtractor();
-		System.out.println(uee.extractTopEntities("http://blogs.nuxeo.com/dev/2011/10/speeding-up-the-android-emulator.html"));
+		System.out.println(uee.extractTopEntities("http://www.pcmag.com/article2/0,2817,2394487,00.asp#fbid=iY_0drVV-th"));
 	}
 		
 }
