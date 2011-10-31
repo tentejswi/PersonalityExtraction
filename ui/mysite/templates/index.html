@@ -6,6 +6,7 @@
 {% endblock %}
 
 {% block top_header %}{% endblock %}
+{% block other_associations %}{% endblock %}
 
 {% block content %}
 <div id = "inner_container">
@@ -21,8 +22,8 @@
 		<div id="login_sources" class="">
 			<h3 style="color:gray">Sign up with</h3>
 			</br>
-			<a rel="nofollow" href="{% url begin "twitter" %}" title="Connect with Twitter" class="auth_source_twitter"> </a>
-			<a rel="nofollow" href="{% url begin "facebook" %}" title="Connect with Facebook" class="auth_source_facebook"> </a>
+			<a rel="nofollow" href="{% url socialauth_begin "twitter" %}" title="Connect with Twitter" class="auth_source_twitter"> </a>
+			<a rel="nofollow" href="{% url socialauth_begin "facebook" %}" title="Connect with Facebook" class="auth_source_facebook"> </a>
 		</div> 
 		</br></br>
 		<div id = "try_out">

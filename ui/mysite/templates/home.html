@@ -16,6 +16,19 @@
 </div>
 {% endblock %}
 
+{% block other_associations %}
+<div id = "other sources">
+	{% if twitter_error %}
+	Associate
+	<a rel="nofollow" href="{% url socialauth_associate_begin 'twitter' %}" title="Associate Twitter with this account" class="associate_auth_source_twitter"> </a>
+	{% endif %}
+	{% if facebook_error %}
+	Associate
+	<a rel="nofollow" href="{% url socialauth_associate_begin 'facebook' %}" title="Associate Facebook with this account" class="associate_auth_source_facebook"> </a>
+	{% endif %}
+</div>
+{% endblock %}
+
 {% block content %}
 
 <div id="chart"></div>

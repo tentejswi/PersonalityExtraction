@@ -1,6 +1,12 @@
 /*base.html*/
 * {padding: 0; margin: 2px;} 
 
+h2 {
+	font-family: 'Helvetica Neue', 'Helvetica', 'Arial';
+	font-size: 25pt;
+	line-height: 0.8
+}
+
 h3 {
 	font-family: 'Helvetica Neue', 'Helvetica', 'Arial';
 	font-size: 20pt;
@@ -117,4 +123,70 @@ a.auth_source_twitter:hover {
 	padding-left: 50%;
 	font: 12pt garamond;
 	color: #2C7F54;
+}
+
+/*home.html*/
+a.associate_auth_source_facebook, a.associate_auth_source_twitter {
+	color: #32A0EB;
+	background-repeat: no-repeat;
+	text-decoration: none;
+	background: transparent url('../images/facebooktwitter_logo.png') no-repeat;
+}
+a.associate_auth_source_facebook {
+	background-position: 0 0;
+	width: 88px;
+	height: 19px;
+	display: inline-block;
+	margin-right: 9px;
+	zoom: 1;
+}
+a.associate_auth_source_twitter {
+	background-position: -88px 0;
+	width: 88px;
+	height: 19px;
+	display: inline-block;
+	zoom: 1;
+}
+
+/*register.html*/
+#reg_inner_div {
+  border-radius: 10px;
+  -moz-border-radius: 10px;
+  -webkit-border-radius: 10px;
+  -moz-box-shadow: 0px 0px 5px #eeeeee;
+  -webkit-box-shadow: 0px 0px 20px #aaaaaa;
+  box-shadow: 0px 0px 5px #eeeeee;
+  width: 70%;
+  height: 200px;
+  padding: 50px;
+  margin-bottom: 2%;
+  margin-top: 2%;
+  margin-left: 30%;
+}
+
+input[type = text] {
+    font: 15pt helvetica neue;
+    background: white;
+	border: 1px solid #CCC;
+	display: inline-block;
+/*    outline: 0;*/
+}
+
+.label_for_register {
+	display: inline-block;
+	color: #333;
+/*	font-size: 13px;*/
+	font: 15pt helvetica neue;
+	font-weight: bold;
+	text-align: left;
+}
+
+.form_field_errors, .form_non_field_errors {
+	padding: 10px
+	display: inline-block;
+	font: 12pt helvetica neue;
+}
+
+.form_field_errors {
+	color: red;
 }

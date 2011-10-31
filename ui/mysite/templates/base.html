@@ -30,13 +30,18 @@
 				{% block top_header %}{% endblock %}
 			</div>
 			<div id="top_user_panel">
-				{% if user.fir_name or user.username %}
-				{{ user.first_name|default:user.username }}
-				&nbsp;|&nbsp;
+				{% if user.last_name %}
+				{% with user.first_name|capfirst|add:" "|add:user.last_name|capfirst as fullName %}
+					{{ fullName|default:user.username }}
+				{% endwith %}
+				&nbsp;
 				{% endif %}
-				{% if user.is_authenticated %} <a href="/accounts/logout/" rel="nofollow">Sign Out</a>
+				{% if user.is_authenticated %} 
+				|&nbsp;
+				<a href="/accounts/logout/" rel="nofollow">Sign Out</a>
 				{% else %} <!-- <a href="/accounts/login/" rel="nofollow">Sign In</a> -->
 				{% endif %}
+				{% block other_associations %}{% endblock %}
 			</div>
 		</div>
 		</br>

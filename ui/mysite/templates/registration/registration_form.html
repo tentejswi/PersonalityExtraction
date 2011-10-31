@@ -8,11 +8,17 @@
     <h2>Register</h2>
     <br/>
     <form method='post' action=''>{% csrf_token %}
+      {% if form.non_field_errors %}
+      <div class="form_field_errors">{{ form.non_field_errors }}</div>
+      {% endif %}
       {% for field in form %}
       <label class="left" >{{field.label}}</label>
       <div class="left"> {{field}}</div><div class="form_field_errors left">{{field.errors}}</div>
       {% endfor %}
       <label class="left">&nbsp;</label>
+      {% if restart %}
+      <div class="left"><input type="submit" name="restart" value=" Restart " /></div>
+      {% endif %}
       <div class="left"><input type="submit" value=" Register " /></div>
     </form>
   </div>
