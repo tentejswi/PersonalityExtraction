@@ -18,15 +18,7 @@ function bckColor(d,i) {
 		d1Parent = d1Parent.parent;
 	}
 	var retColor = d3.hsl(color(d1Parent.key));
-	var m1 = /([a-z]+)\((.*)\)/i.exec(retColor);
-	var m2 = m1[2].split(',');
-	var h = parseFloat(m2[0]), // degrees
-		s = parseFloat(m2[1])/100,
-		l = parseFloat(m2[2])/100
-		;
-
-	retColor = d3.rgb(d3.hsl(h,s,l*Math.pow(0.6,d.depth-1)));
-	return retColor;
+	return retColor.darker(Math.pow(0.6,d.depth-1));
 }
 
 function fillOpacity(d,i) {
@@ -41,20 +33,12 @@ function borderColor(d,i) {
 		d1Parent = d1Parent.parent;
 	}
 	var retColor = d3.hsl(color(d1Parent.key));
-	var m1 = /([a-z]+)\((.*)\)/i.exec(retColor);
-	var m2 = m1[2].split(',');
-	var h = parseFloat(m2[0]), // degrees
-		s = parseFloat(m2[1]),
-		l = parseFloat(m2[2])
-		;
-	retColor = d3.hsl(h,s/100,l*0.5/100);
-	retColor = d3.rgb(retColor);
 	
 	if (d.depth == 0) {
 		return "#fff";
 	}
 	else {
-		return retColor;		
+		return retColor.brighter(0);		
 	}
 }
 
@@ -64,7 +48,6 @@ function activeTrue(d, i){
 			.style("stroke", "white")
 			.style("stroke-width", "1.5px")
 			.style("z-index", "8")
-//			.call(activeTrue(d.parent))
 			;
     }
 	
