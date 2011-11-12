@@ -22,7 +22,9 @@
       	{% if form.non_field_errors %}
       	<div class="form_non_field_errors">{{form.non_field_errors}}</div>
       	{% endif %}
-      <div class="left"><input type="submit" name="restart" value=" Login with existing registered account " class="button"/></div>
+      <div class="left">
+      	<input type="submit" name="restart" value=" Login with existing registered account " class="button" onclick="this.style.visibility='hidden';"/>
+      </div>
       <br/>
       <span class="form_non_field_errors">or try again with another email id.</span>
       {% endif %}

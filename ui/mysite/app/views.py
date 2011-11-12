@@ -165,7 +165,10 @@ def user_check(this_id, **kwa):
 def new_user(request):
     user = request.user
     if not user.is_authenticated():
-        user = User.objects.get(pk=request.session['SEEKINME_NEW_USER_ID'])
+        try:
+            user = User.objects.get(pk=request.session['SEEKINME_NEW_USER_ID'])
+        except (User.DoesNotExist, KeyError): # double click on 'restart'
+            return HttpResponseRedirect('/')
     restart = False
     if request.method == 'POST':
         if 'restart' in request.POST:
@@ -209,7 +212,10 @@ def new_user(request):
 def update_user(request):
     user = request.user
     if not user.is_authenticated():
-        user = User.objects.get(pk=request.session['SEEKINME_NEW_USER_ID'])
+        try:
+            user = User.objects.get(pk=request.session['SEEKINME_NEW_USER_ID'])
+        except (User.DoesNotExist, KeyError): # double click on 'restart'
+            return HttpResponseRedirect('/')
         s_networks = ()
     elif not user.is_active: # before activating user can't delete networks
         s_networks = ()
@@ -230,6 +236,7 @@ def update_user(request):
             else:
                 go_to = '/'
             return HttpResponseRedirect(go_to)
+        # check whick networks are selected and delete them
         for so in s_networks:
             if so.provider in for_delete:
                 so.delete()
@@ -328,9 +335,9 @@ def on_new_user(sender, user, response, details, **kwargs):
 
 def on_user_change(sender, user, response, details, **kwargs):
     for so in UserSocialAuth.objects.filter(user=user, provider='twitter'):
-        user.tw = so.uid + repr(so.extra_data)
+        user.tw = so.provider + so.uid + repr(so.extra_data)
     for so in UserSocialAuth.objects.filter(user=user, provider='facebook'):
-        user.fb = so.uid + repr(so.extra_data)
+        user.fb = so.provider + so.uid + repr(so.extra_data)
     return True  # necessary user.save()
 
 from social_auth.signals import socialauth_registered, pre_update
