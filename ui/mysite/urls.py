@@ -1,7 +1,7 @@
 from django.conf.urls.defaults import patterns, url, include
 from django.contrib import admin
 
-from app.views import home, index, tryfirst, transfer, new_user
+from app.views import home, index, tryfirst, transfer, new_user, email_callback
 
 
 admin.autodiscover()
@@ -10,6 +10,7 @@ urlpatterns = patterns('',
     url(r'^$', index, name='index'),
     url(r'^home/$', home, name='home'),
     url(r'^my/(?P<backend>[^/]+)/$', transfer, name='my_complete'),
+    url(r'^verify/(?P<key>[^/]+)/?$', email_callback),
     url(r'^user/$', new_user),
     url(r'^admin/', include(admin.site.urls)),
     url(r'^accounts/', include('accounts.auth_urls')),

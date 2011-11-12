@@ -15,6 +15,11 @@ from django.contrib.auth import authenticate, login, logout
 from social_auth.models import UserSocialAuth
 from facebook import GraphAPI, GraphAPIError
 from lib import process_tweet, process_feed, create_context
+import datetime, uuid
+import smtplib
+from django.core.mail import send_mail
+from django.core.urlresolvers import reverse
+from .models import UserLog
 
 def index(request):
     """Index view, displays login mechanism"""
@@ -178,7 +183,10 @@ def new_user(request):
                 form._errors['__all__'] = "A %s account has already been registered for this email address." % provider
                 restart = True
             else:
-                form.save()
+                u = form.save()
+                assert u is user, [u, user]
+                if request.session['original_email'] != user.email: # send email to verify that email belongs to you
+                    send_test_email(user, request.build_absolute_uri)
                 if not user.is_active:
                     user.is_active = True
                     user.save()
@@ -187,22 +195,128 @@ def new_user(request):
                 return HttpResponseRedirect('/home/')
     else:
         form = NewUserForm(instance=user)
+        request.session['original_email'] = user.email
         provider = user_check(user.id, email=user.email)
         if provider:
             request.session['provider'] = provider
             form._errors = dict(__all__="A %s account has already been registered for this email address." % provider)
             restart = True
-    return render_to_response('register.html', dict(form=form, restart=restart),
+    return render_to_response('registration/register.html', dict(form=form, restart=restart),
         context_instance=RequestContext(request),
     )
+
+@login_required
+def update_user(request):
+    user = request.user
+    if not user.is_authenticated():
+        user = User.objects.get(pk=request.session['SEEKINME_NEW_USER_ID'])
+        s_networks = ()
+    elif not user.is_active: # before activating user can't delete networks
+        s_networks = ()
+    else:
+        s_networks = UserSocialAuth.objects.filter(user=user)
+    #~ print sorted(request.session.keys())
+    if request.method == 'POST':
+        if 'cancel' in request.POST:
+            return HttpResponseRedirect('/home/')
+        for_delete = request.POST.getlist('delete')
+        # delete user when all networks are deleted
+        if len(s_networks) == len(for_delete) > 0:
+            UserLog.objects.get_or_create(username=user.username, email=user.email)
+            user.delete()
+            logout(request)
+            if 'provider' in request.session:
+                go_to = '/login/' + request.session['provider']
+            else:
+                go_to = '/'
+            return HttpResponseRedirect(go_to)
+        for so in s_networks:
+            if so.provider in for_delete:
+                so.delete()
+        form = NewUserForm(request.POST, instance=user)
+        if form.is_valid():
+            #~ fnm = form.cleaned_data['first_name']
+            #~ lnm = form.cleaned_data['last_name']
+            eml = form.cleaned_data['email']
+            provider = user_check(user.id, email=eml)
+            if provider:
+                request.session['provider'] = provider
+                form._errors['__all__'] = "This email address is already being used for another account. Please try a different email address."
+            else:
+                u = form.save()
+                assert u is user, [u, user]
+                if request.session['original_email'] != user.email: # send email to verify that email belongs to you
+                    send_test_email(user, request.build_absolute_uri)
+                if not user.is_active:
+                    user.is_active = True
+                    user.save()
+                    user.backend = request.session['SEEKINME_NEW_USER_BACKEND']
+                    login(request, user)
+                return HttpResponseRedirect('/home/')
+    else: # when the form is first rendered
+        form = NewUserForm(instance=user)
+        request.session['original_email'] = user.email
+        provider = user_check(user.id, email=user.email)
+        if provider:
+            request.session['provider'] = provider
+            form._errors = dict(__all__="This email address is already being used for another account. Please try a different email address.")
+    return render_to_response('registration/update.html', dict(form=form, networks=s_networks),
+        context_instance=RequestContext(request),
+    )
+
+def send_test_email(user, build):
+    user.secret_key = str(uuid.uuid4())
+    url = reverse(email_callback, args=(user.secret_key,))
+    try:
+        msg = u'Hello %s\nplease use\n%s to confirm' % (user.username, build(url))
+        send_mail('Welcome to seekinme!', msg, 'admin@seekinme.com',
+            [user.email], fail_silently=False)
+    except smtplib.SMTPException:
+        # can't send - retry on next login
+        user.email_term = None
+    except Exception:
+        # can't send - retry on next login
+        user.email_term = None
+    else:
+        user.email_term = datetime.date.today() + datetime.timedelta(days=7)
+    user.save()
+
+def email_callback(request, key):
+    try:
+        user = User.objects.get(secret_key=key)
+    except User.DoesNotExist:
+        user = None
+        tname = 'registration/verify_bad.html'
+    else:
+        user.secret_key = None
+        user.email_term = None
+        user.save()
+        tname = 'registration/verify_good.html'
+    return render_to_response(tname, dict(user=user), context_instance=RequestContext(request))
 
 def pipe_dump(*arg, **kwargs):
     print sorted(kwargs)
     print 'u:', kwargs['user'], 'so_u:', kwargs['social_user'], kwargs['details']
 
-def get_existing_user(social_user=None, *arg, **kwargs):
-    if social_user is not None:
-        return {'user':social_user.user}
+def get_existing_user(request, backend, uid, user=None, social_user=None, *arg, **kwargs):
+    try:
+        social_user = UserSocialAuth.objects.select_related('user').get(provider=backend.name, uid=uid)
+    except UserSocialAuth.DoesNotExist:
+        return {'social_user': None}
+    else: #merging here. Be careful when adding new attributes
+        if user and social_user and social_user.user != user:
+            extra_user = social_user.user
+            extra_user.delete()
+            social_user.user = user
+            social_user.save()
+        user = social_user.user
+        if user.secret_key:
+            if user.email_term is None: # test email has not been sent
+                send_test_email(user, request.build_absolute_uri)
+            elif user.email_term < datetime.date.today(): # no repsonse after 7 days
+                user.delete()
+                return {'social_user':None, 'user':None}
+        return {'social_user': social_user, 'user':user}
 
 def on_new_user(sender, user, response, details, **kwargs):
     user.is_active = False

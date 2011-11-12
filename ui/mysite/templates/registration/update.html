@@ -1,0 +1,56 @@
+{% extends "base.html" %}
+
+{% block header %}
+<link rel="stylesheet" href="{{MEDIA_URL}}css/button.css" type="text/css"/>
+{% endblock %}
+
+{% block top_header %}{% endblock %}
+{% block other_associations %}{% endblock %}
+
+{% block content %}
+<div id="inner_container" class="">
+  <div id="reg_inner_div" >
+    <h2>Update your details</h2>
+ 
+    <form method='post' action=''>{% csrf_token %}
+      {% for field in form %}
+      <label class="left label_for_register" >{{field.label}}</label><div class="form_field_errors left">{{field.errors}}</div>
+      <div class="left"> {{field}}</div>
+      {% endfor %}
+      <label class="left">&nbsp;</label>
+      <label class="left">&nbsp;</label>
+      {% if networks %}
+      	<h4>You have associated the following networks with your account:</h4>
+      	<h5 class="left label_for_delete">Click on the check box to disassociate the accounts</h5>
+      	<label class="left">&nbsp;</label>
+        <table>
+          {% for so in networks %}
+          <tr>
+            <td class = "associate_auth_source_{{ so.provider }}_img"></td>
+<!--             <td>{{ so.uid }}</td> -->
+            <td><input type="checkbox" value="{{ so.provider }}" name="delete" id="id_{{ so.provider }}"/></td>
+            <!-- <td><label class="left label_for_delete" for="id_{{ so.provider }}">Disassociate account</label></td> -->
+          </tr>
+          {% endfor %}
+        </table>
+      {% endif %}
+      {% if form.non_field_errors %}
+      	<div class="form_non_field_errors">{{ form.non_field_errors }}</div>
+      {% endif %}
+      <table>
+      	<tr>
+      		<td>
+     	 		<div class="right"><input type="submit" name="cancel" value=" Cancel " class="button"/></div>
+      		</td>
+      		<td>
+      			<span class="pad_10"> </span>
+      		</td>
+      		<td>
+      			<div class="left"><input type="submit" name ="button" value=" Update " class="button"/></div>
+      		</td>
+      	</tr>
+      </table>
+    </form>
+  </div>
+</div>  	
+{% endblock %}

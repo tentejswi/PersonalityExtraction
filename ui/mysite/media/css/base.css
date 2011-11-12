@@ -12,6 +12,18 @@ h3 {
 	font-size: 20pt;
 	line-height: 0.8
 }
+
+h4 {
+	font-family: 'Helvetica Neue', 'Helvetica', 'Arial';
+	font-size: 15pt;
+	line-height: 0.8
+}
+
+h5 {
+	font-family: 'Helvetica Neue', 'Helvetica', 'Arial';
+	font-size: 10pt;
+	line-height: 0.8
+}
 #outer_container {
 	min-height: 45px;
 }
@@ -38,8 +50,11 @@ h3 {
 	font-size: 10pt;
 	min-height: 45px;
 }
-/*index.html*/
+#content {
 
+}
+
+/*index.html*/
 #seekinme_desc_title {
 	font: 35pt Helvetica Neue;
 	line-height: 0.8
@@ -52,9 +67,19 @@ h3 {
 .italics {
 	font-style: italic;
 }
+
+.pad_10 {
+	padding: 10pt;
+}
+
+.pad_20 {
+	padding: 20pt;
+}
+
 .pad_40 {
 	padding: 40pt;
 }
+
 #seekinme_desc_body {
 	font: 20pt Helvetica Neue;
 	color: #886744;
@@ -126,13 +151,13 @@ a.auth_source_twitter:hover {
 }
 
 /*home.html*/
-a.associate_auth_source_facebook, a.associate_auth_source_twitter {
+.associate_auth_source_facebook_img, .associate_auth_source_twitter_img {
 	color: #32A0EB;
 	background-repeat: no-repeat;
 	text-decoration: none;
 	background: transparent url('../images/facebooktwitter_logo.png') no-repeat;
 }
-a.associate_auth_source_facebook {
+.associate_auth_source_facebook_img {
 	background-position: 0 0;
 	width: 88px;
 	height: 19px;
@@ -140,7 +165,7 @@ a.associate_auth_source_facebook {
 	margin-right: 9px;
 	zoom: 1;
 }
-a.associate_auth_source_twitter {
+.associate_auth_source_twitter_img {
 	background-position: -88px 0;
 	width: 88px;
 	height: 19px;
@@ -156,8 +181,8 @@ a.associate_auth_source_twitter {
   -moz-box-shadow: 0px 0px 5px #eeeeee;
   -webkit-box-shadow: 0px 0px 20px #aaaaaa;
   box-shadow: 0px 0px 5px #eeeeee;
-  width: 70%;
-  height: 200px;
+  width: 50%;
+/*  height: 200px;*/
   padding: 50px;
   margin-bottom: 2%;
   margin-top: 2%;
@@ -182,11 +207,25 @@ input[type = text] {
 }
 
 .form_field_errors, .form_non_field_errors {
-	padding: 10px
+	padding: 10px;
 	display: inline-block;
 	font: 12pt helvetica neue;
 }
 
 .form_field_errors {
-	color: red;
+	color: #880000;
+}
+
+/*update.html*/
+.label_for_delete {
+	display: inline-block;
+	color: #880000;
+/*	font-size: 13px;*/
+	font: 9pt helvetica neue;
+	font-weight: bold;
+	text-align: left;
+}
+
+.table{
+	
 }
