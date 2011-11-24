@@ -173,13 +173,23 @@ var treemap = d3.layout.treemap()
     .value(function(d) { return d.value; })
     .sticky(true)
 	;
-	
-var svg = d3.select("body").append("svg:svg")
-    .attr("width", w)
-    .attr("height", h)
-  .append("svg:g")
-    .attr("transform", "translate(-.5,-.5)")
+
+d3.select("body").append("div")
+	.attr("id", "blockOverlay")
+	.classed("active", false)
+	.attr("display", "none")
+	.on("click", editPopupCancel)
 	;
+	
+var svg = d3.select("body")
+	.append("div")
+		.attr("id", "interests")
+	.append("svg:svg")
+    	.attr("width", w)
+    	.attr("height", h)
+  	.append("svg:g")
+    	.attr("transform", "translate(-.5,-.5)")
+		;
 
 var tooltip = d3.select("body")
 	.append("div")
@@ -288,17 +298,16 @@ function editCategory(d,i) {
 	d3.event.stopPropagation();
 	clickedCell = this.parentNode ? this.parentNode.parentNode : this.parentElement.parentElement;
 
+	d3.select("body").select("div#blockOverlay")
+		.classed("active", true)
+		;
+
 	var editPopup = d3.select("body")
 					.append("div")
-					.attr("class", "editpopup")
-					.style("position", "absolute")
+					.attr("class", "editPopup")
 					.style("left",w/4-100+"px")
 					.style("top",h/4+"px")
-					.style("width","800px")
-					.style("height","150px")
-					.style("padding","20px")
-					.style("background","white")
-					.style("border","4px solid black")
+
 					;
 							
 	editPopup.append("form")
@@ -369,19 +378,28 @@ function editPopupRename(form) {
 		parameters : {u: username, json: stringifyJson},
 		onFailure : function() {alert('Could not update JSON due to POST error.')}
 
-	});	
-	d3.select("body").select("div.editpopup").remove();
+	});
+	d3.select("body").select("div#blockOverlay")
+		.classed("active", false)
+		;
+	d3.select("body").select("div.editPopup").remove();
 }
 
 function editPopupCancel(d,i) {
-	d3.select("body").select("div.editpopup").remove();
+	d3.select("body").select("div#blockOverlay")
+		.classed("active", false)
+		;
+	d3.select("body").select("div.editPopup").remove();
 }
 
 function editPopupDelete(d,i) {
 	var datum = clickedCell.__data__;
 	deleteWithChildren(datum);
-	
-	d3.select("body").select("div.editpopup").remove();	
+
+	d3.select("body").select("div#blockOverlay")
+		.classed("active", false)
+		;
+	d3.select("body").select("div.editPopup").remove();	
 	
 	svg.selectAll("g")
 		.data(treemap.value(function(d) {return d.value;}))
