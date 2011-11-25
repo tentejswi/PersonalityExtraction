@@ -8,6 +8,7 @@ import java.io.InputStreamReader;
 import java.net.URL;
 import java.net.URLConnection;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 
@@ -106,15 +107,62 @@ public class Facebook {
 		return posts;
 	}
 
+	public List<HashMap<String, String>> getLikes() {
+		List<HashMap<String, String>> likes = new ArrayList<HashMap<String,String>>();
+		String url = "https://graph.facebook.com/me/likes?access_token="
+				+ accessToken;
+		String nextUrl = null;
+		
+		for(int i=0; i<10; i++) {
+			String response = getData(url);
+			if (response != null) {
+				JSONObject jsonObj = (JSONObject) JSONSerializer.toJSON(response);
+				
+				if(jsonObj.containsKey("paging")) {
+					JSONObject paging = jsonObj.getJSONObject("paging");
+					if(paging.containsKey("next")) {
+						nextUrl = paging.getString("next");
+					}
+				}
+				
+				if(jsonObj.containsKey("data")) {
+					JSONArray likesArray = jsonObj.getJSONArray("data");
+					Iterator<JSONObject> itr = likesArray.iterator();
+					while (itr.hasNext()) {
+						JSONObject like = itr.next();
+						HashMap<String, String> likeMap = new HashMap<String, String>();
+						likeMap.put("name", like.getString("name"));
+						likeMap.put("category", like.getString("category"));
+						likes.add(likeMap);
+					}
+				}
+			}
+			
+			if(nextUrl == null) {
+				break;
+			} else {
+				url = nextUrl;
+				nextUrl = null;
+			}
+		}
+		
+		return likes;
+	}
+	
 	/**
 	 * @param args
 	 */
 	public static void main(String[] args) {
 		Facebook fb = new Facebook(
-				"AAAAAAITEghMBAC3HeZA6TrXYUb3wMkgZBSZA6ZAKkrL9Y3BZBiapUqz6YC4iLeeclCBKsSxJYBSuq1jByI1YVeLinb01Wn2JXNooZCoHOaPQZDZD");
-		List<String> posts = fb.getUserStatusUpdates();
-		for(String p : posts) {
-			System.out.println(p);
+				"AAAAAAITEghMBABm6TMVqCgkvXYcWpZCgKsciSZC3tBAfPKCetbDIBBU5VK9LL6ZAZCliHIiTuajmYxZBh0OZCDLaMCxe8orZBjJkfP7LBg29QZDZD");
+//		List<String> posts = fb.getUserStatusUpdates();
+//		for(String p : posts) {
+//			System.out.println(p);
+//		}
+		
+		List<HashMap<String, String>> likes = fb.getLikes();
+		for(HashMap<String, String> l : likes) {
+			System.out.println(l.get("name") + "\t" + l.get("category"));
 		}
 	}
 
