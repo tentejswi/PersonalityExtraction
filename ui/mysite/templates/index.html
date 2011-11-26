@@ -14,11 +14,12 @@
 		<div id = "seekinme_desc_title">
 			<span class="script_font"> You </span> are the center </br> <span class="pad_40">of the universe.</span>
 		</div>
-		<div id = "seekinme_desc_body">
+		<div class = "index_body" style="color:#886744">
 			seekinme helps you make a lot more sense of your social data.
 		</div>
 	</div>
 	<div id = "inner_container_right">
+		{% if invited %}
 		<div id="login_sources" class="">
 			<h3 style="color:gray">Sign up with</h3>
 			</br>
@@ -27,22 +28,22 @@
 		</div> 
 		</br></br>
 		<div id = "try_out">
-	<script type="text/javascript">
-		function handleKeyPress(event, username) {
-			if(!event)
-				event = window.event;
-			if(event.keyCode == 13) {
-				new Ajax.Request('http://ec2-50-19-209-97.compute-1.amazonaws.com/api/queue.php?u=' + username + '&s=t', {
-					method : 'get',
-					onSuccess : function(transport) {
-						window.location = "/tryfirst/"+username;
-					},
-					onFailure : function() {
-						alert('Something went wrong...')
-					}
-				});
-			}
-		}
+			<script type="text/javascript">
+				function handleKeyPress(event, username) {
+					if(!event)
+						event = window.event;
+						if(event.keyCode == 13) {
+							new Ajax.Request('http://ec2-50-19-209-97.compute-1.amazonaws.com/api/queue.php?u=' + username + '&s=t', {
+								method : 'get',
+								onSuccess : function(transport) {
+								window.location = "/tryfirst/"+username;
+								},
+								onFailure : function() {
+								alert('Something went wrong...')
+							}
+						});
+						}
+				}
 			</script>
 			<h3 style="color:gray">or try it out on a friend</h3>
 			</br>
@@ -54,7 +55,28 @@
 					press ENTER to submit
 				</div>
 			</div>
-
+		</div>
+		{% endif %}
+		{% if not invited %}
+		<div id = "pass_or_queue">
+			<div class = "index_body" style="color:#2C7F54;">
+				<p>If you have been invited,</p>
+				<p>please enter your email address to proceed.</p>
+			</div>
+			</br>
+			<form action="{% url index %}" method="post">{% csrf_token %}
+				{% for field in form %}
+      			<label class="left label_for_register" >{{field.label}}</label>
+      			{{field}}
+      			{% endfor %}
+			<input type="submit" class = "button" value="Submit" />
+			</form>
+			<div class = "index_body" style="font-size:12pt;">
+				<p>If we haven't been able to invite you yet,</p>
+				we will let you know as soon as we can!
+			</div>	
+		</div>
+		{% endif %}
 	</div>
 </div>
 {% endblock %} 

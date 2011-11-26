@@ -20,17 +20,61 @@ import smtplib
 from django.core.mail import send_mail
 from django.core.urlresolvers import reverse
 from .models import UserLog
+from privatebeta.forms import InviteRequestForm
+from privatebeta.models import InviteRequest
 
+def user_invited_check(**kwa):
+    for inv_user in InviteRequest.objects.filter(**kwa):
+        if inv_user.invited == True:
+            return True
+        return False
+    
 def index(request):
     """Index view, displays login mechanism"""
     if request.user.is_authenticated():
         #if loggedin - go to home page and display the interest graph
         return HttpResponseRedirect('home')
+    # if form has been submitted, show the next steps, or show the form
     else:
-        #else just display the main page with login
-        return render_to_response('index.html', {'version': settings.APP_VERSION},
-                                  RequestContext(request))
+        if request.method == 'POST':    
+            form = InviteRequestForm(request.POST)
+            ctx = RequestContext(request, {
+                                           'version' : settings.APP_VERSION,
+                                           'form': form,
+                                           })
+            if form.is_valid():
+                """ Check if the user has been invited or needs to be invited"""
+                eml = form.cleaned_data['email']
+                # if invited then continue to login
+                if user_invited_check(email=eml):
+                    ctx['invited']=True
+                    return render_to_response('index.html', ctx,
+                                              RequestContext(request))
+                    # else email is in the invitation queue
+                else:
+                    if not InviteRequest.objects.filter(email=eml):
+                        form.save()
+                    return HttpResponseRedirect(reverse('privatebeta_sent'))
+            else:
+                # email address already exists
+                # TO-DO handle the case when email address is not valid
+                print "form is invalid"
+                print form
+                return HttpResponseRedirect(reverse('privatebeta_sent'))
+        else:
+            form = InviteRequestForm(request.POST)
+            ctx = RequestContext(request, {
+                                           'version' : settings.APP_VERSION,
+                                           'form': form,
+                                           })
+            ctx['invited']=False
+            return render_to_response('index.html', ctx,
+                                      RequestContext(request))
 
+def invite_sent(request):
+    return render_to_response('invites/queued.html', {'version' : settings.APP_VERSION},
+                                      RequestContext(request))
+                
 def tryfirst(request, username):
    """This is for when the user tries out by giving the twitter handle directly"""
    ctx = RequestContext(request, {
