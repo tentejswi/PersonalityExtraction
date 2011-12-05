@@ -11,6 +11,7 @@ import java.util.List;
 
 import net.sf.json.JSONObject;
 
+import com.personalityextractor.data.source.Facebook;
 import com.personalityextractor.data.source.Twitter;
 import com.personalityextractor.entity.WikipediaEntity;
 import com.personalityextractor.entity.extractor.frequencybased.TopNNPHashTagsExtractor;
@@ -35,13 +36,15 @@ public class Runner {
 
 	static MysqlStore store;
 
-	public static String popUserFromQueue() {
+	public static String[] popUserFromQueue() {
+		String[] handle = new String[2];
 		ResultSet rs = store
-				.execute("SELECT handle FROM user_queue WHERE done = 0 AND type = 't' LIMIT 1");
+				.execute("SELECT handle, type FROM user_queue WHERE done = 0 LIMIT 1");
 
 		try {
 			if (rs.first()) {
-				String handle = rs.getString("handle");
+				handle[0] = rs.getString("handle");
+				handle[1] = rs.getString("type");
 				return handle;
 			}
 		} catch (Exception e) {
@@ -69,58 +72,64 @@ public class Runner {
 
 	public static String nodesToJson(String handle, Graph g, List<Node> nodes) {
 		JSONObject j = g.toJSON(handle, nodes);
-//			System.out.println(j.toString());
-//			json.put(n.getEntity().getText(), j);
-//		}
-//		
-//		JSONObject jroot =  new JSONObject();
-//		jroot.put(handle, json);
+		// System.out.println(j.toString());
+		// json.put(n.getEntity().getText(), j);
+		// }
+		//
+		// JSONObject jroot = new JSONObject();
+		// jroot.put(handle, json);
 		return j.toString();
 	}
 
 	public static void run() {
-		String handle = popUserFromQueue();
+		String[] handle = popUserFromQueue();
 
 		if (handle == null) {
 			return;
 		}
 
-		Twitter t = new Twitter();
 		HashMap<String, WikipediaEntity> allEntities = new HashMap<String, WikipediaEntity>();
-		if (handle != null) {
-			Date start = new Date();
-			System.out.print("processing " + handle + "...\t");
-			List<String> tweets = t.fetchTweets(handle, 200);
-			//TopNNPHashTagsExtractor tne = new TopNNPHashTagsExtractor();
-			TopNPExtractor tne = new TopNPExtractor(); 
+
+		Date start = new Date();
+		System.out.print("processing " + handle[0] + "...\t");
+
+		if (handle[1].equalsIgnoreCase("t")) {
+			Twitter t = new Twitter();
+			List<String> tweets = t.fetchTweets(handle[0], 200);
+			TopNPExtractor tne = new TopNPExtractor();
 			Counter<String> extracted_entities = tne.extract(tweets);
-			System.out.println("Number of entities: "+extracted_entities.size());
 			allEntities = tne.resolve(extracted_entities);
-			
-			System.out.println("=========Wikipedia Entities==============");
-			for(String str : allEntities.keySet()){
-				System.out.println(str+" "+allEntities.get(str).getText()+" "+allEntities.get(str).getWikiminerID());
-			}
-			System.out.println("=========================================");
-			
-			List<WikipediaEntity> entities = new ArrayList<WikipediaEntity>();
-			entities.addAll(allEntities.values());
-			Graph g = new Graph(entities);
-			g.build(0);
-			g.printWeights();
-			Date end = new Date();
-			PerfMetrics.getInstance().addToMetrics(Metric.TOTAL,
-					(end.getTime() - start.getTime()));
-
-			printMetrics();
-
-			IRanker ranker = new WeightGraphRanker(g);
-			List<Node> topNodes = ranker.getTopRankedNodes(25);
-			setUserInterests(handle, nodesToJson(handle, g, topNodes));
-			// update status
-			updateUser(handle);
-			System.out.println("ALL --- DONE");
+		} else if(handle[1].equalsIgnoreCase("f")) {
+			Facebook fb = new Facebook(handle[0]);
+			List<String> updates = fb.getUserStatusUpdates();
+			TopNPExtractor tne = new TopNPExtractor();
+			Counter<String> extracted_entities = tne.extract(updates);
+			allEntities = tne.resolve(extracted_entities);
 		}
+
+		// System.out.println("=========Wikipedia Entities==============");
+		// for(String str : allEntities.keySet()){
+		// System.out.println(str+" "+allEntities.get(str).getText()+" "+allEntities.get(str).getWikiminerID());
+		// }
+		// System.out.println("=========================================");
+
+		List<WikipediaEntity> entities = new ArrayList<WikipediaEntity>();
+		entities.addAll(allEntities.values());
+		Graph g = new Graph(entities);
+		g.build(0);
+		g.printWeights();
+		Date end = new Date();
+		PerfMetrics.getInstance().addToMetrics(Metric.TOTAL,
+				(end.getTime() - start.getTime()));
+
+		printMetrics();
+
+		IRanker ranker = new WeightGraphRanker(g);
+		List<Node> topNodes = ranker.getTopRankedNodes(25);
+		setUserInterests(handle[0], nodesToJson(handle[0], g, topNodes));
+		// update status
+		updateUser(handle[0]);
+		System.out.println("ALL --- DONE");
 	}
 
 	public static void printMetrics() {
@@ -148,7 +157,8 @@ public class Runner {
 		while (true) {
 			System.out.println("running");
 			run();
-			//Thread.sleep(10000);
+			break;
+			// Thread.sleep(10000);
 		}
 	}
 
