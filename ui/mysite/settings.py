@@ -66,6 +66,7 @@ INSTALLED_APPS = (
     'social_auth',
     'app',
     'accounts',
+    'privatebeta',
 #    'registration', 
 )
 
@@ -90,6 +91,8 @@ except:
 
 LOGIN_REDIRECT_URL = '/'
 SOCIAL_AUTH_LOGIN_REDIRECT_URL = '/'
+SOCIAL_AUTH_CHANGE_SIGNAL_ONLY = True
+SOCIAL_AUTH_COMPLETE_URL_NAME = 'my_complete'
 
 FACEBOOK_EXTENDED_PERMISSIONS = ['email', 'read_stream', 'offline_access',]
 
@@ -117,3 +120,27 @@ OPENID_AX_EXTRA_DATA = [('nickname', 'nickname'),
                         ('email', 'email'),
                         ('fullname', 'fullname')]
 
+SOCIAL_AUTH_PIPELINE = (
+        'social_auth.backends.pipeline.social.social_auth_user',
+        'app.views.get_existing_user',
+        #~ 'social_auth.backends.pipeline.associate.associate_by_email',
+        'social_auth.backends.pipeline.user.get_username',
+        #~ 'app.views.pipe_dump',
+        'social_auth.backends.pipeline.user.create_user',
+        'social_auth.backends.pipeline.social.associate_user',
+        'social_auth.backends.pipeline.social.load_extra_data',
+        'social_auth.backends.pipeline.user.update_user_details',
+   )
+
+# testing with
+# python -m smtpd -n -c DebuggingServer localhost:1025
+
+EMAIL_HOST = 'localhost'
+EMAIL_PORT = 1025
+
+# Private Beta Settings
+PRIVATEBETA_ENABLE_BETA = True
+PRIVATEBETA_NEVER_ALLOW_VIEWS = 'app.views.home', 'app.views.accounts'
+PRIVATEBETA_ALWAYS_ALLOW_VIEWS = 'app.views.index',  'app.views.invite_sent'
+PRIVATEBETA_ALWAYS_ALLOW_MODULES = 'app.views', 'django.contrib.admin.sites', 'social_auth.views'
+PRIVATEBETA_REDIRECT_URL = '/'
