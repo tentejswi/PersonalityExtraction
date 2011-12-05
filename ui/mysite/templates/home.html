@@ -1,37 +1,117 @@
 {% extends "base.html" %}
 
-{% block header %} 
+{% block html_head %} 
 <!-- 	<script type="text/javascript" src="{{MEDIA_URL}}js/sizzle/sizzle.js"></script> -->	
 	<script type="text/javascript" src="http://mbostock.github.com/d3/d3.js"></script>
 	<script type="text/javascript" src="http://mbostock.github.com/d3/d3.layout.js"></script>
 	<link type="text/css" rel="stylesheet" href="{{MEDIA_URL}}css/treemap.css"/>
 	<link type="text/css" rel="stylesheet" href="{{MEDIA_URL}}css/button.css"/>
 	<link type="text/css" rel="stylesheet" href="{{MEDIA_URL}}css/extras.css"/>
+	<link rel="stylesheet" href="{{MEDIA_URL}}css/jqueryui/brown-green/jquery-ui-1.8.16.custom.css" type="text/css"/>
+	<script src="{{MEDIA_URL}}js/jqueryui/jquery-ui-1.8.16.custom.min.js"></script>
+	<style>
+	#tabs { margin-top: 1em; }
+	#tabs li .ui-icon-close { float: left; margin: 0.4em 0.2em 0 0; cursor: pointer; }
+	#add_tab { cursor: pointer; }
+	</style>
+	<script>
+	$(function() {
+		var tab_counter = 2;
+
+		// tabs init with a custom tab template and an "add" callback filling in the content
+		var $tabs = $( "#tabs").tabs({
+			tabTemplate: "<li><a href='#{href}'>#{label}</a> <span class='ui-icon ui-icon-close'>Remove Tab</span></li>",
+			add: function( event, ui ) {
+				var tab_content = "Chat functionality coming next. More will follow!";
+				$( ui.panel ).append( "<p>" + tab_content + "</p>" );
+				$tabs.tabs('select', '#' + ui.panel.id);
+			}
+		});
+
+		// actual addTab function: adds new tab using the title input from the form above
+		function addTab() {
+			var tab_title = "Tab " + tab_counter;
+			var lastIndex = $tabs.tabs( "length" );
+			$tabs.tabs( "add", "#tabs-" + tab_counter, "Chat", lastIndex-1);
+			tab_counter++;
+		}
+
+		// addTab button: just opens the dialog
+		$( "#tabs #add_tab" )
+			.button()
+			.click(function() {
+				addTab();
+			});
+
+		// close icon: removing the tab on click
+		// note: closable tabs gonna be an option in the future - see http://dev.jqueryui.com/ticket/3924
+		$( "#tabs span.ui-icon-close" ).live( "click", function() {
+			var index = $( "li", $tabs ).index( $( this ).parent() );
+			$tabs.tabs( "remove", index );
+		});
+		
+		// Make tabs adjustable
+		// Problem: when the first(Home) tab is replaced by some other thread, closing the other tab closes the Home tab
+		// $( "#tabs" ).tabs().find( ".ui-tabs-nav" ).sortable({ axis: "x" });
+	});
+	</script>
 {% endblock %}
 
-{% block top_header %}
+{% block body %}
+	<div id="tabs" style="margin-top:0em;padding:0em;border:none">
+		<div>
+			<a id="top_logo" href="/" rel="nofollow" style="text-decoration:none">
+				seekinme
+			</a>
+		</div>
+		<ul style="border:none; border-bottom: 1px solid #DDD;">
+			<li><a href="#Home">
+				{% with user.first_name|capfirst|add:" "|add:user.last_name|capfirst as fullName %}
+					{{ fullName|default:user.username }}
+				{% endwith %}
+				</a>
+			</li>
+			<li><a href='#Dummy' style='display:none'>#Dummy</a></li>
+			<li>
+				<button id="add_tab" class = "ui-button ui-widget ui-state-default ui-corner-all" role="button" aria-disabled="false">
+					<span>New Do</span>
+				</button>
+			</li>
+			<div id="top_user_panel">
+				{% if user.is_authenticated %}
+				{% if user.last_name %}
+				<a href="/accounts/update" rel="nofollow" style="text-decoration:none">
+				{% with user.first_name|capfirst|add:" "|add:user.last_name|capfirst as fullName %}
+					{{ fullName|default:user.username }}
+				{% endwith %}
+				</a>
+				&nbsp;
+				{% endif %}
+ 
+				|&nbsp;
+				<a href="/accounts/logout/" rel="nofollow" style="text-decoration:none">Sign Out</a>
+				{% else %} <!-- <a href="/accounts/login/" rel="nofollow">Sign In</a> -->
+				{% endif %}
+			</div>
+			</br>
+			<div id = "other_sources">
+				{% if twitter_error %}
+				Associate
+				<a rel="nofollow" href="{% url socialauth_associate_begin 'twitter' %}" title="Associate Twitter with this account" class="associate_auth_source_twitter_img"> </a>
+				{% endif %}
+				{% if facebook_error %}
+				Associate
+				<a rel="nofollow" href="{% url socialauth_associate_begin 'facebook' %}" title="Associate Facebook with this account" class="associate_auth_source_facebook_img"> </a>
+				{% endif %}
+			</div>
+	</ul>
+	<div id="Home" style="padding:0em;">
+<div id="chart">
+</div>
 <div id="title">
 	<label for="search"> search: </label>
 	<input type="text" id="search" onkeyup="update(this.value)">
 </div>
-{% endblock %}
-
-{% block other_associations %}
-<div id = "other sources">
-	{% if twitter_error %}
-	Associate
-	<a rel="nofollow" href="{% url socialauth_associate_begin 'twitter' %}" title="Associate Twitter with this account" class="associate_auth_source_twitter_img"> </a>
-	{% endif %}
-	{% if facebook_error %}
-	Associate
-	<a rel="nofollow" href="{% url socialauth_associate_begin 'facebook' %}" title="Associate Facebook with this account" class="associate_auth_source_facebook_img"> </a>
-	{% endif %}
-</div>
-{% endblock %}
-
-{% block content %}
-
-<div id="chart"></div>
 <script type="text/javascript">
 	var media_path = "{{MEDIA_URL}}";
 	var profilePic = 'http://michelleshaeffer.com/wp-content/uploads/2010/08/coffee_cup.jpg';
@@ -51,6 +131,10 @@
 	{% endfor %}
 </script>
 
-<script type="text/javascript" src="{{MEDIA_URL}}js/treemap_final.js">
-</script>
+<script type="text/javascript" src="{{MEDIA_URL}}js/treemap_final.js"></script>
+	</div>
+	
+<div id="Dummy" style="display:none"></div>
+
+</div>
 {% endblock %}

@@ -1,5 +1,5 @@
-var w = window.innerWidth - 20,
-   h = window.innerHeight - 100;
+var w = 0.97*window.innerWidth,
+   h = 0.80*window.innerHeight;
 var colorbrewer = ["rgb(158,1,66)","rgb(213,62,79)","rgb(244,109,67)",
 	"rgb(253,174,97)","rgb(171,221,164)","rgb(102,194,165)","rgb(50,136,189)",
 	"rgb(94,79,162)"];
@@ -9,6 +9,7 @@ var goldenratio = 1.618;
 goldenratio = 1.5
 var clickedCell;
 var stringifyJson;
+var divForThis = "#Home";
 
 function bckColor(d,i) {
 	var dep = d.depth;
@@ -174,14 +175,14 @@ var treemap = d3.layout.treemap()
     .sticky(true)
 	;
 
-d3.select("body").append("div")
+d3.select(divForThis).append("div")
 	.attr("id", "blockOverlay")
 	.classed("active", false)
 	.attr("display", "none")
 	.on("click", editPopupCancel)
 	;
 	
-var svg = d3.select("body")
+var svg = d3.select(divForThis)
 	.append("div")
 		.attr("id", "interests")
 	.append("svg:svg")
@@ -191,7 +192,7 @@ var svg = d3.select("body")
     	.attr("transform", "translate(-.5,-.5)")
 		;
 
-var tooltip = d3.select("body")
+var tooltip = d3.select(divForThis)
 	.append("div")
 	.attr("id", "tooltip")
 	.style("position", "absolute")
@@ -298,11 +299,11 @@ function editCategory(d,i) {
 	d3.event.stopPropagation();
 	clickedCell = this.parentNode ? this.parentNode.parentNode : this.parentElement.parentElement;
 
-	d3.select("body").select("div#blockOverlay")
+	d3.select(divForThis).select("div#blockOverlay")
 		.classed("active", true)
 		;
 
-	var editPopup = d3.select("body")
+	var editPopup = d3.select(divForThis)
 					.append("div")
 					.attr("class", "editPopup")
 					.style("left",w/4-100+"px")
@@ -379,27 +380,27 @@ function editPopupRename(form) {
 		onFailure : function() {alert('Could not update JSON due to POST error.')}
 
 	});
-	d3.select("body").select("div#blockOverlay")
+	d3.select(divForThis).select("div#blockOverlay")
 		.classed("active", false)
 		;
-	d3.select("body").select("div.editPopup").remove();
+	d3.select(divForThis).select("div.editPopup").remove();
 }
 
 function editPopupCancel(d,i) {
-	d3.select("body").select("div#blockOverlay")
+	d3.select(divForThis).select("div#blockOverlay")
 		.classed("active", false)
 		;
-	d3.select("body").select("div.editPopup").remove();
+	d3.select(divForThis).select("div.editPopup").remove();
 }
 
 function editPopupDelete(d,i) {
 	var datum = clickedCell.__data__;
 	deleteWithChildren(datum);
 
-	d3.select("body").select("div#blockOverlay")
+	d3.select(divForThis).select("div#blockOverlay")
 		.classed("active", false)
 		;
-	d3.select("body").select("div.editPopup").remove();	
+	d3.select(divForThis).select("div.editPopup").remove();	
 	
 	svg.selectAll("g")
 		.data(treemap.value(function(d) {return d.value;}))

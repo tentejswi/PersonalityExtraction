@@ -5,8 +5,8 @@
 		<link rel="stylesheet" href="{{MEDIA_URL}}css/base.css" type="text/css"/>
 		<link rel="stylesheet" href="{{MEDIA_URL}}css/Garton-fontfacekit/stylesheet.css" type="text/css"/>
 		<link rel="stylesheet" href="{{MEDIA_URL}}css/button.css" type="text/css"/>
-		<script src="{{MEDIA_URL}}js/jquery-1.6.1.min.js"></script>
-		{% block header %}{% endblock %} 
+		<script src="{{MEDIA_URL}}js/jquery-1.6.2.js"></script>
+		{% block html_head %}{% endblock %} 
 		<title>seekinme</title>
 		<script type="text/javascript">
 			var _gaq = _gaq || [];
@@ -23,14 +23,16 @@
 		</script>
 	</head>
 	<body>
-		<div id = "outer_container">
-			<a id="top_logo" href="/" rel="nofollow" style="text-decoration:none">
-				seekinme
-			</a>
-			<div id = "top_content">
-				{% block top_header %}{% endblock %}
+	{% block body %}
+		{% block body_head %}
+		<div id = "top_container">
+			<div>
+				<a id="top_logo" href="/" rel="nofollow" style="text-decoration:none">
+					seekinme
+				</a>
 			</div>
-			<div id="top_user_panel">
+		</div>
+		<div id="top_user_panel">
 				{% if user.is_authenticated %}
 				{% if user.last_name %}
 				<a href="/accounts/update" rel="nofollow" style="text-decoration:none">
@@ -45,14 +47,14 @@
 				<a href="/accounts/logout/" rel="nofollow" style="text-decoration:none">Sign Out</a>
 				{% else %} <!-- <a href="/accounts/login/" rel="nofollow">Sign In</a> -->
 				{% endif %}
-				{% block other_associations %}{% endblock %}
-			</div>
 		</div>
+		{% endblock %}
 		</br>
 		<hr/>
 		<div id="content">
 			{% block content %}{% endblock %}
 		</div>
+	{% endblock %}
 	</body>
 	<hr />
 	<footer></footer>

@@ -25,8 +25,8 @@ h5 {
 	line-height: 0.8
 }
 
-#outer_container {
-	min-height: 45px;
+#top_container {
+/*	min-height: 45px;*/
 }
 #top_logo {
 	font: 40pt 'GartonMedium';
@@ -35,21 +35,25 @@ h5 {
 	float: left;
 	margin-right: 2%;
 	margin-top: 4px;
-	min-height: 45px;
+/*	min-height: 45px;*/
 }
 #top_content {
 	float: left;
 	text-align: center;
 	font-size: 10pt;
 	margin-right: 5%;
-	min-height: 45px;
+/*	min-height: 45px;*/
 }
 #top_user_panel {
 	float: right;
 	text-align: right;
 	font-family: 'Helvetica Neue', 'Helvetica', 'Arial';
 	font-size: 10pt;
-	min-height: 45px;
+/*	min-height: 45px;*/
+}
+#other_sources {
+	float: right;
+	text-align: right;
 }
 #content {
 
