@@ -81,7 +81,7 @@ def tryfirst(request, username):
 		'version' : settings.APP_VERSION,
 		'username': username,
 	})
-   return render_to_response('home.html', ctx,
+   return render_to_response('trial.html', ctx,
                              RequestContext(request))
 
 @login_required

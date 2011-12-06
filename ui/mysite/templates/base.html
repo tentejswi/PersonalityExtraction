@@ -31,7 +31,7 @@
 					seekinme
 				</a>
 			</div>
-		</div>
+		
 		<div id="top_user_panel">
 				{% if user.is_authenticated %}
 				{% if user.last_name %}
@@ -47,6 +47,7 @@
 				<a href="/accounts/logout/" rel="nofollow" style="text-decoration:none">Sign Out</a>
 				{% else %} <!-- <a href="/accounts/login/" rel="nofollow">Sign In</a> -->
 				{% endif %}
+		</div>
 		</div>
 		{% endblock %}
 		</br>
