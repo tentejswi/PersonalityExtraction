@@ -138,7 +138,7 @@ public class Wikiminer {
 		try {
 			// String urlStr =
 			// "http://wdm.cs.waikato.ac.nz:8080/service?task=search&xml";
-			String urlStr = "http://50.19.209.97:8080/wikipediaminer/services/exploreArticle?parentCategories=true";
+			String urlStr = "http://ec2-50-19-209-97.compute-1.amazonaws.com:8080/wikipedia-miner/services/exploreArticle?parentCategories=true";
 			urlStr += "&id=" + wikiminer_id;
 
 			// return from cache
@@ -177,7 +177,7 @@ public class Wikiminer {
 		try {
 			// String urlStr =
 			// "http://wdm.cs.waikato.ac.nz:8080/service?task=search&xml";
-			String urlStr = "http://50.19.209.97:8080/wikipediaminer/services/exploreCategory?parentCategories=true";
+			String urlStr = "http://ec2-50-19-209-97.compute-1.amazonaws.com:8080/wikipedia-miner/services/exploreCategory?parentCategories=true";
 			urlStr += "&id=" + wikiminer_id;
 
 			// return from cache
@@ -656,7 +656,7 @@ public class Wikiminer {
 	}
 
 	public static double compareIds(String id1, String id2) {
-		String urlStr = "http://50.19.209.97:8080/wikipediaminer/services/compare?&ids1="
+		String urlStr = "http://ec2-50-19-209-97.compute-1.amazonaws.com:8080/wikipedia-miner/services/compare?&ids1="
 				+ id1 + "&ids2=" + id2;
 
 		try {
@@ -738,7 +738,7 @@ public class Wikiminer {
 		try {
 			// String urlStr =
 			// "http://wdm.cs.waikato.ac.nz:8080/service?task=search&xml";
-			String urlStr = "http://50.19.209.97:8080/wikipediaminer/services/search?complex";
+			String urlStr = "http://ec2-50-19-209-97.compute-1.amazonaws.com:8080/wikipedia-miner/services/search?complex";
 
 			if (isId) {
 				// urlStr += "&id=" + query;
