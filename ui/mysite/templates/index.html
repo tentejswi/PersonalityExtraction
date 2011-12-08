@@ -3,6 +3,23 @@
 {% block html_head %}
 	<script src="{{MEDIA_URL}}js/prototype.js"></script>
 	<link rel="stylesheet" href="{{MEDIA_URL}}css/scriptina-pro-fontfacekit/stylesheet.css" type="text/css"/>
+	<script type="text/javascript">
+		function handleKeyPress(event, username) {
+			if(!event)
+				event = window.event;
+			if(event.keyCode == 13) {
+				new Ajax.Request('http://ec2-50-19-209-97.compute-1.amazonaws.com/api/queue.php?u=' + username + '&s=t', {
+					method : 'get',
+					onSuccess : function(transport) {
+					window.location = "/tryfirst/"+username;
+					},
+					onFailure : function() {
+						alert('Something went wrong...')
+					}
+				});
+			}
+		}
+	</script>
 {% endblock %}
 
 {% block content %}
@@ -22,26 +39,9 @@
 			</br>
 			<a rel="nofollow" href="{% url socialauth_begin "twitter" %}" title="Connect with Twitter" class="auth_source_twitter"> </a>
 			<a rel="nofollow" href="{% url socialauth_begin "facebook" %}" title="Connect with Facebook" class="auth_source_facebook"> </a>
-		</div> 
+		</div>
 		</br></br>
 		<div id = "try_out">
-			<script type="text/javascript">
-				function handleKeyPress(event, username) {
-					if(!event)
-						event = window.event;
-						if(event.keyCode == 13) {
-							new Ajax.Request('http://ec2-50-19-209-97.compute-1.amazonaws.com/api/queue.php?u=' + username + '&s=t', {
-								method : 'get',
-								onSuccess : function(transport) {
-								window.location = "/tryfirst/"+username;
-								},
-								onFailure : function() {
-								alert('Something went wrong...')
-							}
-						});
-						}
-				}
-			</script>
 			<h3 style="color:gray">or try it out on a friend</h3>
 			</br>
 			<div id = "trial_form">
@@ -72,6 +72,19 @@
 				<p>If we haven't been able to invite you yet,</p>
 				we will let you know as soon as we can!
 			</div>	
+		</div>
+		</br></br>
+		<div id = "try_out">
+			<h3 style="color:gray">or try it out on a friend</h3>
+			</br>
+			<div id = "trial_form">
+				<input type="text" class= "inputtext" id="trial_handle" value = "enter a twitter username" name="loginname" onKeyPress="return handleKeyPress(event, this.value)"
+				size="25pt" onfocus="if (this.value=='enter a twitter username') this.value=''; this.style.color = '#000'"
+				onblur="if (this.value=='') this.value='enter a twitter username'; if (this.value=='enter a twitter username') this.style.color = '#ccc'">
+				<div id="trial_submit">
+					press ENTER to submit
+				</div>
+			</div>
 		</div>
 		{% endif %}
 	</div>
