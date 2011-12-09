@@ -8,14 +8,20 @@
 	<link type="text/css" rel="stylesheet" href="{{MEDIA_URL}}css/button.css"/>
 	<link type="text/css" rel="stylesheet" href="{{MEDIA_URL}}css/extras.css"/>
 	<link rel="stylesheet" href="{{MEDIA_URL}}css/jqueryui/brown-green/jquery-ui-1.8.16.custom.css" type="text/css"/>
+	<script src="{{MEDIA_URL}}js/jqueryui/external/jquery.cookie.js"></script>
 	<script src="{{MEDIA_URL}}js/jqueryui/jquery-ui-1.8.16.custom.min.js"></script>
 	<style>
+	#chat_tab_dialog label{ display:block; }
+	#chat_tab_dialog label { margin-top: 0.5em; }
 	#tabs { margin-top: 1em; }
 	#tabs li .ui-icon-close { float: left; margin: 0.4em 0.2em 0 0; cursor: pointer; }
 	#add_tab { cursor: pointer; }
 	</style>
 	<script>
 	$(function() {
+		var $chat_gender_input,
+			$chat_age_input,
+			$chat_location_input;
 		var tab_counter = 2;
 
 		// tabs init with a custom tab template and an "add" callback filling in the content
@@ -25,14 +31,53 @@
 				var tab_content = "Chat functionality coming next. More will follow!";
 				$( ui.panel ).append( "<p>" + tab_content + "</p>" );
 				$tabs.tabs('select', '#' + ui.panel.id);
+			},
+		});
+
+		// modal dialog init: custom buttons and a "close" callback reseting the form inside
+		var $dialog = $( "#chat_tab_dialog" ).dialog({
+			autoOpen: false,
+			modal: true,
+			buttons: {
+				Chat: function() {
+					addTab();
+					$( this ).dialog( "close" );
+				},
+				Cancel: function() {
+					$( this ).dialog( "close" );
+				}
+			},
+			// open: function() {
+				// $chat_gender_input.focus();
+			// },
+			close: function() {
+				$form[ 0 ].reset();
 			}
 		});
 
+		// addTab form: calls addTab function on submit and closes the dialog
+		var $form = $( "form", $dialog ).submit(function() {
+			addTab();
+			$dialog.dialog( "close" );
+			return false;
+		});
+				
 		// actual addTab function: adds new tab using the title input from the form above
 		function addTab() {
-			var tab_title = "Tab " + tab_counter;
+			var c_sex = [];
+			$( "#chat_tab_dialog :checked" ).each(function() {c_sex.push($(this).val());});
+			c_sex = (c_sex == "Guy,Gal") ? "" : c_sex;
+			
+			var c_age = [];
+			$( "#chat_age option:selected" ).each(function() {c_age.push($(this).val());});
+			var c_age = (c_age == "About My Age") ? " "+c_age : " in "+c_age;
+			
+			var c_loc = $( "#chat_location" ).val();
+			var c_loc = c_loc ?" near "+c_loc : "";
+			
+			var tab_title = c_sex+c_age+c_loc|| " Chat ";
 			var lastIndex = $tabs.tabs( "length" );
-			$tabs.tabs( "add", "#tabs-" + tab_counter, "Chat", lastIndex-1);
+			$tabs.tabs( "add", "#tabs-" + tab_counter, tab_title, lastIndex-1);
 			tab_counter++;
 		}
 
@@ -40,7 +85,7 @@
 		$( "#tabs #add_tab" )
 			.button()
 			.click(function() {
-				addTab();
+				$dialog.dialog( "open" );
 			});
 
 		// close icon: removing the tab on click
@@ -58,6 +103,29 @@
 {% endblock %}
 
 {% block body %}
+	<div id="chat_tab_dialog" title="Who would you like to chat with?">
+		<form>
+			<fieldset class="ui-helper-reset">
+				<label for="chat_gender">Looking to chat with a </label>
+				<input type="checkbox" name="chat_gender" id="chat_gender" value="Guy" class="ui-widget-content ui-corner-all"/> Guy
+				<input type="checkbox" name="chat_gender" id="chat_gender" value="Gal" class="ui-widget-content ui-corner-all"/> Gal</br>
+				<label for="chat_age">in his/her </label>
+				<select id="chat_age" name="chat_age">
+					<option value="About My Age">About my age</option>
+					<option value="teens">Teens</option>
+					<option value="20s">20s</option>
+					<option value="30s">30s</option>
+					<option value="40s">40s</option>
+					<option value="50s">50s</option>
+					<option value="60s">60s</option>
+					<option value="70plus">70+</option>
+				</select>
+				<label for="chat_location">near</label>
+				<input type="text" name="chat_location" id="chat_location" value="Palo Alto" class="ui-widget-content ui-corner-all" />
+			</fieldset>
+		</form>
+	</div>
+	
 	<div id="tabs" style="margin-top:0em;padding:0em;border:none">
 		<div>
 			<a id="top_logo" href="/" rel="nofollow" style="text-decoration:none">
@@ -104,37 +172,34 @@
 				<a rel="nofollow" href="{% url socialauth_associate_begin 'facebook' %}" title="Associate Facebook with this account" class="associate_auth_source_facebook_img"> </a>
 				{% endif %}
 			</div>
-	</ul>
-	<div id="Home" style="padding:0em;">
-<div id="chart">
-</div>
-<div id="title">
-	<label for="search"> search: </label>
-	<input type="text" id="search" onkeyup="update(this.value)">
-</div>
-<script type="text/javascript">
-	var media_path = "{{MEDIA_URL}}";
-	var profilePic = 'http://michelleshaeffer.com/wp-content/uploads/2010/08/coffee_cup.jpg';
-	var username = "{{user.username}}";
-	var socialBackend;
-	var isAuthenticated = "{{user.is_authenticated}}" == "True" ? true : false;
+		</ul>
+		<div id="Home" style="padding:0em;">
+			<div id="chart"></div>
+			<div id="title">
+				<label for="search"> search: </label>
+				<input type="text" id="search" onkeyup="update(this.value)">
+			</div>
+			<script type="text/javascript">
+				var media_path = "{{MEDIA_URL}}";
+				var profilePic = 'http://michelleshaeffer.com/wp-content/uploads/2010/08/coffee_cup.jpg';
+				var username = "{{user.username}}";
+				var socialBackend;
+				var isAuthenticated = "{{user.is_authenticated}}" == "True" ? true : false;
 
-	if(!isAuthenticated)
-		username = "{{username}}";
-	{% for tweet in tweets %}
-		profilePic = "{{tweet.user.profile_image_url}}";
-		socialBackend = "t";
-	{% endfor %}
-	{% for feed in feeds %}
-		profilePic = "https://graph.facebook.com/{{feed.from.id}}/picture";
-		socialBackend = "f";
-	{% endfor %}
-</script>
+				if(!isAuthenticated)
+					username = "{{username}}";
+				{% for tweet in tweets %}
+					profilePic = "{{tweet.user.profile_image_url}}";
+					socialBackend = "t";
+				{% endfor %}
+				{% for feed in feeds %}
+					profilePic = "https://graph.facebook.com/{{feed.from.id}}/picture";
+					socialBackend = "f";
+				{% endfor %}
+			</script>
 
-<script type="text/javascript" src="{{MEDIA_URL}}js/treemap_final.js"></script>
+			<script type="text/javascript" src="{{MEDIA_URL}}js/treemap_final.js"></script>
+		</div>
+		<div id="Dummy" style="display:none"></div>
 	</div>
-	
-<div id="Dummy" style="display:none"></div>
-
-</div>
 {% endblock %}
