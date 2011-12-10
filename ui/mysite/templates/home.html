@@ -28,8 +28,10 @@
 		var $tabs = $( "#tabs").tabs({
 			tabTemplate: "<li><a href='#{href}'>#{label}</a> <span class='ui-icon ui-icon-close'>Remove Tab</span></li>",
 			add: function( event, ui ) {
-				var tab_content = "Chat functionality coming next. More will follow!";
+				var tab_content = "Chat with " + ($chat_gender_input!="" ? "a " + $chat_gender_input : "someone") + ($chat_age_input!="About My Age" ? " in the " + $chat_age_input : " about my age") + " near " + $chat_location_input;
 				$( ui.panel ).append( "<p>" + tab_content + "</p>" );
+				$( ui.panel ).append( "<div id=\"chat-"+ui.panel.id+"\" class=\"chat-tabs\"></div>" );
+				chatChoices("#chat-"+ui.panel.id);
 				$tabs.tabs('select', '#' + ui.panel.id);
 			},
 		});
@@ -66,13 +68,16 @@
 		function addTab() {
 			var c_sex = [];
 			$( "#chat_tab_dialog :checked" ).each(function() {c_sex.push($(this).val());});
+			$chat_gender_input = c_sex;
 			c_sex = (c_sex == "Guy,Gal") ? "" : c_sex;
 			
 			var c_age = [];
 			$( "#chat_age option:selected" ).each(function() {c_age.push($(this).val());});
+			$chat_age_input = c_age;
 			var c_age = (c_age == "About My Age") ? " "+c_age : " in "+c_age;
 			
 			var c_loc = $( "#chat_location" ).val();
+			$chat_location_input = c_loc;
 			var c_loc = c_loc ?" near "+c_loc : "";
 			
 			var tab_title = c_sex+c_age+c_loc|| " Chat ";
@@ -99,6 +104,17 @@
 		// Problem: when the first(Home) tab is replaced by some other thread, closing the other tab closes the Home tab
 		// $( "#tabs" ).tabs().find( ".ui-tabs-nav" ).sortable({ axis: "x" });
 	});
+	
+	function chatChoices(div_id) {
+		var len = 6;
+		var html = "<ul class='chat-options-list ui-helper-clearfix'>";
+		for (var i = 0; i < len; i++) {
+    		html += '<li id=\"chat-option-'+i+'\" class=\"chat-option-choices\"></li>';
+		}
+		html += '</ul>';
+		var list = $(html).appendTo(div_id);
+		$(div_id+' .chat-options-list li').append("<div style=\"width:300px;height:300px;border:1px solid #000;\">Place holder for chat options</div>");
+	}
 	</script>
 {% endblock %}
 

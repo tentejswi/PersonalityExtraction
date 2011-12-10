@@ -1,5 +1,9 @@
 /*base.html*/
-* {padding: 0; margin: 2px;} 
+* {
+	padding: 0; 
+	margin: 2px;
+	font-family: 'Helvetica Neue', 'Helvetica', 'Arial';
+} 
 
 h2 {
 	font-family: 'Helvetica Neue', 'Helvetica', 'Arial';
@@ -151,6 +155,10 @@ a.auth_source_twitter:hover {
 	font: 12pt garamond;
 }
 
+.clear-float {
+	clear: both;
+}
+
 /*home.html*/
 .associate_auth_source_facebook_img, .associate_auth_source_twitter_img {
 	color: #32A0EB;
@@ -172,6 +180,20 @@ a.auth_source_twitter:hover {
 	height: 19px;
 	display: inline-block;
 	zoom: 1;
+}
+
+.chat-tabs {
+}
+
+ul.chat-options-list {
+	list-style:none;
+	float: left;
+	position: relative;
+	
+}
+
+li.chat-option-choices {
+	float: left;
 }
 
 /*register.html*/
