@@ -39,17 +39,12 @@ public class TopNPExtractor implements IFrequencyBasedExtractor {
 
 		allTweets = newList;
 		
-		System.out.println(allTweets.size());
 		Counter<String> entityCounter = new Counter<String>();
 		IEntityExtractor extractor = EntityExtractFactory
 				.produceExtractor(Extracter.NOUNPHRASE);
 
-		int tcount =0;
 		for (String tw : allTweets) {
 			System.out.println(tw);
-			tcount++;
-			if(tcount>100)
-				break;
 			HashSet<String> entitiesinTweet = new HashSet<String>();
 			Tweet tweet = new Tweet(tw);
 			for (String sentence : tweet.getSentences()) {
@@ -62,7 +57,7 @@ public class TopNPExtractor implements IFrequencyBasedExtractor {
 			
 			for (String link : tweet.getLinks()) {
 				List<String> entities = URLEntityExtractor
-						.extractEntitiesinTitle(link);
+						.extractEntitiesinTitle(link, extractor);
 				if (entities != null) {
 					entitiesinTweet.addAll(entities);
 					entityCounter.incrementAll(entities, 1.0);
@@ -82,7 +77,6 @@ public class TopNPExtractor implements IFrequencyBasedExtractor {
 			}	
 		}
 		
-
 		// apply cutoff
 		Counter<String> finalEntityCounter = new Counter<String>();
 		for (String entity : entityCounter.keySet()) {
@@ -103,8 +97,6 @@ public class TopNPExtractor implements IFrequencyBasedExtractor {
 			String entityXML = Wikiminer.getXML(entity, false);
 			if (entityXML == null)
 				continue;
-
-			// System.out.println("Resolving : " + entity);
 
 			List<String> oentities = new ArrayList<String>();
 			if (cooccurence.keySet().contains(entity)) {
@@ -133,7 +125,9 @@ public class TopNPExtractor implements IFrequencyBasedExtractor {
 			}
 
 			if (senseCounter.argMax() != null) {
-				resolvedEntities.put(entity, senseCounter.argMax());
+				WikipediaEntity we = senseCounter.argMax();
+				we.count = entityCounter.getCount(entity);
+				resolvedEntities.put(entity, we);
 			} else {
 				List<WikipediaEntity> wikiSenses = Wikiminer
 						.getWikipediaEntities(entityXML, false);
@@ -176,13 +170,13 @@ public class TopNPExtractor implements IFrequencyBasedExtractor {
 			System.out.println("\n");
 		}
 
-		// HashMap<String, WikipediaEntity> resolved = tt.resolve(entities);
-		// for (String entity : resolved.keySet()) {
-		// WikipediaEntity we = resolved.get(entity);
-		// System.out.println("Entity: " + entity + " Count: "
-		// + entities.getCount(entity) + " Resolution: "
-		// + we.getText() + " " + we.getWikiminerID());
-		// }
+		 HashMap<String, WikipediaEntity> resolved = tt.resolve(entities);
+		 for (String entity : resolved.keySet()) {
+		 WikipediaEntity we = resolved.get(entity);
+		 System.out.println("Entity: " + entity + " Count: "
+		 + entities.getCount(entity) + " Resolution: "
+		 + we.getText() + " " + we.getWikiminerID());
+		 }
 
 	}
 
