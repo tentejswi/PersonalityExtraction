@@ -72,11 +72,13 @@ public class Graph {
 		}
 	}
 
-	private WikipediaEntity getSuperCategory(String id, int depth) {
+	private List<WikipediaEntity> getSuperCategory(String id, int depth) {
 		WikipediaEntity entity = null;
+		List<WikipediaEntity> supeCategories = new ArrayList<WikipediaEntity>();
 		int shortestPath = Integer.MAX_VALUE;
 		int currentDepth = 0;
 		int maxCount = -1;
+		int minCount = 999;
 		HashMap<String, WikipediaEntity> entities = new HashMap<String, WikipediaEntity>();
 		HashMap<String, Integer> entityCount = new HashMap<String, Integer>();
 		Set<String> prevCategories = new HashSet<String>();
@@ -107,8 +109,8 @@ public class Graph {
 					if (!superCategories.contains(category.getText())) {
 						currCategories.add(category.getWikiminerID());
 					} else {
-//						System.out.println("hit " + category.getText()
-//								+ " at depth " + currentDepth);
+						System.out.println("hit " + category.getText()
+								+ " at depth " + currentDepth);
 						// if (currentDepth < shortestPath) {
 						// entity = category;
 						// }
@@ -119,10 +121,11 @@ public class Graph {
 
 						if (!entityCount.containsKey(category.getText())) {
 							entityCount.put(category.getText(), (depth-currentDepth));
-						} else {
-							entityCount.put(category.getText(),
-									entityCount.get(category.getText()) + (depth-currentDepth));
 						}
+//						else {
+//							entityCount.put(category.getText(),
+//									entityCount.get(category.getText()) + (depth-currentDepth));
+//						}
 					}
 					// n2 = new Node(category);
 					// nodes.put(n2.getId(), n2);
@@ -142,14 +145,29 @@ public class Graph {
 
 		for (String k : entityCount.keySet()) {
 			int count = entityCount.get(k);
-			System.out.println(k + "\t" + count);
+//			System.out.println(k + "\t" + count);
+//			supeCategories.add(entities.get(k));
 			if (count > maxCount) {
 				maxCount = count;
-				entity = entities.get(k);
+//				entity = entities.get(k);
+			}
+			
+			if (count < minCount) {
+				minCount = count;
 			}
 		}
+		
+		for (String k : entityCount.keySet()) {
+			int count = entityCount.get(k);
+			System.out.println(k + "\t" + count);
+//			supeCategories.add(entities.get(k));
+			if (count >= (maxCount-minCount)/2) {
+				supeCategories.add(entities.get(k));
+			}
+		}
+		
 
-		return entity;
+		return supeCategories;
 	}
 
 	public void build(int depth) {
@@ -157,23 +175,25 @@ public class Graph {
 		Object[] ids = nodes.keySet().toArray();
 		for (Object id : ids) {
 			String cid = (String) id;
-			WikipediaEntity e = getSuperCategory(cid, 5);
+			List<WikipediaEntity> e = getSuperCategory(cid, 5);
 			if (e != null) {
-				System.out.println(nodes.get(id).getEntity().getText()
-						+ " has super category " + e.getText());
-				Node n2 = null;
-				if(nodes.containsKey(e.getWikiminerID())) {
-					n2 = nodes.get(e.getWikiminerID());
-				} else {
-					n2 = new Node(e);
+				for(WikipediaEntity e1 : e) {
+					System.out.println(nodes.get(id).getEntity().getText()
+							+ " has super category " + e1.getText());
+					Node n2 = null;
+					if(nodes.containsKey(e1.getWikiminerID())) {
+						n2 = nodes.get(e1.getWikiminerID());
+					} else {
+						n2 = new Node(e1);
+					}
+					if (!nodes.containsKey(n2.getId())) {
+						cNodes.add(n2);
+						nodes.put(n2.getId(), n2);
+						formEdge(n2, root, 1);
+					}
+					Node n1 = nodes.get(cid);
+					formEdge(n1, n2, 1); // fixed weight for now
 				}
-				if (!nodes.containsKey(n2.getId())) {
-					cNodes.add(n2);
-					nodes.put(n2.getId(), n2);
-					formEdge(n2, root, 1);
-				}
-				Node n1 = nodes.get(cid);
-				formEdge(n1, n2, 1); // fixed weight for now
 			}
 		}
 
@@ -365,28 +385,29 @@ public class Graph {
 
 	public static void main(String[] args) {
 		ArrayList<WikipediaEntity> entities = new ArrayList<WikipediaEntity>();
-		// entities.add(new WikipediaEntity("Rajiv Gandhi", "26129", 1));
-		// WikipediaEntity e = new WikipediaEntity("Sonia Gandhi", "169798", 1);
-		// e.incrCount();
-		// e.incrCount();
-		// e.incrCount();
-		// entities.add(e);
+		 entities.add(new WikipediaEntity("Rajiv Gandhi", "26129", 1));
+		 WikipediaEntity e = new WikipediaEntity("Sonia Gandhi", "169798", 1);
+		 e.incrCount();
+		 e.incrCount();
+		 e.incrCount();
+		 entities.add(e);
 
 		List<String> tweets = new ArrayList<String>();
 //		tweets.add("Sonia Gandhi is a person.");
-//		tweets.add("Rajiv Gandhi is a person.");
-//		tweets.add("Rahul Gandhi is a person.");
-//		tweets.add("Sonia Gandhi is a Congress leader.");
+		tweets.add("Rajiv Gandhi is a Congress leader.");
+		tweets.add("Sachin Tendulkar is awesome.");
 		tweets.add("Amazon is an awesome company.");
 		TopNNPHashTagsExtractor tne = new TopNNPHashTagsExtractor();
 		Counter<String> extracted_entities = tne.extract(tweets);
-		HashMap<String, WikipediaEntity> allEntities = tne
-				.resolve(extracted_entities);
-		entities = new ArrayList<WikipediaEntity>();
-		entities.addAll(allEntities.values());
+		Counter<String> finalEntityCounter = new Counter<String>();
+		finalEntityCounter.setCount("Sonia Gandhi" , 10);
+//		HashMap<String, WikipediaEntity> allEntities = tne
+//				.resolve(finalEntityCounter);
+//		entities = new ArrayList<WikipediaEntity>();
+//		entities.addAll(allEntities.values());
 
 		Graph g = new Graph(entities);
-		g.build(10);
+		g.build(5);
 		g.printWeights();
 		IRanker ranker = new WeightGraphRanker(g);
 		// List<Node> topNodes = ranker.getTopRankedNodes(100);
