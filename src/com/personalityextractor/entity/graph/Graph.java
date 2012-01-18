@@ -5,6 +5,7 @@ package com.personalityextractor.entity.graph;
 
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -122,10 +123,10 @@ public class Graph {
 						if (!entityCount.containsKey(category.getText())) {
 							entityCount.put(category.getText(), (depth-currentDepth));
 						}
-//						else {
-//							entityCount.put(category.getText(),
-//									entityCount.get(category.getText()) + (depth-currentDepth));
-//						}
+						else {
+							entityCount.put(category.getText(),
+									entityCount.get(category.getText()) + (depth-currentDepth));
+						}
 					}
 					// n2 = new Node(category);
 					// nodes.put(n2.getId(), n2);
@@ -157,11 +158,19 @@ public class Graph {
 			}
 		}
 		
+		System.out.println("maxcount: " + maxCount + "\tmincount: " + minCount);
+		List<Integer> list = new ArrayList<Integer>();
+		for (String k : entityCount.keySet()) {
+			list.add(entityCount.get(k));
+		}
+		Collections.sort(list);
+		System.out.println("95 percentile: " + list.get((int) Math.floor(((list.size()-1)*0.95))));
+		int midcount = list.get((int) Math.floor(((list.size()-1)*0.95)));
 		for (String k : entityCount.keySet()) {
 			int count = entityCount.get(k);
 			System.out.println(k + "\t" + count);
 //			supeCategories.add(entities.get(k));
-			if (count >= (maxCount-minCount)/2) {
+			if (count >= midcount) {
 				supeCategories.add(entities.get(k));
 			}
 		}
@@ -175,7 +184,7 @@ public class Graph {
 		Object[] ids = nodes.keySet().toArray();
 		for (Object id : ids) {
 			String cid = (String) id;
-			List<WikipediaEntity> e = getSuperCategory(cid, 5);
+			List<WikipediaEntity> e = getSuperCategory(cid, depth);
 			if (e != null) {
 				for(WikipediaEntity e1 : e) {
 					System.out.println(nodes.get(id).getEntity().getText()
@@ -386,11 +395,14 @@ public class Graph {
 	public static void main(String[] args) {
 		ArrayList<WikipediaEntity> entities = new ArrayList<WikipediaEntity>();
 		 entities.add(new WikipediaEntity("Rajiv Gandhi", "26129", 1));
-		 WikipediaEntity e = new WikipediaEntity("Sonia Gandhi", "169798", 1);
-		 e.incrCount();
-		 e.incrCount();
-		 e.incrCount();
-		 entities.add(e);
+		 entities.add(new WikipediaEntity("Apple", "856", 1));
+		 entities.add(new WikipediaEntity("Sonia Gandhi", "169798", 1));
+		 entities.add(new WikipediaEntity("Bill Gates", "3747", 1));
+//		 WikipediaEntity e = new WikipediaEntity("Sonia Gandhi", "169798", 1);
+//		 e.incrCount();
+//		 e.incrCount();
+//		 e.incrCount();
+//		 entities.add(e);
 
 		List<String> tweets = new ArrayList<String>();
 //		tweets.add("Sonia Gandhi is a person.");
@@ -407,7 +419,7 @@ public class Graph {
 //		entities.addAll(allEntities.values());
 
 		Graph g = new Graph(entities);
-		g.build(5);
+		g.build(7);
 		g.printWeights();
 		IRanker ranker = new WeightGraphRanker(g);
 		// List<Node> topNodes = ranker.getTopRankedNodes(100);

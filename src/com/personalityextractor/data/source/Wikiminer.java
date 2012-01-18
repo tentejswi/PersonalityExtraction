@@ -136,9 +136,9 @@ public class Wikiminer {
 
 	public static String getexploreArticleXML(String wikiminer_id) {
 		try {
-			 String urlStr =
-			 "http://wikipedia-miner.cms.waikato.ac.nz/services/exploreArticle?parentCategories=true";
-//			String urlStr = "http://ec2-50-19-209-97.compute-1.amazonaws.com:8080/wikipedia-miner/services/exploreArticle?parentCategories=true";
+//			 String urlStr =
+//			 "http://wikipedia-miner.cms.waikato.ac.nz/services/exploreArticle?parentCategories=true";
+			String urlStr = "http://ec2-50-19-209-97.compute-1.amazonaws.com:8080/wikipediaminer/services/exploreArticle?parentCategories=true";
 			urlStr += "&id=" + wikiminer_id;
 
 			// return from cache
@@ -159,7 +159,7 @@ public class Wikiminer {
 
 			String xml = buf.toString();
 
-			if (!xml.contains("parentCategory")) {
+			if (!xml.contains("ParentCategory")) {
 				return null;
 			}
 
@@ -175,9 +175,9 @@ public class Wikiminer {
 	
 	public static String getexploreCategoryXML(String wikiminer_id) {
 		try {
-			 String urlStr =
-			 "http://wikipedia-miner.cms.waikato.ac.nz/services/exploreCategory?parentCategories=true";
-//			String urlStr = "http://ec2-50-19-209-97.compute-1.amazonaws.com:8080/wikipedia-miner/services/exploreCategory?parentCategories=true";
+//			 String urlStr =
+//			 "http://wikipedia-miner.cms.waikato.ac.nz/services/exploreCategory?parentCategories=true";
+			String urlStr = "http://ec2-50-19-209-97.compute-1.amazonaws.com:8080/wikipediaminer/services/exploreCategory?parentCategories=true";
 			urlStr += "&id=" + wikiminer_id;
 
 			// return from cache
@@ -198,7 +198,7 @@ public class Wikiminer {
 
 			String xml = buf.toString();
 
-			if (!xml.contains("parentCategory")) {
+			if (!xml.contains("ParentCategory")) {
 				return null;
 			}
 
@@ -230,7 +230,7 @@ public class Wikiminer {
 		is.setCharacterStream(new StringReader(xml));
 		try {
 			Document dom = db.parse(is);
-			NodeList catNodes = dom.getElementsByTagName("parentCategory");
+			NodeList catNodes = dom.getElementsByTagName("ParentCategory");
 			if (catNodes != null && catNodes.getLength() != 0) {
 				for (int i = 0; i < catNodes.getLength(); i++) {
 					Node cat = catNodes.item(i);
@@ -267,7 +267,7 @@ public class Wikiminer {
 		is.setCharacterStream(new StringReader(xml));
 		try {
 			Document dom = db.parse(is);
-			NodeList catNodes = dom.getElementsByTagName("parentCategory");
+			NodeList catNodes = dom.getElementsByTagName("ParentCategory");
 			if (catNodes != null && catNodes.getLength() != 0) {
 				for (int i = 0; i < catNodes.getLength(); i++) {
 					Node cat = catNodes.item(i);
@@ -656,10 +656,10 @@ public class Wikiminer {
 	}
 
 	public static double compareIds(String id1, String id2) {
-//		String urlStr = "http://ec2-50-19-209-97.compute-1.amazonaws.com:8080/wikipedia-miner/services/compare?&ids1="
-//				+ id1 + "&ids2=" + id2;
-		String urlStr = "http://wikipedia-miner.cms.waikato.ac.nz/services/compare?&ids1="
+		String urlStr = "http://ec2-50-19-209-97.compute-1.amazonaws.com:8080/wikipediaminer/services/compare?&ids1="
 				+ id1 + "&ids2=" + id2;
+//		String urlStr = "http://wikipedia-miner.cms.waikato.ac.nz/services/compare?&ids1="
+//				+ id1 + "&ids2=" + id2;
 
 		try {
 			if (cache.containsKey(urlStr)) {
@@ -738,9 +738,9 @@ public class Wikiminer {
 		}
 
 		try {
-			 String urlStr =
-			 "http://wikipedia-miner.cms.waikato.ac.nz/services/search?&complex=true";
-//			String urlStr = "http://ec2-50-19-209-97.compute-1.amazonaws.com:8080/wikipedia-miner/services/search?complex";
+//			 String urlStr =
+//			 "http://wikipedia-miner.cms.waikato.ac.nz/services/search?&complex=true";
+			String urlStr = "http://ec2-50-19-209-97.compute-1.amazonaws.com:8080/wikipediaminer/services/search?complex";
 
 			if (isId) {
 				// urlStr += "&id=" + query;
