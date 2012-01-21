@@ -743,7 +743,7 @@ public class Wikiminer {
 			String urlStr = "http://ec2-50-19-209-97.compute-1.amazonaws.com:8080/wikipediaminer/services/search?complex";
 
 			if (isId) {
-				// urlStr += "&id=" + query;
+				 urlStr += "&id=" + query;
 				return null;
 			} else {
 				urlStr += "&query=" + query;
