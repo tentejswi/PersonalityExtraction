@@ -9,6 +9,7 @@ import com.personalityextractor.commons.FileRW;
 import com.personalityextractor.commons.ReadJSON;
 
 import com.personalityextractor.commons.data.Tweet;
+import com.personalityextractor.data.source.Twitter;
 import com.personalityextractor.data.source.Wikiminer;
 import com.personalityextractor.entity.WikipediaEntity;
 import com.personalityextractor.entity.extractor.EntityExtractFactory;
@@ -44,8 +45,7 @@ public class TopNNPHashTagsExtractor implements IFrequencyBasedExtractor {
 		System.out.println(allTweets.size());
 		buildTweetIDMap(allTweets);
 		Counter<String> entityCounter = new Counter<String>();
-		IEntityExtractor extractor = EntityExtractFactory
-				.produceExtractor(Extracter.NOUNPHRASE);
+		IEntityExtractor extractor = EntityExtractFactory.produceExtractor(Extracter.NOUNPHRASE);
 		for (String id : tweetIDs.keySet()) {
 			HashSet<String> entitiesInTweet = new HashSet<String>();
 			Tweet tweet = tweetIDs.get(id);
@@ -74,9 +74,8 @@ public class TopNNPHashTagsExtractor implements IFrequencyBasedExtractor {
 
 			if (tweet.getLinks() != null) {
 				for (String link : tweet.getLinks()) {
-					List<String> entities = URLEntityExtractor
-							.extractEntitiesinTitle(link);
-					entities.addAll(URLEntityExtractor.extractTopEntities(link));
+					List<String> entities = URLEntityExtractor.extractEntitiesinTitle(link, extractor);
+					entities.addAll(URLEntityExtractor.extractTopEntities(link, extractor));
 					if (entities != null) {
 						entitiesInTweet.addAll(entities);
 						for (String entity : entities) {
@@ -249,14 +248,17 @@ public class TopNNPHashTagsExtractor implements IFrequencyBasedExtractor {
 	
 	public static void main(String[] args) {
 		TopNNPHashTagsExtractor tt = new TopNNPHashTagsExtractor();
-		ReadJSON rjs = new ReadJSON();
-		List<String> json = FileRW.getLinesinFile(args[0]);
-		List<String> tweets = new ArrayList<String>();
-		for (String son : json) {
-			if(son.length()==0)
-				continue;
-			tweets.addAll(rjs.parseJSONArray(son));
-		}
+		//ReadJSON rjs = new ReadJSON();
+		//List<String> json = FileRW.getLinesinFile(args[0]);
+		Twitter t = new Twitter();
+		List<String> tweets = t.fetchTweets("werner", 200);
+		System.out.println(tweets.size());
+		
+//		for (String son : json) {
+//			if(son.length()==0)
+//				continue;
+//			tweets.addAll(rjs.parseJSONArray(son));
+//		}
 
 		Counter<String> entities = tt.extract(tweets);
 		System.out.println("Done getting entities..");
@@ -275,13 +277,13 @@ public class TopNNPHashTagsExtractor implements IFrequencyBasedExtractor {
 			System.out.println("\n");
 		}
 
-//		HashMap<String, WikipediaEntity> resolved = tt.resolve(entities);
-//		for (String entity : resolved.keySet()) {
-//			WikipediaEntity we = resolved.get(entity);
-//			System.out.println("Entity: " + entity + " Count: "
-//					+ entities.getCount(entity) + " Resolution: "
-//					+ we.getText() + " " + we.getWikiminerID());
-//		}
+		HashMap<String, WikipediaEntity> resolved = tt.resolve(entities);
+		for (String entity : resolved.keySet()) {
+			WikipediaEntity we = resolved.get(entity);
+			System.out.println("Entity: " + entity + " Count: "
+					+ entities.getCount(entity) + " Resolution: "
+					+ we.getText() + " " + we.getWikiminerID());
+		}
 
 	}
 
