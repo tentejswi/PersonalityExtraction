@@ -20,15 +20,16 @@ public class URLEntityExtractor {
 
 	ViterbiResolver vr = new ViterbiResolver();
 	
-	public static List<String> extractEntitiesinTitle(String urlStr) {
+	public static List<String> extractEntitiesinTitle(String urlStr, IEntityExtractor extractor) {
+		if(extractor==null)
+			extractor = EntityExtractFactory.produceExtractor(Extracter.NOUNPHRASE);
 		ArrayList<String> entities = new ArrayList<String>();
 		String urlContent = URLContent.fetchURLContent(urlStr);
 		if(urlContent==null)
-			return null;
+			return entities;
 		String title = URLContent.fetchTitleString(urlContent);
-		IEntityExtractor extractor = EntityExtractFactory.produceExtractor(Extracter.NOUNPHRASE);
 		if(title==null)
-			return null;
+			return entities;
 		Tweet t = new Tweet(title);
 		for (String sentence : t.getSentences()) {
 			entities.addAll(extractor.extract(sentence));
@@ -36,21 +37,24 @@ public class URLEntityExtractor {
 		return entities;
 	}
 	
-	public static List<String> extractTopEntities(String url){
+	public static List<String> extractTopEntities(String url, IEntityExtractor extractor){
+		
+		if(extractor==null)
+			extractor = EntityExtractFactory.produceExtractor(Extracter.PROPERNOUNPHRASE);
+		
 		ArrayList<String> topEntities = new ArrayList<String>();
 		Readability read = new Readability();
 		String text = read.removeHTML(url);
 		if(text==null)
-			return null;
+			return topEntities;
 		String[] lines = text.split("\n");
 		Counter<String> entities = new Counter<String>();
-		IEntityExtractor extractor = EntityExtractFactory.produceExtractor(Extracter.PROPERNOUNPHRASE);
+		
 		int line_count =0;
 		for(String line : lines){
 			line = line.trim();
 			if(line.length()==0)
 				continue;
-			
 			if(line_count>2)
 				break;
 			line_count++;
@@ -98,7 +102,7 @@ public class URLEntityExtractor {
 	
 	public static void main(String[] args) {
 		URLEntityExtractor uee = new URLEntityExtractor();
-		System.out.println(uee.extractTopEntities("http://www.pcmag.com/article2/0,2817,2394487,00.asp#fbid=iY_0drVV-th"));
+		//System.out.println(uee.extractTopEntities("http://www.pcmag.com/article2/0,2817,2394487,00.asp#fbid=iY_0drVV-th"));
 	}
 		
 }
