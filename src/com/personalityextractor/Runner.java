@@ -99,7 +99,7 @@ public class Runner {
 			TopNPExtractor tne = new TopNPExtractor();
 			Counter<String> extracted_entities = tne.extract(tweets);
 			allEntities = tne.resolve(extracted_entities);
-		} else if(handle[1].equalsIgnoreCase("f")) {
+		} else if (handle[1].equalsIgnoreCase("f")) {
 			Facebook fb = new Facebook(handle[0]);
 			List<String> updates = fb.getUserStatusUpdates();
 			TopNPExtractor tne = new TopNPExtractor();
@@ -107,16 +107,17 @@ public class Runner {
 			allEntities = tne.resolve(extracted_entities);
 		}
 
-		// System.out.println("=========Wikipedia Entities==============");
-		// for(String str : allEntities.keySet()){
-		// System.out.println(str+" "+allEntities.get(str).getText()+" "+allEntities.get(str).getWikiminerID());
-		// }
-		// System.out.println("=========================================");
+		System.out.println("=========Wikipedia Entities==============");
+		for (String str : allEntities.keySet()) {
+			System.out.println(str + " " + allEntities.get(str).getText() + " "
+					+ allEntities.get(str).getWikiminerID());
+		}
+		System.out.println("=========================================");
 
 		List<WikipediaEntity> entities = new ArrayList<WikipediaEntity>();
 		entities.addAll(allEntities.values());
 		Graph g = new Graph(entities);
-		g.build(0);
+		g.build(7);
 		g.printWeights();
 		Date end = new Date();
 		PerfMetrics.getInstance().addToMetrics(Metric.TOTAL,
@@ -126,7 +127,8 @@ public class Runner {
 
 		IRanker ranker = new WeightGraphRanker(g);
 		List<Node> topNodes = ranker.getTopRankedNodes(25);
-		setUserInterests(handle[0], nodesToJson(handle[0], g, topNodes));
+		System.out.println(g.toJSON(handle[0], null));
+		setUserInterests(handle[0], g.toJSON(handle[0], null).toString());
 		// update status
 		updateUser(handle[0]);
 		System.out.println("ALL --- DONE");
