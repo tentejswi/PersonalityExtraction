@@ -30,53 +30,57 @@ public class TopNPExtractor implements IFrequencyBasedExtractor {
 		HashSet<String> distTweets = new HashSet<String>(allTweets);
 		allTweets = new ArrayList<String>(distTweets);
 		List<String> newList = new ArrayList<String>();
-	
-		for(int i=0; i <allTweets.size(); i++){
-			if(!allTweets.get(i).startsWith("@")){
+
+		for (int i = 0; i < allTweets.size(); i++) {
+			if (!allTweets.get(i).startsWith("@")) {
 				newList.add(allTweets.get(i));
 			}
 		}
 
 		allTweets = newList;
-		
+
 		Counter<String> entityCounter = new Counter<String>();
 		IEntityExtractor extractor = EntityExtractFactory
 				.produceExtractor(Extracter.NOUNPHRASE);
 
 		for (String tw : allTweets) {
-			System.out.println(tw);
-			HashSet<String> entitiesinTweet = new HashSet<String>();
-			Tweet tweet = new Tweet(tw);
-			for (String sentence : tweet.getSentences()) {
-				List<String> entities = extractor.extract(sentence);
-					if(entities!=null){
+			try {
+				System.out.println(tw);
+				HashSet<String> entitiesinTweet = new HashSet<String>();
+				Tweet tweet = new Tweet(tw);
+				for (String sentence : tweet.getSentences()) {
+					List<String> entities = extractor.extract(sentence);
+					if (entities != null) {
 						entitiesinTweet.addAll(entities);
 						entityCounter.incrementAll(entities, 1.0);
 					}
-			}
-			
-			for (String link : tweet.getLinks()) {
-				List<String> entities = URLEntityExtractor
-						.extractEntitiesinTitle(link, extractor);
-				if (entities != null) {
-					entitiesinTweet.addAll(entities);
-					entityCounter.incrementAll(entities, 1.0);
 				}
-			}
-			
-			entitiesinTweet.addAll(tweet.getHashTags());
-			entityCounter.incrementAll(tweet.getHashTags(), 1.0);
-			System.out.println(entitiesinTweet);
-			
-			for (String ent1 : entitiesinTweet) {
-				for (String ent2 : entitiesinTweet) {
-					if (!ent1.equalsIgnoreCase(ent2)) {
-						cooccurence.incrementCount(ent1, ent2, 1.0);
+
+				for (String link : tweet.getLinks()) {
+					List<String> entities = URLEntityExtractor
+							.extractEntitiesinTitle(link, extractor);
+					if (entities != null) {
+						entitiesinTweet.addAll(entities);
+						entityCounter.incrementAll(entities, 1.0);
 					}
 				}
-			}	
+
+				entitiesinTweet.addAll(tweet.getHashTags());
+				entityCounter.incrementAll(tweet.getHashTags(), 1.0);
+				System.out.println(entitiesinTweet);
+
+				for (String ent1 : entitiesinTweet) {
+					for (String ent2 : entitiesinTweet) {
+						if (!ent1.equalsIgnoreCase(ent2)) {
+							cooccurence.incrementCount(ent1, ent2, 1.0);
+						}
+					}
+				}
+			} catch (Exception e) {
+				e.printStackTrace();
+			}
 		}
-		
+
 		// apply cutoff
 		Counter<String> finalEntityCounter = new Counter<String>();
 		for (String entity : entityCounter.keySet()) {
@@ -107,7 +111,7 @@ public class TopNPExtractor implements IFrequencyBasedExtractor {
 					oentities.add(sorted.next());
 					count++;
 				}
-			} 
+			}
 
 			for (String oentity : oentities) {
 				if (Wikiminer.getXML(oentity, false) == null)
@@ -170,13 +174,13 @@ public class TopNPExtractor implements IFrequencyBasedExtractor {
 			System.out.println("\n");
 		}
 
-		 HashMap<String, WikipediaEntity> resolved = tt.resolve(entities);
-		 for (String entity : resolved.keySet()) {
-		 WikipediaEntity we = resolved.get(entity);
-		 System.out.println("Entity: " + entity + " Count: "
-		 + entities.getCount(entity) + " Resolution: "
-		 + we.getText() + " " + we.getWikiminerID());
-		 }
+		HashMap<String, WikipediaEntity> resolved = tt.resolve(entities);
+		for (String entity : resolved.keySet()) {
+			WikipediaEntity we = resolved.get(entity);
+			System.out.println("Entity: " + entity + " Count: "
+					+ entities.getCount(entity) + " Resolution: "
+					+ we.getText() + " " + we.getWikiminerID());
+		}
 
 	}
 
