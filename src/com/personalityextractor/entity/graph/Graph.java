@@ -164,14 +164,18 @@ public class Graph {
 			list.add(entityCount.get(k));
 		}
 		Collections.sort(list);
-		System.out.println("95 percentile: " + list.get((int) Math.floor(((list.size()-1)*0.95))));
-		int midcount = list.get((int) Math.floor(((list.size()-1)*0.95)));
-		for (String k : entityCount.keySet()) {
-			int count = entityCount.get(k);
-			System.out.println(k + "\t" + count);
-//			supeCategories.add(entities.get(k));
-			if (count >= midcount) {
-				supeCategories.add(entities.get(k));
+//		System.out.println("95 percentile: " + list.get((int) Math.floor(((list.size()-1)*0.95))));
+		int index = (int) Math.floor(((list.size()-1)*0.95));
+		if(index >= 0) {
+			int midcount = list.get(index);
+		
+			for (String k : entityCount.keySet()) {
+				int count = entityCount.get(k);
+				System.out.println(k + "\t" + count);
+	//			supeCategories.add(entities.get(k));
+				if (count >= midcount) {
+					supeCategories.add(entities.get(k));
+				}
 			}
 		}
 		

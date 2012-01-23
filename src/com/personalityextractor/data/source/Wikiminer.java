@@ -767,7 +767,7 @@ public class Wikiminer {
 
 			String xml = buf.toString();
 
-			if (!xml.contains("sense")) {
+			if (!xml.contains("Sense")) {
 				return null;
 			}
 
@@ -781,11 +781,11 @@ public class Wikiminer {
 	}
 
 	public static void main(String args[]) {
-		ArrayList<WikipediaEntity> ents = getCategories("52648");
-		for(WikipediaEntity we : ents){
-			System.out.println(we.getText()+" "+we.getWikiminerID());
-		}
-
+//		ArrayList<WikipediaEntity> ents = getCategories("52648");
+//		for(WikipediaEntity we : ents){
+//			System.out.println(we.getText()+" "+we.getWikiminerID());
+//		}
+		System.out.println(getXML("India", false));
 	}
 
 }

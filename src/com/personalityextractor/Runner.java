@@ -62,7 +62,7 @@ public class Runner {
 
 	public static boolean setUserInterests(String handle, String json) {
 		return store
-				.executeUpdate("INSERT INTO user_interests_alpha(handle, json) values ('"
+				.executeUpdate("INSERT INTO user_interests(handle, json) values ('"
 						+ handle
 						+ "','"
 						+ json
@@ -98,6 +98,7 @@ public class Runner {
 			List<String> tweets = t.fetchTweets(handle[0], 200);
 			TopNPExtractor tne = new TopNPExtractor();
 			Counter<String> extracted_entities = tne.extract(tweets);
+			System.out.println(extracted_entities.toString(10));
 			allEntities = tne.resolve(extracted_entities);
 		} else if (handle[1].equalsIgnoreCase("f")) {
 			Facebook fb = new Facebook(handle[0]);
