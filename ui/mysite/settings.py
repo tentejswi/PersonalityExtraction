@@ -37,6 +37,12 @@ MEDIA_URL = '/media/'
 
 SECRET_KEY = 't2eo^kd%k+-##ml3@_x__$j0(ps4p0q6eg*c4ttp9d2n(t!iol'
 
+STATIC_URL = '/static/'
+STATIC_ROOT = "/home/ubuntu/virtualenvs/seekinme/mysite/sitestatic"
+STATICFILES_DIR =(
+    'django/contrib/admin/static/admin',
+)
+
 TEMPLATE_LOADERS = (
     'django.template.loaders.filesystem.Loader',
     'django.template.loaders.app_directories.Loader',
@@ -63,11 +69,11 @@ INSTALLED_APPS = (
     'django.contrib.sites',
     'django.contrib.messages',
     'django.contrib.admin',
+    'django.contrib.staticfiles',
     'social_auth',
     'app',
     'accounts',
     'privatebeta',
-#    'registration', 
 )
 
 AUTHENTICATION_BACKENDS = (
