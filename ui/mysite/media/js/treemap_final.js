@@ -205,6 +205,7 @@ var tooltip = d3.select(divForThis)
 var user_url = "http://ec2-50-19-209-97.compute-1.amazonaws.com/api/interest.php?u="+username + '&s='+socialBackend;
 
 d3.json(user_url, function(json) {
+  objJson = json;
   stringifyJson = JSON.stringify(json);
   var cell = svg.data(d3.entries(json)).selectAll("g")
 		.data(treemap.nodes)
@@ -363,10 +364,13 @@ function editCategory(d,i) {
 function editPopupRename(form) {
     var renamedTo = form.inputbox.value;
 	var d = clickedCell.__data__;
-	d.key = renamedTo;
+
 	var oldKey = "\"" + d.key + "\"";
 	var newKey = "\"" + renamedTo + "\"";
 
+// This statement should only come after oldKey value has been set
+	d.key = renamedTo;
+	
 	d3.select(clickedCell).select("text")
 		.each(fontSize)
 		.each(wordWrap)
@@ -407,6 +411,7 @@ function editPopupDelete(d,i) {
 //		.transition()
 		.call(refreshTree)
 		;
+	
 //	svg.selectAll("g").exit().remove();
 }
 
