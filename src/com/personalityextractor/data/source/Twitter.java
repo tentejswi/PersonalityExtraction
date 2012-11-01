@@ -48,8 +48,8 @@ public class Twitter {
 		ArrayList<String> tweets = new ArrayList<String>();
 
 		for (int i = 1; i < 5; i++) {
-			String urlStr = "http://api.twitter.com/statuses/user_timeline/"
-					+ user + ".json?count=" + count+"&include_rts=true&page="+i;
+			String urlStr = "http://api.twitter.com/1/statuses/user_timeline.json/"
+					+ "?count=" + 200+"&include_rts=true&page="+i+"&screen_name="+user;
 
 			try {
 				URL url = new URL(urlStr);
