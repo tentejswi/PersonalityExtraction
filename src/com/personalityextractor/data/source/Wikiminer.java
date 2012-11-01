@@ -136,9 +136,9 @@ public class Wikiminer {
 
 	public static String getexploreArticleXML(String wikiminer_id) {
 		try {
-//			 String urlStr =
-//			 "http://wikipedia-miner.cms.waikato.ac.nz/services/exploreArticle?parentCategories=true";
-			String urlStr = "http://ec2-50-19-209-97.compute-1.amazonaws.com:8080/wikipediaminer/services/exploreArticle?parentCategories=true";
+			 String urlStr =
+			 "http://wikipedia-miner.cms.waikato.ac.nz/services/exploreArticle?parentCategories=true";
+//			String urlStr = "http://ec2-50-19-209-97.compute-1.amazonaws.com:8080/wikipediaminer/services/exploreArticle?parentCategories=true";
 			urlStr += "&id=" + wikiminer_id;
 
 			// return from cache
@@ -175,9 +175,9 @@ public class Wikiminer {
 	
 	public static String getexploreCategoryXML(String wikiminer_id) {
 		try {
-//			 String urlStr =
-//			 "http://wikipedia-miner.cms.waikato.ac.nz/services/exploreCategory?parentCategories=true";
-			String urlStr = "http://ec2-50-19-209-97.compute-1.amazonaws.com:8080/wikipediaminer/services/exploreCategory?parentCategories=true";
+			 String urlStr =
+			 "http://wikipedia-miner.cms.waikato.ac.nz/services/exploreCategory?parentCategories=true";
+//			String urlStr = "http://ec2-50-19-209-97.compute-1.amazonaws.com:8080/wikipediaminer/services/exploreCategory?parentCategories=true";
 			urlStr += "&id=" + wikiminer_id;
 
 			// return from cache
@@ -439,8 +439,7 @@ public class Wikiminer {
 
 	}
 
-	public static ArrayList<WikipediaEntity> getWikipediaEntities(String xml,
-			boolean getId) {
+	public static ArrayList<WikipediaEntity> getWikipediaEntities(String xml, boolean getId) {
 		ArrayList<WikipediaEntity> senses = new ArrayList<WikipediaEntity>();
 		DocumentBuilder db = null;
 		DocumentBuilderFactory dbf = DocumentBuilderFactory.newInstance();
@@ -455,7 +454,7 @@ public class Wikiminer {
 		// System.out.println(xml);
 		try {
 			Document dom = db.parse(is);
-			NodeList senseNodes = dom.getElementsByTagName("Sense");
+			NodeList senseNodes = dom.getElementsByTagName("sense");
 			if (senseNodes != null && senseNodes.getLength() != 0) {
 				for (int i = 0; i < senseNodes.getLength(); i++) {
 					Node topSense = senseNodes.item(i);
@@ -512,9 +511,19 @@ public class Wikiminer {
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
-
+		
+		
+		
 		return senses;
 
+	}
+	
+	public static ArrayList<WikipediaEntity> filterSenses(ArrayList<WikipediaEntity> senses){
+		ArrayList<WikipediaEntity> filteredSenses = new ArrayList<WikipediaEntity>();
+		
+		
+		return filteredSenses;
+		
 	}
 
 	public static ArrayList<String[]> getWikipediaSenses(String xml,
@@ -533,7 +542,7 @@ public class Wikiminer {
 		// System.out.println(xml);
 		try {
 			Document dom = db.parse(is);
-			NodeList senseNodes = dom.getElementsByTagName("Sense");
+			NodeList senseNodes = dom.getElementsByTagName("sense");
 			if (senseNodes != null && senseNodes.getLength() != 0) {
 				for (int i = 0; i < senseNodes.getLength(); i++) {
 					Node topSense = senseNodes.item(i);
@@ -656,10 +665,10 @@ public class Wikiminer {
 	}
 
 	public static double compareIds(String id1, String id2) {
-		String urlStr = "http://ec2-50-19-209-97.compute-1.amazonaws.com:8080/wikipediaminer/services/compare?&ids1="
-				+ id1 + "&ids2=" + id2;
-//		String urlStr = "http://wikipedia-miner.cms.waikato.ac.nz/services/compare?&ids1="
+//		String urlStr = "http://ec2-50-19-209-97.compute-1.amazonaws.com:8080/wikipediaminer/services/compare?&ids1="
 //				+ id1 + "&ids2=" + id2;
+		String urlStr = "http://wikipedia-miner.cms.waikato.ac.nz/services/compare?&ids1="
+				+ id1 + "&ids2=" + id2;
 
 		try {
 			if (cache.containsKey(urlStr)) {
@@ -722,8 +731,7 @@ public class Wikiminer {
 			if(s.length()<=0)
 				continue;
 			if (Character.isLowerCase(s.charAt(0))) {
-				sensesplit[i] = (Character.toUpperCase(s.charAt(0)) + s
-						.substring(1));
+				sensesplit[i] = (Character.toUpperCase(s.charAt(0)) + s.substring(1));
 			}
 		}
 
@@ -738,9 +746,9 @@ public class Wikiminer {
 		}
 
 		try {
-//			 String urlStr =
-//			 "http://wikipedia-miner.cms.waikato.ac.nz/services/search?&complex=true";
-			String urlStr = "http://ec2-50-19-209-97.compute-1.amazonaws.com:8080/wikipediaminer/services/search?complex";
+			 String urlStr =
+			 "http://wikipedia-miner.cms.waikato.ac.nz/services/search?&complex=true";
+//			String urlStr = "http://ec2-50-19-209-97.compute-1.amazonaws.com:8080/wikipediaminer/services/search?";
 
 			if (isId) {
 				 urlStr += "&id=" + query;
@@ -756,8 +764,7 @@ public class Wikiminer {
 
 			URL url = new URL(urlStr);
 			URLConnection yc = url.openConnection();
-			BufferedReader in = new BufferedReader(new InputStreamReader(yc
-					.getInputStream()));
+			BufferedReader in = new BufferedReader(new InputStreamReader(yc.getInputStream()));
 			String inputLine;
 
 			StringBuffer buf = new StringBuffer();
@@ -767,7 +774,7 @@ public class Wikiminer {
 
 			String xml = buf.toString();
 
-			if (!xml.contains("Sense")) {
+			if (!xml.contains("sense")) {
 				return null;
 			}
 
