@@ -8,7 +8,7 @@
 			if(!event)
 				event = window.event;
 			if(event.keyCode == 13) {
-				new Ajax.Request('http://ec2-50-19-209-97.compute-1.amazonaws.com/api/queue.php?u=' + username + '&s=t', {
+				new Ajax.Request('http://seekinme.com/api/queue.php?u=' + username + '&s=t', {
 					method : 'get',
 					onSuccess : function(transport) {
 					window.location = "/tryfirst/"+username;
@@ -29,7 +29,8 @@
 			<span class="script_font"> You </span> are the center </br> <span class="pad_40">of the universe.</span>
 		</div>
 		<div class = "index_body" style="color:#886744">
-			seekinme helps you make a lot more sense of your social data.
+			seekinme helps you make a lot more sense of your social data. </br>
+			We take your <span style="font-weight: bold;">twitter</span> feed, overlay it with <span style="font-weight: bold;">Wikipedia</span> to create a beautiful visualization of your interests.
 		</div>
 	</div>
 	<div id = "inner_container_right">
@@ -42,7 +43,7 @@
 		</div>
 		</br></br>
 		<div id = "try_out">
-			<h3 style="color:gray">or try it out on a friend</h3>
+			<h3 style="color:gray">or try it out first</h3>
 			</br>
 			<div id = "trial_form">
 				<input type="text" class= "inputtext" id="trial_handle" value = "enter a twitter username" name="loginname" onKeyPress="return handleKeyPress(event, this.value)"

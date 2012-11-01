@@ -201,8 +201,9 @@ var tooltip = d3.select(divForThis)
 	.text("")
 	;
 
-// var user_url = media_path+"user.json";
-var user_url = "http://ec2-50-19-209-97.compute-1.amazonaws.com/api/interest.php?u="+username + '&s='+socialBackend;
+//var user_url = media_path+"user.json";
+var user_url = "http://"+location.hostname+"/api/interest.php?u="+username + '&s='+socialBackend;
+console.log(user_url);
 
 d3.json(user_url, function(json) {
   objJson = json;
@@ -377,7 +378,7 @@ function editPopupRename(form) {
 		;
 	
 	stringifyJson = stringifyJson.replace(oldKey, newKey);
-	new Ajax.request('http://ec2-50-19-209-97.compute-1.amazonaws.com/api/edit.php',
+	new Ajax.request('http://'+location.hostname+'/api/edit.php',
 	{
 		method : 'post',
 		parameters : {u: username, json: stringifyJson},
