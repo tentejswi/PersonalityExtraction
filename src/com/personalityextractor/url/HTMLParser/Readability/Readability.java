@@ -3,9 +3,6 @@ package com.personalityextractor.url.HTMLParser.Readability;
 import java.io.BufferedReader;
 import java.io.InputStreamReader;
 
-import com.personalityextractor.url.HTMLParser.Neko.HTMLParser;
-
-import sun.net.www.content.text.plain;
 
 public class Readability {
 
@@ -23,6 +20,7 @@ public class Readability {
 				while (chars[i] != '>') {
 					i++;
 				}
+				plain.append(" ");
 				//i++;
 			} else{
 				plain.append(chars[i]);
@@ -61,7 +59,7 @@ public class Readability {
 	}
 
 	public static void main(String[] args) {
-		HTMLParser hp = new HTMLParser();
+	//	HTMLParser hp = new HTMLParser();
 		Readability r = new Readability();
 		System.out.println(r.removeTags((r.removeHTML(args[0]))));
 	}

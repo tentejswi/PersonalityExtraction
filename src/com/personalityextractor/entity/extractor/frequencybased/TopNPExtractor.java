@@ -93,8 +93,7 @@ public class TopNPExtractor implements IFrequencyBasedExtractor {
 		return finalEntityCounter;
 	}
 
-	public HashMap<String, WikipediaEntity> resolve(
-			Counter<String> entityCounter) {
+	public HashMap<String, WikipediaEntity> resolve(Counter<String> entityCounter) {
 		HashMap<String, WikipediaEntity> resolvedEntities = new HashMap<String, WikipediaEntity>();
 		for (String entity : entityCounter.keySet()) {
 			Counter<WikipediaEntity> senseCounter = new Counter<WikipediaEntity>();
@@ -130,58 +129,79 @@ public class TopNPExtractor implements IFrequencyBasedExtractor {
 
 			if (senseCounter.argMax() != null) {
 				WikipediaEntity we = senseCounter.argMax();
-				we.count = entityCounter.getCount(entity);
+				//we.count = entityCounter.getCount(entity);
+				
 				resolvedEntities.put(entity, we);
 			} else {
-				List<WikipediaEntity> wikiSenses = Wikiminer
-						.getWikipediaEntities(entityXML, false);
+				List<WikipediaEntity> wikiSenses = Wikiminer.getWikipediaEntities(entityXML, false);
+				try{
 				resolvedEntities.put(entity, wikiSenses.get(0));
+				}catch(Exception e){
+					e.printStackTrace();
+					System.out.println("Entity"+ entity);
+					System.out.println(entityXML);
+				}
 			}
 		}
 		return resolvedEntities;
 	}
+	
+	public static double getOverlap(String ent1, String ent2){
+		String[] ent1_split = ent1.toLowerCase().split("\\s+");
+		String[] ent2_split = ent2.toLowerCase().split("\\s+");
+		double overlap = 0.0;
+		for(String e1 : ent1_split){
+			for(String e2 : ent2_split){
+				if(e1.equalsIgnoreCase(e2))
+					overlap++;
+			}
+		}
+		
+		return (overlap/(ent1_split.length + ent2_split.length));
+	}
 
 	public static void main(String[] args) {
+		System.out.println(getOverlap("Capital Fund Focused", "Capital (economics)"));
 
-		TopNPExtractor tt = new TopNPExtractor();
-
-		ReadJSON rjs = new ReadJSON();
-		List<String> json = FileRW.getLinesinFile(args[0]);
-		List<String> tweets = new ArrayList<String>();
-		for (String son : json) {
-			if (son.length() == 0)
-				continue;
-			tweets.addAll(rjs.parseJSONArray(son));
-		}
-
-		Counter<String> entities = tt.extract(tweets);
-		System.out.println("Done getting entities..");
-
-		PriorityQueue<String> pq = entities.asPriorityQueue();
-		while (pq.hasNext()) {
-			String entity = pq.next();
-			System.out.println(entity + " TotalCount:"
-					+ entities.getCount(entity));
-			PriorityQueue<String> pq1 = tt.cooccurence.getCounter(entity)
-					.asPriorityQueue();
-			int count = 0;
-			while (pq1.hasNext() && count < 5) {
-				count++;
-				String key = pq1.next();
-				System.out.println(key + " Cooccurence: "
-						+ tt.cooccurence.getCount(entity, key));
-			}
-			System.out.println("\n");
-		}
-
-		HashMap<String, WikipediaEntity> resolved = tt.resolve(entities);
-		for (String entity : resolved.keySet()) {
-			WikipediaEntity we = resolved.get(entity);
-			System.out.println("Entity: " + entity + " Count: "
-					+ entities.getCount(entity) + " Resolution: "
-					+ we.getText() + " " + we.getWikiminerID());
-		}
-
+//		TopNPExtractor tt = new TopNPExtractor();
+//
+//		ReadJSON rjs = new ReadJSON();
+//		List<String> json = FileRW.getLinesinFile(args[0]);
+//		List<String> tweets = new ArrayList<String>();
+//		for (String son : json) {
+//			if (son.length() == 0)
+//				continue;
+//			tweets.addAll(rjs.parseJSONArray(son));
+//		}
+//
+//		Counter<String> entities = tt.extract(tweets);
+//		System.out.println("Done getting entities..");
+//
+//		PriorityQueue<String> pq = entities.asPriorityQueue();
+//		while (pq.hasNext()) {
+//			String entity = pq.next();
+//			System.out.println(entity + " TotalCount:"
+//					+ entities.getCount(entity));
+//			PriorityQueue<String> pq1 = tt.cooccurence.getCounter(entity)
+//					.asPriorityQueue();
+//			int count = 0;
+//			while (pq1.hasNext() && count < 5) {
+//				count++;
+//				String key = pq1.next();
+//				System.out.println(key + " Cooccurence: "
+//						+ tt.cooccurence.getCount(entity, key));
+//			}
+//			System.out.println("\n");
+//		}
+//
+//		HashMap<String, WikipediaEntity> resolved = tt.resolve(entities);
+//		for (String entity : resolved.keySet()) {
+//			WikipediaEntity we = resolved.get(entity);
+//			System.out.println("Entity: " + entity + " Count: "
+//					+ entities.getCount(entity) + " Resolution: "
+//					+ we.getText() + " " + we.getWikiminerID());
+//		}
+//
 	}
 
 }
